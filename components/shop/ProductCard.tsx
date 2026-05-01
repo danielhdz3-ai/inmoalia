@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useCartStore } from '@/store/cart'
+import { useFavoritesStore } from '@/store/favorites'
 import { formatPrice } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import type { Product } from '@/lib/supabase/types'
@@ -17,9 +18,10 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, priority = false }: ProductCardProps) {
-  const [isWishlisted, setIsWishlisted] = useState(false)
   const [imageIndex, setImageIndex] = useState(0)
   const addItem = useCartStore((s) => s.addItem)
+  const toggleFavorite = useFavoritesStore((s) => s.toggleItem)
+  const isFavorite = useFavoritesStore((s) => s.isFavorite(product.id))
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -77,15 +79,18 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
-              setIsWishlisted(!isWishlisted)
+              toggleFavorite(product)
             }}
-            className="absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all opacity-0 group-hover:opacity-100 shadow-sm"
-            aria-label="Añadir a favoritos"
+            className={cn(
+              'absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all shadow-sm',
+              isFavorite ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            )}
+            aria-label={isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
           >
             <Heart
               className={cn(
                 'w-4 h-4 transition-colors',
-                isWishlisted ? 'fill-[#c0392b] text-[#c0392b]' : 'text-[#6b5344]'
+                isFavorite ? 'fill-[#c0392b] text-[#c0392b]' : 'text-[#6b5344]'
               )}
             />
           </button>
