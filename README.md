@@ -1,36 +1,127 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# INMOALIA — Hogar, Jardín y Decoración Premium
 
-## Getting Started
+Plataforma de dropshipping premium para el mercado español y europeo. Stack 100% headless y moderno.
 
-First, run the development server:
+## Stack Tecnológico
+
+| Capa | Tecnología |
+|------|-----------|
+| Frontend | Next.js 16+ (App Router) |
+| Hosting | Vercel |
+| Base de datos | Supabase (PostgreSQL) |
+| Auth | Supabase Auth |
+| Pagos | Stripe (Checkout + Webhooks) |
+| Email | Resend |
+| Estilos | Tailwind CSS v4 |
+| Componentes | shadcn/ui (Radix UI) |
+| Lenguaje | TypeScript estricto |
+| Gestor de paquetes | pnpm |
+
+## Inicio rápido
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# Instalar dependencias
+pnpm install
+
+# Copiar variables de entorno
+cp .env.local.example .env.local
+# → Completar las variables en .env.local
+
+# Iniciar el servidor de desarrollo
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Variables de entorno
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Stripe
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
 
-## Learn More
+# Resend
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=pedidos@inmoalia.com
 
-To learn more about Next.js, take a look at the following resources:
+# Proveedores
+DROPXL_API_KEY=
+DROPPERY_API_KEY=
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# App
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Base de datos
 
-## Deploy on Vercel
+Ejecutar las migraciones en Supabase:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# Desde el dashboard de Supabase → SQL Editor
+# 1. Ejecutar: supabase/migrations/001_schema.sql
+# 2. Ejecutar: supabase/migrations/002_seed.sql
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Estructura del proyecto
+
+```
+inmoalia/
+├── app/
+│   ├── (shop)/               # Rutas públicas de la tienda
+│   ├── (account)/            # Zona privada del cliente
+│   ├── (admin)/              # Panel de administración
+│   └── api/                  # API Routes
+├── components/
+│   ├── shop/                 # Componentes de tienda
+│   ├── layout/               # Header, Footer
+│   └── ui/                   # shadcn/ui components
+├── lib/
+│   ├── supabase/             # Cliente Supabase + tipos
+│   ├── stripe/               # Cliente Stripe + webhooks
+│   ├── resend/               # Emails transaccionales
+│   └── providers/            # dropXL + Droppery APIs
+├── hooks/                    # useCart, useAuth
+├── store/                    # Zustand (carrito)
+└── supabase/
+    └── migrations/           # SQL migrations + seed
+```
+
+## Flujo de pedido
+
+1. Cliente añade al carrito (Zustand, localStorage)
+2. Checkout → `/api/orders` crea Stripe Session
+3. Cliente paga en Stripe Checkout
+4. Webhook `/api/stripe/webhook` → crea Order en Supabase
+5. Se lanza pedido automático al proveedor (dropXL / Droppery)
+6. Resend envía email de confirmación
+7. Proveedor envía → tracking actualiza Order → email de envío
+
+## Proveedores
+
+- **dropXL (vidaXL)**: Proveedor principal de volumen
+- **Droppery**: Proveedor boutique europeo premium
+
+## Sincronización
+
+La sincronización automática se ejecuta mediante GitHub Actions diariamente:
+
+```bash
+# Sync manual desde admin
+POST /api/sync
+Authorization: Bearer <SYNC_SECRET_KEY>
+Body: { "supplier": "all" | "dropxl" | "droppery" }
+```
+
+## Deploy
+
+```bash
+# Deploy en Vercel
+vercel --prod
+
+# Variables de entorno en Vercel Dashboard
+# Stripe webhook endpoint: https://inmoalia.com/api/stripe/webhook
+```

@@ -1,0 +1,55 @@
+name: Sincronización de productos
+
+on:
+  # Sync automático cada día a las 3:00 AM (hora España en invierno)
+  schedule:
+    - cron: '0 2 * * *'
+
+  # Permite lanzar el sync manualmente desde GitHub Actions
+  workflow_dispatch:
+    inputs:
+      supplier:
+        description: 'Proveedor a sincronizar'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - dropxl
+          - droppery
+
+jobs:
+  sync:
+    name: Sincronizar catálogo
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Llamar a la API de sincronización
+        run: |
+          SUPPLIER="${{ github.event.inputs.supplier || 'all' }}"
+
+          RESPONSE=$(curl -s -o /tmp/response.json -w "%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.SYNC_SECRET_KEY }}" \
+            -d "{\"supplier\": \"$SUPPLIER\"}" \
+            "${{ secrets.NEXT_PUBLIC_SITE_URL }}/api/sync")
+
+          echo "HTTP status: $RESPONSE"
+          cat /tmp/response.json
+
+          if [ "$RESPONSE" != "200" ]; then
+            echo "Error en la sincronización. Código HTTP: $RESPONSE"
+            exit 1
+          fi
+
+      - name: Notificar éxito
+        if: success()
+        run: |
+          echo "Sincronización completada correctamente."
+
+      - name: Notificar fallo
+        if: failure()
+        run: |
+          echo "La sincronización ha fallado. Revisar los logs."
