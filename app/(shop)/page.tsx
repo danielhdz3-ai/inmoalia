@@ -203,18 +203,25 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* BANNER JARDÍN */}
-      <section className="relative py-20 md:py-32 overflow-hidden">
-        <div className="absolute inset-0">
+      {/* BANNER JARDÍN — degradado verdoso base + foto decorativa (alt vacío si falla la carga) */}
+      <section className="relative py-24 md:py-36 overflow-hidden min-h-[min(70vh,520px)] flex items-center">
+        <div className="absolute inset-0" aria-hidden>
+          {/* Capa fija verde-esmeralda: siempre visible aunque falle la imagen */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#022c22] via-[#0d5c4a] to-[#134e4a]" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-[#34d399]/25 via-transparent to-[#065f46]/50" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_50%_0%,rgba(167,243,208,0.35)_0%,transparent_55%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_100%_100%,rgba(6,78,59,0.55)_0%,transparent_50%)]" />
           <Image
-            src="https://images.unsplash.com/photo-1590002989516-ae85dc4eca79?w=1920&q=85"
-            alt="Jardín con muebles de ratán INMOALIA"
+            src="https://images.unsplash.com/photo-1598902108854-10e335adac99?w=1920&q=88"
+            alt=""
             fill
-            className="object-cover"
+            className="object-cover opacity-[0.45] scale-105"
+            sizes="100vw"
           />
-          <div className="absolute inset-0 bg-[#2d4a3e]/60" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#022c22]/50 via-transparent to-[#022c22]/85" />
+          <div className="absolute inset-0 ring-1 ring-white/10" />
         </div>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 text-center text-white">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 text-center text-white w-full">
           <span className="text-[#c9a84c] text-sm font-semibold tracking-widest uppercase mb-4 block">
             Colección exterior
           </span>

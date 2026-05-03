@@ -93,36 +93,33 @@ export default function RegistroPage() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left panel — imagen decorativa */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <Image
-          src="https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=1400&q=85"
-          alt="Decoración de hogar INMOALIA"
-          fill
-          className="object-cover"
-          priority
-          sizes="50vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1a2e26]/80 via-[#1a2e26]/20 to-transparent" />
-
-        <div className="absolute bottom-10 left-10 right-10 text-white">
-          <p className="text-xs tracking-[0.3em] uppercase opacity-70 mb-2">Únete a nosotros</p>
-          <h2 className="text-3xl font-bold leading-snug mb-3">
-            Tu hogar,<br />tu estilo
-          </h2>
-          <p className="text-sm opacity-70 max-w-xs">
-            Crea una cuenta y accede a ofertas exclusivas, guarda tus favoritos y sigue tus pedidos.
-          </p>
-        </div>
-
-        <div className="absolute top-8 left-10">
-          <Link href="/" className="text-white font-bold text-xl tracking-tight">INMOALIA</Link>
+      {/* Left panel — ambiente degradado verdoso (sin texto/logo; marca en columna del formulario) */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden min-h-screen" aria-hidden>
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#022c22] via-[#0f766e] to-[#14532d]" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-[#6ee7b7]/20 via-transparent to-[#065f46]/45" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(209,250,229,0.35)_0%,transparent_50%)]" />
+          <Image
+            src="https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=1400&q=88"
+            alt=""
+            fill
+            className="object-cover opacity-40 transition-opacity duration-200"
+            priority
+            sizes="50vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/70 via-transparent to-[#052e16]/85" />
         </div>
       </div>
 
       {/* Right panel — formulario */}
       <div className="flex-1 flex items-center justify-center px-6 py-12 bg-[#fdfcfa]">
         <div className="w-full max-w-md">
+          <div className="mb-8 hidden lg:block">
+            <Link href="/" className="text-2xl font-bold tracking-tight text-[#2a2a2a] hover:text-[#2d4a3e] transition-colors">
+              INMOALIA
+            </Link>
+            <p className="text-[10px] tracking-[0.25em] text-[#a08c7a] uppercase mt-1">Hogar &amp; Jardín</p>
+          </div>
           {/* Logo mobile */}
           <div className="text-center mb-8 lg:hidden">
             <Link href="/" className="inline-flex flex-col items-center">

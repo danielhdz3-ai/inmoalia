@@ -85,39 +85,34 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left panel — imagen decorativa */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <Image
-          src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1400&q=85"
-          alt="Interior elegante INMOALIA"
-          fill
-          className="object-cover"
-          priority
-          sizes="50vw"
-        />
-        {/* Overlay degradado */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1a2e26]/80 via-[#1a2e26]/20 to-transparent" />
-
-        {/* Brand overlay text */}
-        <div className="absolute bottom-10 left-10 right-10 text-white">
-          <p className="text-xs tracking-[0.3em] uppercase opacity-70 mb-2">Hogar & Jardín</p>
-          <h2 className="text-3xl font-bold leading-snug mb-3">
-            Spaces that<br />tell your story
-          </h2>
-          <p className="text-sm opacity-70 max-w-xs">
-            Muebles y decoración de calidad europea para transformar tu hogar.
-          </p>
-        </div>
-
-        {/* Logo top-left */}
-        <div className="absolute top-8 left-10">
-          <Link href="/" className="text-white font-bold text-xl tracking-tight">INMOALIA</Link>
+      {/* Left panel — solo ambiente visual (gradiente verdoso + foto decorativa), sin texto superpuesto */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden min-h-screen" aria-hidden>
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#022c22] via-[#0f766e] to-[#14532d]" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-[#6ee7b7]/20 via-transparent to-[#065f46]/45" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(209,250,229,0.4)_0%,transparent_45%)]" />
+          <Image
+            src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=1400&q=88"
+            alt=""
+            fill
+            className="object-cover opacity-40 transition-opacity duration-200"
+            priority
+            sizes="50vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-emerald-950/40 via-transparent to-[#052e16]/90" />
         </div>
       </div>
 
       {/* Right panel — formulario */}
       <div className="flex-1 flex items-center justify-center px-6 py-12 bg-[#fdfcfa]">
         <div className="w-full max-w-md">
+          {/* Logo escritorio (el panel izquierdo ya no lleva marca) */}
+          <div className="mb-8 hidden lg:block">
+            <Link href="/" className="text-2xl font-bold tracking-tight text-[#2a2a2a] hover:text-[#2d4a3e] transition-colors">
+              INMOALIA
+            </Link>
+            <p className="text-[10px] tracking-[0.25em] text-[#a08c7a] uppercase mt-1">Hogar &amp; Jardín</p>
+          </div>
           {/* Logo mobile */}
           <div className="text-center mb-8 lg:hidden">
             <Link href="/" className="inline-flex flex-col items-center">
