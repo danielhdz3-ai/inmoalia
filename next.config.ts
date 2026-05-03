@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "cdn.droppery.com",
       },
+      /* Imágenes del feed CSV de AW Dropship (CDN Aiku). */
+      {
+        protocol: "https",
+        hostname: "media.aiku.io",
+      },
     ],
   },
   experimental: {
