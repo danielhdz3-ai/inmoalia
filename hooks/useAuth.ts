@@ -35,11 +35,16 @@ export function useAuth() {
 
   const signUp = useCallback(async (email: string, password: string, fullName: string) => {
     const supabase = createClient()
+    const redirectBase =
+      typeof window !== 'undefined' ? window.location.origin : ''
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { full_name: fullName },
+        emailRedirectTo: redirectBase
+          ? `${redirectBase}/api/auth/callback?next=/cuenta`
+          : undefined,
       },
     })
     return { error }
