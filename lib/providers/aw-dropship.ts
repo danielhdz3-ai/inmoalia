@@ -44,6 +44,15 @@ function stripHtml(html: string): string {
     .trim()
 }
 
+/** Primera celda no vacía entre variantes EN/ES de cabecera CSV AW. */
+function cell(row: Record<string, string>, ...keys: string[]): string | undefined {
+  for (const k of keys) {
+    const v = row[k]
+    if (v !== undefined && String(v).trim() !== '') return v
+  }
+  return undefined
+}
+
 function parseDecimal(v: string | undefined): number | null {
   if (v === undefined || v === null || String(v).trim() === '') return null
   const n = parseFloat(String(v).replace(',', '.'))
@@ -77,17 +86,24 @@ function parseImageUrls(imagesCell: string | undefined): string[] {
 }
 
 function computeStock(row: Record<string, string>): number {
-  const flag = (row['Stock'] ?? '').trim().toLowerCase()
+  const flag = (cell(row, 'Stock', 'Existencias') ?? '').trim().toLowerCase()
   if (flag === 'outofstock') return 0
-  const qty = parseInt(row['Available Quantity'] ?? '', 10)
+  const qty = parseInt(
+    cell(row, 'Available Quantity', 'Cantidad disponible') ?? '',
+    10,
+  )
   if (Number.isFinite(qty) && qty >= 0) return qty
   return 0
 }
 
 function mapAwCategory(row: Record<string, string>): string {
-  const code = (row['Department code'] ?? '').toLowerCase()
-  const dept = (row['Department'] ?? '').toLowerCase()
-  const sub = (row['Subdepartment'] ?? '').toLowerCase()
+  const code = (
+    cell(row, 'Department code', 'Código departamento', 'Codigo departamento') ?? ''
+  ).toLowerCase()
+  const dept = (cell(row, 'Department', 'Departamento') ?? '').toLowerCase()
+  const sub = (
+    cell(row, 'Subdepartment', 'Subdepartamento', 'Sub departamento') ?? ''
+  ).toLowerCase()
   const blob = `${code} ${dept} ${sub}`
 
   if (blob.includes('garden') || blob.includes('jardín') || blob.includes('jardin') || blob.includes('outdoor')) {
@@ -117,25 +133,44 @@ function mapAwCategory(row: Record<string, string>): string {
 }
 
 function normalizeRow(row: Record<string, string>): AwNormalizedProduct | null {
-  const productCode = (row['Product code'] ?? '').trim()
-  const name = (row['Unit Name'] ?? '').trim()
+  const productCode = (cell(row, 'Product code', 'Código de producto', 'Codigo de producto') ?? '').trim()
+  const name = (cell(row, 'Unit Name', 'Nombre de la unidad', 'Nombre unitario') ?? '').trim()
   if (!productCode || !name) return null
 
-  const status = (row['Status'] ?? '').trim().toLowerCase()
+  const status = (cell(row, 'Status', 'Estado') ?? '').trim().toLowerCase()
 
-  let description = (row['Webpage description (plain text)'] ?? '').trim()
-  if (!description) {
-    const html = (row['Webpage description (html)'] ?? '').trim()
-    if (html) description = stripHtml(html)
-  }
-  if (!description) description = null
+  const description: string | null = ((): string | null => {
+    const plainRaw = (
+      cell(
+        row,
+        'Webpage description (plain text)',
+        'Descripción página web (texto plano)',
+      ) ?? ''
+    ).trim()
+    if (plainRaw) return plainRaw
+    const htmlRaw = (
+      cell(
+        row,
+        'Webpage description (html)',
+        'Descripción página web (html)',
+      ) ?? ''
+    ).trim()
+    if (!htmlRaw) return null
+    const stripped = stripHtml(htmlRaw).trim()
+    return stripped || null
+  })()
 
-  const rrp = parseDecimal(row['Unit RRP'])
-  const wholesale = parseDecimal(row['Unit price']) ?? parseDecimal(row['Price'])
+  const rrp = parseDecimal(cell(row, 'Unit RRP', 'RRP unitario', 'PVR unitario'))
+  const wholesale =
+    parseDecimal(cell(row, 'Unit price', 'Precio unitario')) ??
+    parseDecimal(cell(row, 'Price', 'Precio'))
   const price = rrp ?? wholesale ?? 0
 
-  const tags = [row['Family'], row['Department'], row['Subdepartment']]
-    .map((t) => (t ?? '').trim())
+  const deptName = cell(row, 'Department', 'Departamento') ?? ''
+  const subName =
+    cell(row, 'Subdepartment', 'Subdepartamento', 'Sub departamento') ?? ''
+  const tags = [(cell(row, 'Family', 'Familia') ?? ''), deptName, subName]
+    .map((t) => t.trim())
     .filter(Boolean)
 
   return {
@@ -144,17 +179,29 @@ function normalizeRow(row: Record<string, string>): AwNormalizedProduct | null {
     description,
     price,
     cost_price: wholesale,
-    images: parseImageUrls(row['Images']),
+    images: parseImageUrls(cell(row, 'Images', 'Imágenes', 'Imagenes')),
     category: mapAwCategory(row),
-    subcategory: row['Subdepartment']?.trim() || null,
+    subcategory: subName.trim() || null,
     tags,
     sku: `AW-${productCode}`,
     supplier_sku: productCode,
     supplier: 'aw-dropship',
     stock: computeStock(row),
-    weight_kg: parseDecimal(row['Unit net weight']) ?? parseDecimal(row['Package weight (shipping)']),
-    dimensions: parseDimensionsCell(row['Unit dimensions']),
-    material: row['Materials/Ingredients']?.trim() || null,
+    weight_kg:
+      parseDecimal(cell(row, 'Unit net weight', 'Peso neto de la unidad')) ??
+      parseDecimal(cell(row, 'Package weight (shipping)', 'Peso del paquete (envío)')),
+    dimensions: parseDimensionsCell(
+      cell(row, 'Unit dimensions', 'Dimensiones de la unidad'),
+    ),
+    material:
+      (
+        cell(
+          row,
+          'Materials/Ingredients',
+          'Materiales/Ingredientes',
+          'Materials',
+        ) ?? ''
+      ).trim() || null,
     is_active: status === 'active',
   }
 }
