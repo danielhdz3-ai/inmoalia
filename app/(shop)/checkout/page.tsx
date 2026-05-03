@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -9,6 +10,9 @@ import { useCart } from '@/hooks/useCart'
 import { formatPrice } from '@/lib/utils'
 import { Lock, Loader2 } from 'lucide-react'
 import Image from 'next/image'
+
+// IVA 21% extraído del total (precios con IVA incluido)
+const calcIva = (totalWithIva: number) => totalWithIva * 21 / 121
 
 interface FormData {
   full_name: string
@@ -27,6 +31,7 @@ export default function CheckoutPage() {
   const { items, getSubtotal, shippingCost, hasFreeShipping } = useCart()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [termsAccepted, setTermsAccepted] = useState(false)
   const [form, setForm] = useState<FormData>({
     full_name: '',
     email: '',
@@ -40,6 +45,8 @@ export default function CheckoutPage() {
   })
 
   const subtotal = getSubtotal()
+  const total = subtotal + shippingCost
+  const ivaAmount = calcIva(total)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
@@ -47,6 +54,10 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!termsAccepted) {
+      setError('Debes aceptar los términos y condiciones para continuar.')
+      return
+    }
     setLoading(true)
     setError(null)
 
@@ -212,7 +223,36 @@ export default function CheckoutPage() {
             </div>
           )}
 
-          <Button type="submit" size="xl" className="w-full gap-2" disabled={loading}>
+          {/* Checkbox de términos — aceptación explícita obligatoria */}
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={termsAccepted}
+              onChange={(e) => {
+                setTermsAccepted(e.target.checked)
+                if (e.target.checked) setError(null)
+              }}
+              className="mt-0.5 w-4 h-4 rounded border-[#a08c7a] text-[#2d4a3e] accent-[#2d4a3e] cursor-pointer shrink-0"
+            />
+            <span className="text-xs text-[#6b5344] leading-relaxed group-hover:text-[#2a2a2a] transition-colors">
+              He leído y acepto los{' '}
+              <Link href="/terminos" target="_blank" className="underline hover:text-[#2d4a3e]">
+                términos y condiciones
+              </Link>
+              {' '}y la{' '}
+              <Link href="/privacidad" target="_blank" className="underline hover:text-[#2d4a3e]">
+                política de privacidad
+              </Link>
+              . Entiendo que mi pedido implica una obligación de pago. *
+            </span>
+          </label>
+
+          <Button
+            type="submit"
+            size="xl"
+            className="w-full gap-2"
+            disabled={loading || !termsAccepted}
+          >
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -221,15 +261,13 @@ export default function CheckoutPage() {
             ) : (
               <>
                 <Lock className="w-4 h-4" />
-                Pagar {formatPrice(subtotal + shippingCost)} con Stripe
+                Pagar {formatPrice(total)} con Stripe
               </>
             )}
           </Button>
 
           <p className="text-xs text-center text-[#a08c7a]">
-            Al hacer clic aceptas nuestros{' '}
-            <a href="/terminos" className="underline hover:text-[#2d4a3e]">términos y condiciones</a>
-            . Pago procesado de forma segura por Stripe.
+            Pago procesado de forma segura por Stripe. Tus datos nunca se almacenan en nuestros servidores.
           </p>
         </form>
 
@@ -268,9 +306,13 @@ export default function CheckoutPage() {
                   {hasFreeShipping ? 'GRATIS' : formatPrice(shippingCost)}
                 </span>
               </div>
+              <div className="flex justify-between text-xs text-[#a08c7a] pt-1">
+                <span>IVA 21% (incluido)</span>
+                <span>{formatPrice(ivaAmount)}</span>
+              </div>
               <div className="flex justify-between font-bold text-base pt-2 border-t border-[#e8ddd0]">
                 <span>Total</span>
-                <span className="text-[#2d4a3e]">{formatPrice(subtotal + shippingCost)}</span>
+                <span className="text-[#2d4a3e]">{formatPrice(total)}</span>
               </div>
             </div>
           </div>

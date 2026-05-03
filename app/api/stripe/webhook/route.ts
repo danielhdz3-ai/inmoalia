@@ -75,6 +75,34 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to create order' }, { status: 500 })
     }
 
+    // Decrementar stock de cada producto vendido
+    try {
+      const productIds = items.map((i) => i.product_id)
+      const { data: currentProducts } = await supabase
+        .from('products')
+        .select('id, stock')
+        .in('id', productIds)
+
+      if (currentProducts) {
+        await Promise.all(
+          items.map((item) => {
+            const current = (currentProducts as { id: string; stock: number }[]).find(
+              (p) => p.id === item.product_id
+            )
+            if (!current) return Promise.resolve()
+            const newStock = Math.max(0, current.stock - item.quantity)
+            return supabase
+              .from('products')
+              .update({ stock: newStock } as never)
+              .eq('id', item.product_id)
+          })
+        )
+      }
+    } catch (stockErr) {
+      console.error('Error decrementing stock:', stockErr)
+      // No fallar el webhook por error de stock
+    }
+
     // Crear pedido en el proveedor según supplier
     const suppliers = [...new Set(items.map((i) => i.supplier).filter(Boolean))]
 

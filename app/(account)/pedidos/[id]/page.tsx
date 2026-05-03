@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Package, ChevronLeft, MapPin, Truck, CreditCard } from 'lucide-react'
 import { formatPrice, formatDate } from '@/lib/utils'
+
+const calcIva = (totalWithIva: number) => totalWithIva * 21 / 121
 import type { Order, OrderItem, ShippingAddress } from '@/lib/supabase/types'
 
 interface Props {
@@ -175,6 +177,10 @@ export default async function PedidoDetailPage({ params }: Props) {
               <div className="flex justify-between text-[#6b5344]">
                 <span>Envío</span>
                 <span>{order.shipping_cost === 0 ? 'Gratis' : formatPrice(order.shipping_cost)}</span>
+              </div>
+              <div className="flex justify-between text-xs text-[#a08c7a]">
+                <span>IVA 21% (incluido)</span>
+                <span>{formatPrice(calcIva(order.total))}</span>
               </div>
               <div className="flex justify-between font-bold text-[#2a2a2a] pt-2 border-t border-[#e8ddd0]">
                 <span>Total</span>
