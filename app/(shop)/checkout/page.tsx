@@ -11,6 +11,7 @@ import { formatPrice } from '@/lib/utils'
 import { Lock, Loader2, Tag, X, CheckCircle } from 'lucide-react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
+import type { Customer } from '@/lib/supabase/types'
 
 // IVA 21% extraído del total (precios con IVA incluido)
 const calcIva = (totalWithIva: number) => totalWithIva * 21 / 121
@@ -67,14 +68,15 @@ export default function CheckoutPage() {
 
         setForm((prev) => ({ ...prev, email: user.email ?? prev.email }))
 
-        const { data: customer } = await supabase
+        const { data: rawCustomer } = await supabase
           .from('customers')
           .select('full_name, phone, address')
           .eq('id', user.id)
           .single()
 
-        if (!customer) return
+        if (!rawCustomer) return
 
+        const customer = rawCustomer as Pick<Customer, 'full_name' | 'phone' | 'address'>
         const addr = customer.address as Record<string, string> | null
         setForm((prev) => ({
           ...prev,

@@ -152,7 +152,9 @@ export async function POST(req: NextRequest) {
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
-      payment_method_types: ['card', 'bizum'],
+      // Bizum en Stripe (ES); el tipo del SDK no lista 'bizum' aún
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      payment_method_types: ['card', 'bizum'] as any,
       line_items: lineItems,
       ...(stripeDiscounts.length > 0 ? { discounts: stripeDiscounts } : {}),
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout/exito?session_id={CHECKOUT_SESSION_ID}`,
