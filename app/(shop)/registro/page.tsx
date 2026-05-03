@@ -45,13 +45,24 @@ export default function RegistroPage() {
     setLoading(true)
     const { error, session } = await signUp(form.email, form.password, form.fullName)
     if (error) {
-      setError(error.message === 'User already registered'
-        ? 'Ya existe una cuenta con ese email. Prueba a iniciar sesión.'
-        : (error.message || 'Error al crear la cuenta. Inténtalo de nuevo.'))
+      const raw = (error.message || '').toLowerCase()
+      if (error.message === 'User already registered') {
+        setError('Ya existe una cuenta con ese email. Prueba a iniciar sesión.')
+      } else if (
+        raw.includes('confirmation email')
+        || raw.includes('sending confirmation')
+        || raw.includes('error sending')
+      ) {
+        setError(
+          'No se pudo enviar el email de confirmación. En el panel de Supabase revisa Authentication → SMTP (p. ej. Resend) o, si prefieres acceso inmediato, desactiva “Confirm email” en Email. Mientras tanto puedes registrarte con Google o escribir a info@inmoalia.com.'
+        )
+      } else {
+        setError(error.message || 'Error al crear la cuenta. Inténtalo de nuevo.')
+      }
       setLoading(false)
       return
     }
-    // Confirmación por email desactivada en Supabase: sesión lista al instante.
+    // Si “Confirm email” está desactivado en Supabase, llega sesión y el usuario entra al momento.
     if (session) {
       router.push('/cuenta')
       router.refresh()

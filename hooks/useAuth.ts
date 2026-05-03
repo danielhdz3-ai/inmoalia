@@ -51,7 +51,11 @@ export function useAuth() {
           : undefined,
       },
     })
-    return { error, session: data.session }
+    return {
+      error,
+      session: data.session,
+      errorCode: error?.code ?? null,
+    }
   }, [])
 
   const signInWithGoogle = useCallback(async (redirectTo = '/cuenta') => {
