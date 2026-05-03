@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { revalidatePath } from 'next/cache'
-import { Package, ChevronLeft, Eye, EyeOff, ExternalLink } from 'lucide-react'
+import { Package, ChevronLeft, Eye, EyeOff, ExternalLink, Pencil, Plus } from 'lucide-react'
 import { formatPrice, formatDate } from '@/lib/utils'
 import type { Product } from '@/lib/supabase/types'
 
@@ -56,6 +56,13 @@ export default async function AdminProductosPage() {
             {products?.length ?? 0} totales · {active} activos · {inactive} inactivos
           </p>
         </div>
+        <Link
+          href="/admin/productos/nuevo"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#2d4a3e] text-white rounded-lg text-sm font-medium hover:bg-[#1e3329] transition-colors shadow-sm"
+        >
+          <Plus className="w-4 h-4" />
+          Nuevo producto
+        </Link>
       </div>
 
       {/* Summary cards */}
@@ -153,14 +160,23 @@ export default async function AdminProductosPage() {
                       </form>
                     </td>
                     <td className="px-4 py-3">
-                      <Link
-                        href={`/productos/${product.slug}`}
-                        target="_blank"
-                        className="text-[#a08c7a] hover:text-[#2d4a3e] transition-colors"
-                        title="Ver en tienda"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </Link>
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/admin/productos/${product.id}`}
+                          className="text-[#a08c7a] hover:text-[#2d4a3e] transition-colors"
+                          title="Editar producto"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Link>
+                        <Link
+                          href={`/productos/${product.slug}`}
+                          target="_blank"
+                          className="text-[#a08c7a] hover:text-[#2d4a3e] transition-colors"
+                          title="Ver en tienda"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}

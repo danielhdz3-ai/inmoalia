@@ -66,30 +66,25 @@ export default function FilterSidebar({ currentParams }: FilterSidebarProps) {
         </div>
       )}
 
-      {/* Categories */}
+      {/* Categories — navigate to /categorias/[slug] directly */}
       <div>
         <h3 className="text-xs font-semibold text-[#2a2a2a] uppercase tracking-wider mb-3">
           Categoría
         </h3>
         <div className="space-y-1">
           <Link
-            href={buildUrl({ categoria: undefined })}
-            className={cn(
-              'block text-sm px-2 py-1.5 rounded-lg transition-colors',
-              !currentParams.categoria
-                ? 'bg-[#2d4a3e] text-white font-medium'
-                : 'text-[#2a2a2a] hover:bg-[#f9f6f1] hover:text-[#2d4a3e]'
-            )}
+            href="/categorias"
+            className="block text-sm px-2 py-1.5 rounded-lg transition-colors text-[#2a2a2a] hover:bg-[#f9f6f1] hover:text-[#2d4a3e]"
           >
-            Todos
+            Todas
           </Link>
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.slug}
-              href={buildUrl({ categoria: cat.slug })}
+              href={`/categorias/${cat.slug}`}
               className={cn(
                 'block text-sm px-2 py-1.5 rounded-lg transition-colors',
-                isActive('categoria', cat.slug)
+                currentParams.categoria === cat.slug
                   ? 'bg-[#2d4a3e] text-white font-medium'
                   : 'text-[#2a2a2a] hover:bg-[#f9f6f1] hover:text-[#2d4a3e]'
               )}
