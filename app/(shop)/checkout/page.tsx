@@ -68,15 +68,16 @@ export default function CheckoutPage() {
 
         setForm((prev) => ({ ...prev, email: user.email ?? prev.email }))
 
-        const { data: rawCustomer } = await supabase
+        const { data } = await supabase
           .from('customers')
           .select('full_name, phone, address')
           .eq('id', user.id)
           .single()
 
-        if (!rawCustomer) return
+        // Doble aserción: evita que el genérico de Supabase resuelva `data` como `never` en algunos builds
+        const customer = data as unknown as Pick<Customer, 'full_name' | 'phone' | 'address'> | null
+        if (!customer) return
 
-        const customer = rawCustomer as Pick<Customer, 'full_name' | 'phone' | 'address'>
         const addr = customer.address as Record<string, string> | null
         setForm((prev) => ({
           ...prev,

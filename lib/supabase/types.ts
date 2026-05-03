@@ -39,6 +39,16 @@ export interface Database {
         Insert: Partial<Waitlist> & Pick<Waitlist, 'email'>
         Update: Partial<Waitlist>
       }
+      favorites: {
+        Row: Favorite
+        Insert: Partial<Favorite> & Pick<Favorite, 'user_id' | 'product_id'>
+        Update: Partial<Favorite>
+      }
+      coupons: {
+        Row: CouponRow
+        Insert: Partial<CouponRow> & Pick<CouponRow, 'code' | 'discount_type' | 'discount_value'>
+        Update: Partial<CouponRow>
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -126,6 +136,27 @@ export interface Waitlist {
   id: string
   email: string
   product_id: string | null
+  created_at: string
+}
+
+export interface Favorite {
+  id: string
+  user_id: string
+  product_id: string
+  created_at: string
+}
+
+export interface CouponRow {
+  id: string
+  code: string
+  description: string | null
+  discount_type: 'percentage' | 'fixed'
+  discount_value: number
+  min_order: number
+  max_uses: number | null
+  uses_count: number
+  expires_at: string | null
+  is_active: boolean
   created_at: string
 }
 
