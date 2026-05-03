@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { Package, ChevronLeft, Eye, EyeOff, ExternalLink, Pencil, Plus } from 'lucide-react'
 import { formatPrice, formatDate } from '@/lib/utils'
 import type { Product } from '@/lib/supabase/types'
+import { assertAdmin } from '@/lib/admin/assert-admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,11 +17,13 @@ function createAdminClient() {
 
 async function toggleProductActive(formData: FormData) {
   'use server'
+  await assertAdmin()
   const id = formData.get('id') as string
   const currentActive = formData.get('is_active') === 'true'
   const supabase = createAdminClient()
   await supabase.from('products').update({ is_active: !currentActive }).eq('id', id)
   revalidatePath('/admin/productos')
+  revalidatePath('/admin/inventario')
 }
 
 const STATUS_MAP: Record<string, string> = {
@@ -43,9 +46,13 @@ export default async function AdminProductosPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex flex-wrap items-center gap-2 mb-6">
         <Link href="/admin" className="flex items-center gap-1.5 text-sm text-[#a08c7a] hover:text-[#2d4a3e] transition-colors">
           <ChevronLeft className="w-4 h-4" /> Panel admin
+        </Link>
+        <span className="text-[#e8ddd0]" aria-hidden>·</span>
+        <Link href="/admin/inventario" className="text-sm text-[#2d4a3e] hover:underline font-medium">
+          Inventario
         </Link>
       </div>
 

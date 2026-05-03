@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
+import { assertAdmin } from '@/lib/admin/assert-admin'
 import type { Product } from '@/lib/supabase/types'
 
 export const dynamic = 'force-dynamic'
@@ -14,12 +15,26 @@ interface Props {
 function createAdminClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
   )
+}
+
+function trimmedOrNull(v: FormDataEntryValue | null): string | null {
+  if (v == null || typeof v !== 'string') return null
+  const t = v.trim()
+  return t === '' ? null : t
+}
+
+function parseOptionalFloat(formData: FormData, key: string): number | null {
+  const v = formData.get(key)
+  if (v == null || v === '') return null
+  const n = parseFloat(String(v))
+  return Number.isFinite(n) ? n : null
 }
 
 async function saveProduct(formData: FormData) {
   'use server'
+  await assertAdmin()
   const supabase = createAdminClient()
   const id = formData.get('id') as string
   const isNew = id === 'nuevo'
@@ -33,14 +48,17 @@ async function saveProduct(formData: FormData) {
     slug,
     description: (formData.get('description') as string) || null,
     price: parseFloat(formData.get('price') as string) || 0,
-    cost_price: parseFloat(formData.get('cost_price') as string) || null,
+    cost_price: parseOptionalFloat(formData, 'cost_price'),
     category: formData.get('category') as string,
     subcategory: (formData.get('subcategory') as string) || null,
-    sku: (formData.get('sku') as string) || null,
+    sku: trimmedOrNull(formData.get('sku')),
+    supplier_sku: trimmedOrNull(formData.get('supplier_sku')),
+    supplier: trimmedOrNull(formData.get('supplier')),
+    supplier_product_url: trimmedOrNull(formData.get('supplier_product_url')),
     stock: parseInt(formData.get('stock') as string, 10) || 0,
     material: (formData.get('material') as string) || null,
     color: (formData.get('color') as string) || null,
-    weight_kg: parseFloat(formData.get('weight_kg') as string) || null,
+    weight_kg: parseOptionalFloat(formData, 'weight_kg'),
     is_active: formData.get('is_active') === 'true',
     is_featured: formData.get('is_featured') === 'true',
     meta_title: (formData.get('meta_title') as string) || null,
@@ -64,6 +82,7 @@ async function saveProduct(formData: FormData) {
   }
 
   revalidatePath('/admin/productos')
+  revalidatePath('/admin/inventario')
   revalidatePath(`/productos/${slug}`)
   redirect('/admin/productos')
 }
@@ -118,10 +137,26 @@ export default async function EditProductPage({ params }: Props) {
           <h2 className="font-semibold text-[#2a2a2a] text-sm uppercase tracking-wide">Precio y stock</h2>
           <div className="grid grid-cols-3 gap-4">
             <Field label="Precio venta (€) *" name="price" type="number" step="0.01" defaultValue={String(product?.price ?? '')} required />
-            <Field label="Coste proveedor (€)" name="cost_price" type="number" step="0.01" defaultValue={String(product?.cost_price ?? '')} />
+            <Field label="Coste proveedor (€)" name="cost_price" type="number" step="0.01" defaultValue={product?.cost_price != null ? String(product.cost_price) : ''} />
             <Field label="Stock" name="stock" type="number" defaultValue={String(product?.stock ?? 0)} />
           </div>
-          <Field label="Peso (kg)" name="weight_kg" type="number" step="0.01" defaultValue={String(product?.weight_kg ?? '')} />
+          <Field label="Peso (kg)" name="weight_kg" type="number" step="0.01" defaultValue={product?.weight_kg != null ? String(product.weight_kg) : ''} />
+        </section>
+
+        {/* Proveedor */}
+        <section className="bg-white rounded-2xl border border-[#e8ddd0] p-6 space-y-5">
+          <h2 className="font-semibold text-[#2a2a2a] text-sm uppercase tracking-wide">Proveedor</h2>
+          <p className="text-xs text-[#a08c7a]">Identificadores dropshipping y enlace directo a la ficha en el portal del proveedor (útil sobre todo en AW Dropship).</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Field label="Código técnico (supplier slug)" name="supplier" defaultValue={product?.supplier ?? ''} placeholder="aw-dropship, dropxl, droppery" />
+            <Field label="SKU proveedor" name="supplier_sku" defaultValue={product?.supplier_sku ?? ''} placeholder="Ej. HPS-05" />
+            <Field
+              label="URL ficha proveedor"
+              name="supplier_product_url"
+              defaultValue={product?.supplier_product_url ?? ''}
+              placeholder="https://www.aw-dropship.es/..."
+            />
+          </div>
         </section>
 
         {/* Categoría y atributos */}

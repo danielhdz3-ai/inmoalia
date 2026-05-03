@@ -85,11 +85,16 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Nav shortcuts */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         {[
+          {
+            href: '/admin/inventario',
+            label: 'Inventario',
+            desc: 'Stock, coste, margen por proveedor y enlaces.',
+          },
           { href: '/admin/productos', label: 'Gestionar productos', desc: 'Ver, editar y añadir productos al catálogo' },
           { href: '/admin/pedidos', label: 'Gestionar pedidos', desc: 'Ver estado de pedidos y gestionar envíos' },
-          { href: '/admin/sincronizacion', label: 'Sincronización', desc: 'Sincronizar catálogo con dropXL y Droppery' },
+          { href: '/admin/sincronizacion', label: 'Sincronización', desc: 'Sincronizar catálogo con proveedores' },
         ].map((item) => (
           <Link key={item.href} href={item.href} className="bg-white rounded-2xl border border-[#e8ddd0] p-5 hover:border-[#2d4a3e] hover:shadow-sm transition-all group">
             <h3 className="font-semibold text-[#2a2a2a] group-hover:text-[#2d4a3e] transition-colors mb-1">{item.label}</h3>

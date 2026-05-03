@@ -70,6 +70,7 @@ export interface Product {
   sku: string | null
   supplier_sku: string | null
   supplier: string | null
+  supplier_product_url: string | null
   stock: number
   weight_kg: number | null
   dimensions: Json | null
