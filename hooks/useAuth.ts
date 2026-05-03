@@ -30,14 +30,18 @@ export function useAuth() {
   const signIn = useCallback(async (email: string, password: string) => {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return { error }
+    return {
+      error,
+      /** Código estable de Supabase (p. ej. email_not_confirmed) para mensajes UX */
+      errorCode: error?.code ?? null,
+    }
   }, [])
 
   const signUp = useCallback(async (email: string, password: string, fullName: string) => {
     const supabase = createClient()
     const redirectBase =
       typeof window !== 'undefined' ? window.location.origin : ''
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -47,7 +51,7 @@ export function useAuth() {
           : undefined,
       },
     })
-    return { error }
+    return { error, session: data.session }
   }, [])
 
   const signInWithGoogle = useCallback(async (redirectTo = '/cuenta') => {

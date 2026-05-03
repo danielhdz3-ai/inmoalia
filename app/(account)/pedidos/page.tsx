@@ -28,17 +28,24 @@ export default async function PedidosPage() {
   const orders = rawOrders as unknown as Order[] | null
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 md:py-12">
-      <h1 className="text-2xl font-bold text-[#2a2a2a] mb-8">Mis pedidos</h1>
+    <div className="max-w-4xl lg:max-w-none">
+      <div className="mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#2a2a2a]">Mis pedidos</h1>
+        <p className="text-sm text-[#a08c7a] mt-2 leading-relaxed">
+          Consulta el estado y los detalles de cada compra.
+        </p>
+      </div>
 
       {!orders || orders.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#e8ddd0] p-12 text-center">
+        <div className="bg-white rounded-xl border border-[#e8ddd0] p-12 md:p-14 text-center shadow-sm">
           <Package className="w-12 h-12 text-[#e8ddd0] mx-auto mb-4" />
           <h2 className="text-lg font-semibold text-[#2a2a2a] mb-2">No tienes pedidos aún</h2>
-          <p className="text-[#a08c7a] mb-6">Cuando realices tu primer pedido, aparecerá aquí.</p>
+          <p className="text-[#a08c7a] mb-6 text-sm leading-relaxed max-w-sm mx-auto">
+            Cuando realices tu primer pedido, aparecerá aquí.
+          </p>
           <Link
             href="/productos"
-            className="inline-flex items-center gap-2 bg-[#2d4a3e] text-white px-6 py-3 rounded-lg hover:bg-[#1e3329] transition-colors text-sm font-medium"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#2d4a3e] text-white px-6 py-3 text-sm font-medium shadow-sm transition-all duration-200 hover:bg-[#1e3329] hover:shadow-md"
           >
             Explorar productos
           </Link>
@@ -54,7 +61,7 @@ export default async function PedidosPage() {
               <Link
                 key={order.id}
                 href={`/pedidos/${order.id}`}
-                className="block bg-white rounded-2xl border border-[#e8ddd0] p-5 hover:border-[#a08c7a] hover:shadow-sm transition-all"
+                className="block bg-white rounded-xl border border-[#e8ddd0] p-5 shadow-sm transition-all duration-300 hover:border-[#d4c4b0] hover:shadow-md"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -90,3 +97,4 @@ export default async function PedidosPage() {
     </div>
   )
 }
+

@@ -1,8 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { User, Package, LogOut } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { User, Package } from 'lucide-react'
 import type { Customer, Order } from '@/lib/supabase/types'
 
 export default async function CuentaPage() {
@@ -35,99 +34,107 @@ export default async function CuentaPage() {
     cancelled: { label: 'Cancelado', color: 'text-[#c0392b] bg-[#c0392b]/10' },
   }
 
+  const greetName =
+    customer?.full_name?.trim().split(/\s+/)[0]
+    ?? (user.user_metadata?.full_name as string | undefined)?.trim().split(/\s+/)[0]
+    ?? 'Cliente'
+
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 md:py-12">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-[#2a2a2a]">Mi cuenta</h1>
-        <form action="/api/auth/signout" method="POST">
-          <Button variant="ghost" size="sm" className="gap-2 text-[#a08c7a]">
-            <LogOut className="w-4 h-4" />
-            Cerrar sesión
-          </Button>
-        </form>
+    <div className="max-w-4xl lg:max-w-none">
+      <div className="mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#2a2a2a]">Resumen</h1>
+        <p className="text-sm text-[#a08c7a] mt-2 leading-relaxed">
+          Hola, {greetName}. Aquí tienes un vistazo rápido de tu cuenta.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Profile */}
-        <div className="md:col-span-1">
-          <div className="bg-white rounded-2xl border border-[#e8ddd0] p-6">
-            <div className="flex flex-col items-center text-center mb-5">
-              <div className="w-16 h-16 rounded-full bg-[#2d4a3e]/10 flex items-center justify-center mb-3">
-                <User className="w-8 h-8 text-[#2d4a3e]" />
-              </div>
-              <h2 className="font-semibold text-[#2a2a2a]">
-                {customer?.full_name ?? user.user_metadata?.full_name ?? 'Mi perfil'}
-              </h2>
-              <p className="text-sm text-[#a08c7a]">{user.email}</p>
-            </div>
-
-            <div className="space-y-2">
-              <Link
-                href="/cuenta/perfil"
-                className="block w-full text-center text-sm py-2 rounded-lg border border-[#e8ddd0] text-[#2a2a2a] hover:bg-[#f9f6f1] transition-colors"
-              >
-                Editar perfil
-              </Link>
-              <Link
-                href="/pedidos"
-                className="flex items-center gap-2 justify-center w-full text-sm py-2 rounded-lg bg-[#2d4a3e] text-white hover:bg-[#1e3329] transition-colors"
-              >
-                <Package className="w-4 h-4" />
-                Mis pedidos
-              </Link>
-            </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <Link
+          href="/cuenta/perfil"
+          className="group flex items-center gap-4 rounded-xl border border-[#e8ddd0] bg-white p-5 shadow-sm transition-all duration-300 hover:border-[#d4c4b0] hover:shadow-md"
+        >
+          <div className="w-12 h-12 rounded-full bg-[#f9f6f1] border border-[#e8ddd0] flex items-center justify-center shrink-0 group-hover:border-[#d4c4b0] transition-colors">
+            <User className="w-6 h-6 text-[#2d4a3e]" />
           </div>
+          <div className="min-w-0 text-left">
+            <p className="font-semibold text-[#2a2a2a] group-hover:text-[#2d4a3e] transition-colors">Datos y dirección</p>
+            <p className="text-sm text-[#a08c7a] truncate">{user.email}</p>
+          </div>
+        </Link>
+        <Link
+          href="/pedidos"
+          className="group flex items-center gap-4 rounded-xl border border-[#e8ddd0] bg-white p-5 shadow-sm transition-all duration-300 hover:border-[#d4c4b0] hover:shadow-md"
+        >
+          <div className="w-12 h-12 rounded-full bg-[#f9f6f1] border border-[#e8ddd0] flex items-center justify-center shrink-0 group-hover:border-[#d4c4b0] transition-colors">
+            <Package className="w-6 h-6 text-[#2d4a3e]" />
+          </div>
+          <div className="min-w-0 text-left">
+            <p className="font-semibold text-[#2a2a2a] group-hover:text-[#2d4a3e] transition-colors">Mis pedidos</p>
+            <p className="text-sm text-[#a08c7a]">Historial y seguimiento</p>
+          </div>
+        </Link>
+      </div>
+
+      <div className="bg-white rounded-xl border border-[#e8ddd0] p-6 shadow-sm">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="font-semibold text-[#2a2a2a] text-lg">Pedidos recientes</h2>
+          <Link
+            href="/pedidos"
+            className="text-sm font-medium text-[#2d4a3e] hover:text-[#1e3329] hover:underline underline-offset-2 transition-colors"
+          >
+            Ver todos
+          </Link>
         </div>
 
-        {/* Recent orders */}
-        <div className="md:col-span-2">
-          <div className="bg-white rounded-2xl border border-[#e8ddd0] p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-[#2a2a2a]">Pedidos recientes</h3>
-              <Link href="/pedidos" className="text-sm text-[#2d4a3e] hover:underline">
-                Ver todos
-              </Link>
-            </div>
-
-            {!recentOrders || recentOrders.length === 0 ? (
-              <div className="text-center py-8">
-                <Package className="w-10 h-10 text-[#e8ddd0] mx-auto mb-3" />
-                <p className="text-sm text-[#a08c7a]">Aún no tienes pedidos</p>
-                <Link href="/productos" className="text-sm text-[#2d4a3e] hover:underline mt-1 block">
-                  Empezar a comprar →
+        {!recentOrders || recentOrders.length === 0 ? (
+          <div className="text-center py-10">
+            <Package className="w-11 h-11 text-[#e8ddd0] mx-auto mb-3" />
+            <p className="text-sm text-[#a08c7a]">Aún no tienes pedidos</p>
+            <Link
+              href="/productos"
+              className="text-sm font-medium text-[#2d4a3e] hover:text-[#1e3329] hover:underline underline-offset-2 mt-2 inline-block transition-colors"
+            >
+              Empezar a comprar →
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {recentOrders.map((order) => {
+              const statusInfo = STATUS_LABELS[order.status] ?? {
+                label: order.status,
+                color: 'text-[#a08c7a] bg-[#a08c7a]/10',
+              }
+              return (
+                <Link
+                  key={order.id}
+                  href={`/pedidos/${order.id}`}
+                  className="flex items-center justify-between gap-4 p-3 rounded-lg border border-[#e8ddd0] bg-[#fdfcfa] hover:border-[#d4c4b0] hover:bg-[#f9f6f1] transition-all duration-200"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-[#2a2a2a]">{order.order_number}</p>
+                    <p className="text-xs text-[#a08c7a]">
+                      {new Date(order.created_at).toLocaleDateString('es-ES', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-bold text-[#2a2a2a]">
+                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(
+                        order.total
+                      )}
+                    </p>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusInfo.color}`}>
+                      {statusInfo.label}
+                    </span>
+                  </div>
                 </Link>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {recentOrders.map((order) => {
-                  const statusInfo = STATUS_LABELS[order.status] ?? { label: order.status, color: 'text-[#a08c7a] bg-[#a08c7a]/10' }
-                  return (
-                    <Link
-                      key={order.id}
-                      href={`/pedidos/${order.id}`}
-                      className="flex items-center justify-between p-3 rounded-xl border border-[#e8ddd0] hover:border-[#a08c7a] hover:bg-[#f9f6f1] transition-all"
-                    >
-                      <div>
-                        <p className="text-sm font-semibold text-[#2a2a2a]">{order.order_number}</p>
-                        <p className="text-xs text-[#a08c7a]">
-                          {new Date(order.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-bold text-[#2a2a2a]">
-                          {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(order.total)}
-                        </p>
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusInfo.color}`}>
-                          {statusInfo.label}
-                        </span>
-                      </div>
-                    </Link>
-                  )
-                })}
-              </div>
-            )}
+              )
+            })}
           </div>
-        </div>
+        )}
       </div>
     </div>
   )

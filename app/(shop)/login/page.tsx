@@ -45,9 +45,26 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    const { error } = await signIn(form.email, form.password)
+    const { error, errorCode } = await signIn(form.email, form.password)
     if (error) {
-      setError('Email o contraseña incorrectos. Inténtalo de nuevo.')
+      const msg = error.message ?? ''
+      if (
+        errorCode === 'email_not_confirmed'
+        || /email not confirmed|correo no confirm/i.test(msg)
+      ) {
+        setError(
+          'Tu cuenta aún no está activada: abre el enlace que te enviamos por correo (revisa también spam). Si no lo recibes, vuelve a registrarte con otro correo o contacta con soporte.'
+        )
+      } else if (/too many requests|rate limit/i.test(msg)) {
+        setError('Demasiados intentos. Espera unos minutos e inténtalo de nuevo.')
+      } else if (
+        msg.toLowerCase().includes('invalid login')
+        || errorCode === 'invalid_credentials'
+      ) {
+        setError('Email o contraseña incorrectos. Inténtalo de nuevo.')
+      } else {
+        setError(msg || 'No se pudo iniciar sesión. Inténtalo de nuevo.')
+      }
       setLoading(false)
       return
     }

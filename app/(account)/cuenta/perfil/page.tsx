@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, Loader2, CheckCircle } from 'lucide-react'
+import { Loader2, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -20,6 +20,7 @@ export default function PerfilPage() {
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const [email, setEmail] = useState('')
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState<AddressForm>({
@@ -46,6 +47,7 @@ export default function PerfilPage() {
 
       const customer = rawCustomer as unknown as Customer | null
 
+      setEmail(user.email ?? '')
       setFullName(customer?.full_name ?? user.user_metadata?.full_name ?? '')
       setPhone(customer?.phone ?? '')
 
@@ -93,30 +95,50 @@ export default function PerfilPage() {
 
   if (loading) {
     return (
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 md:py-12 flex items-center justify-center min-h-[40vh]">
+      <div className="max-w-2xl flex items-center justify-center min-h-[40vh]">
         <Loader2 className="w-6 h-6 animate-spin text-[#2d4a3e]" />
       </div>
     )
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 md:py-12">
-      <div className="flex items-center gap-3 mb-8">
-        <Link
-          href="/cuenta"
-          className="flex items-center gap-1.5 text-sm text-[#a08c7a] hover:text-[#2d4a3e] transition-colors"
-        >
-          <ChevronLeft className="w-4 h-4" /> Mi cuenta
-        </Link>
+    <div className="max-w-2xl">
+      <div className="mb-8">
+        <p className="text-sm text-[#a08c7a]">
+          <Link href="/cuenta" className="hover:text-[#2d4a3e] transition-colors duration-200">
+            Mi cuenta
+          </Link>
+          <span className="text-[#d4c4b0] mx-2 select-none" aria-hidden>
+            ·
+          </span>
+          <span className="text-[#2a2a2a] font-medium">Datos y dirección</span>
+        </p>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#2a2a2a] mt-3">Datos y dirección</h1>
+        <p className="text-sm text-[#a08c7a] mt-2 leading-relaxed">
+          Gestiona tus datos personales y la dirección de envío habitual.
+        </p>
       </div>
-
-      <h1 className="text-2xl font-bold text-[#2a2a2a] mb-8">Editar perfil</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Personal data */}
-        <div className="bg-white rounded-2xl border border-[#e8ddd0] p-6">
-          <h2 className="font-semibold text-[#2a2a2a] mb-5">Datos personales</h2>
+        <div className="bg-white rounded-xl border border-[#e8ddd0] shadow-sm p-6">
+          <h2 className="font-semibold text-[#2a2a2a] text-lg mb-5">Datos personales</h2>
           <div className="space-y-4">
+            <div>
+              <Label htmlFor="email-readonly">Correo electrónico</Label>
+              <Input
+                id="email-readonly"
+                type="email"
+                value={email}
+                readOnly
+                tabIndex={-1}
+                aria-readonly="true"
+                className="mt-1 bg-[#f9f6f1] text-[#6b5344] border-[#e8ddd0] rounded-lg"
+              />
+              <p className="text-xs text-[#a08c7a] mt-1.5">
+                Lo usamos para iniciar sesión y notificarte sobre tus pedidos.
+              </p>
+            </div>
             <div>
               <Label htmlFor="fullName">Nombre completo</Label>
               <Input
@@ -142,8 +164,8 @@ export default function PerfilPage() {
         </div>
 
         {/* Address */}
-        <div className="bg-white rounded-2xl border border-[#e8ddd0] p-6">
-          <h2 className="font-semibold text-[#2a2a2a] mb-5">Dirección de envío por defecto</h2>
+        <div className="bg-white rounded-xl border border-[#e8ddd0] shadow-sm p-6">
+          <h2 className="font-semibold text-[#2a2a2a] text-lg mb-5">Dirección de envío por defecto</h2>
           <div className="space-y-4">
             <div>
               <Label htmlFor="address_line1">Dirección</Label>

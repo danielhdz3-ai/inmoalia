@@ -43,11 +43,18 @@ export default function RegistroPage() {
       return
     }
     setLoading(true)
-    const { error } = await signUp(form.email, form.password, form.fullName)
+    const { error, session } = await signUp(form.email, form.password, form.fullName)
     if (error) {
       setError(error.message === 'User already registered'
         ? 'Ya existe una cuenta con ese email. Prueba a iniciar sesión.'
-        : 'Error al crear la cuenta. Inténtalo de nuevo.')
+        : (error.message || 'Error al crear la cuenta. Inténtalo de nuevo.'))
+      setLoading(false)
+      return
+    }
+    // Confirmación por email desactivada en Supabase: sesión lista al instante.
+    if (session) {
+      router.push('/cuenta')
+      router.refresh()
       setLoading(false)
       return
     }

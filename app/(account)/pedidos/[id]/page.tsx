@@ -3,9 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Package, ChevronLeft, MapPin, Truck, CreditCard } from 'lucide-react'
 import { formatPrice, formatDate } from '@/lib/utils'
+import type { Order, OrderItem, ShippingAddress } from '@/lib/supabase/types'
 
 const calcIva = (totalWithIva: number) => totalWithIva * 21 / 121
-import type { Order, OrderItem, ShippingAddress } from '@/lib/supabase/types'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -44,29 +44,45 @@ export default async function PedidoDetailPage({ params }: Props) {
   const STEPS = ['Pendiente', 'Pagado', 'En proceso', 'Enviado', 'Entregado']
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 md:py-12">
-      <div className="flex items-center gap-3 mb-8">
-        <Link
-          href="/pedidos"
-          className="flex items-center gap-1.5 text-sm text-[#a08c7a] hover:text-[#2d4a3e] transition-colors"
-        >
-          <ChevronLeft className="w-4 h-4" /> Mis pedidos
+    <div className="max-w-4xl lg:max-w-none">
+      <div className="text-sm text-[#a08c7a] mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+        <Link href="/cuenta" className="hover:text-[#2d4a3e] transition-colors duration-200">
+          Mi cuenta
         </Link>
+        <span className="text-[#d4c4b0] select-none" aria-hidden>
+          ·
+        </span>
+        <Link href="/pedidos" className="hover:text-[#2d4a3e] transition-colors duration-200">
+          Mis pedidos
+        </Link>
+        <span className="text-[#d4c4b0] select-none" aria-hidden>
+          ·
+        </span>
+        <span className="text-[#2a2a2a] font-medium">{order.order_number}</span>
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
+      <div className="mb-8">
+        <Link
+          href="/pedidos"
+          className="inline-flex items-center gap-1.5 text-sm text-[#a08c7a] hover:text-[#2d4a3e] transition-colors duration-200 mb-3"
+        >
+          <ChevronLeft className="w-4 h-4 shrink-0" aria-hidden /> Volver a la lista
+        </Link>
+
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-[#2a2a2a]">{order.order_number}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#2a2a2a]">{order.order_number}</h1>
           <p className="text-sm text-[#a08c7a] mt-0.5">{formatDate(order.created_at)}</p>
         </div>
         <span className={`self-start sm:self-auto text-sm font-semibold px-3.5 py-1.5 rounded-full ${status.bg} ${status.color}`}>
           {status.label}
         </span>
       </div>
+      </div>
 
       {/* Progress tracker */}
       {order.status !== 'cancelled' && (
-        <div className="bg-white rounded-2xl border border-[#e8ddd0] p-6 mb-6">
+        <div className="bg-white rounded-xl border border-[#e8ddd0] shadow-sm p-6 mb-6">
           <div className="flex items-center justify-between relative">
             <div className="absolute left-0 right-0 top-4 h-0.5 bg-[#e8ddd0] -z-0" />
             <div
@@ -100,7 +116,7 @@ export default async function PedidoDetailPage({ params }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Items */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="bg-white rounded-2xl border border-[#e8ddd0] overflow-hidden">
+          <div className="bg-white rounded-xl border border-[#e8ddd0] shadow-sm overflow-hidden">
             <div className="flex items-center gap-2 px-6 py-4 border-b border-[#e8ddd0]">
               <Package className="w-4 h-4 text-[#2d4a3e]" />
               <h2 className="font-semibold text-[#2a2a2a]">Productos ({items.length})</h2>
@@ -135,7 +151,7 @@ export default async function PedidoDetailPage({ params }: Props) {
 
           {/* Tracking */}
           {order.tracking_number && (
-            <div className="bg-[#2d4a3e]/5 border border-[#2d4a3e]/20 rounded-2xl p-5 flex items-start gap-3">
+            <div className="bg-[#2d4a3e]/5 border border-[#2d4a3e]/20 rounded-xl shadow-sm p-5 flex items-start gap-3">
               <Truck className="w-5 h-5 text-[#2d4a3e] mt-0.5 shrink-0" />
               <div>
                 <p className="font-semibold text-[#2d4a3e] text-sm">Número de seguimiento</p>
@@ -148,7 +164,7 @@ export default async function PedidoDetailPage({ params }: Props) {
         {/* Sidebar */}
         <div className="space-y-4">
           {/* Shipping address */}
-          <div className="bg-white rounded-2xl border border-[#e8ddd0] p-5">
+          <div className="bg-white rounded-xl border border-[#e8ddd0] shadow-sm p-5">
             <div className="flex items-center gap-2 mb-4">
               <MapPin className="w-4 h-4 text-[#2d4a3e]" />
               <h3 className="font-semibold text-[#2a2a2a] text-sm">Dirección de envío</h3>
@@ -164,7 +180,7 @@ export default async function PedidoDetailPage({ params }: Props) {
           </div>
 
           {/* Totals */}
-          <div className="bg-white rounded-2xl border border-[#e8ddd0] p-5">
+          <div className="bg-white rounded-xl border border-[#e8ddd0] shadow-sm p-5">
             <div className="flex items-center gap-2 mb-4">
               <CreditCard className="w-4 h-4 text-[#2d4a3e]" />
               <h3 className="font-semibold text-[#2a2a2a] text-sm">Resumen del pago</h3>
