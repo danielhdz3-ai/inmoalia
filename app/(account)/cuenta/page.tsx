@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { User, Package } from 'lucide-react'
+import { User, Package, Heart, Shield } from 'lucide-react'
 import type { Customer, Order } from '@/lib/supabase/types'
 
 export default async function CuentaPage() {
@@ -43,34 +43,61 @@ export default async function CuentaPage() {
     <div className="max-w-4xl lg:max-w-none">
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#2a2a2a]">Resumen</h1>
+        <p className="text-[10px] tracking-[0.25em] uppercase text-[#a08c7a] mt-1 font-medium">
+          Panel de cliente
+        </p>
         <p className="text-sm text-[#a08c7a] mt-2 leading-relaxed">
           Hola, {greetName}. Aquí tienes un vistazo rápido de tu cuenta.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <Link
           href="/cuenta/perfil"
-          className="group flex items-center gap-4 rounded-xl border border-[#e8ddd0] bg-white p-5 shadow-sm transition-all duration-300 hover:border-[#d4c4b0] hover:shadow-md"
+          className="group flex items-center gap-4 rounded-xl border border-[#e8ddd0] bg-white p-5 shadow-sm transition-all duration-200 hover:border-[#d4c4b0] hover:shadow-md"
         >
-          <div className="w-12 h-12 rounded-full bg-[#f9f6f1] border border-[#e8ddd0] flex items-center justify-center shrink-0 group-hover:border-[#d4c4b0] transition-colors">
+          <div className="w-12 h-12 rounded-full bg-[#f9f6f1] border border-[#e8ddd0] flex items-center justify-center shrink-0 transition-all duration-200 group-hover:border-[#d4c4b0]">
             <User className="w-6 h-6 text-[#2d4a3e]" />
           </div>
           <div className="min-w-0 text-left">
-            <p className="font-semibold text-[#2a2a2a] group-hover:text-[#2d4a3e] transition-colors">Datos y dirección</p>
+            <p className="font-semibold text-[#2a2a2a] group-hover:text-[#2d4a3e] transition-all duration-200">Datos y dirección</p>
             <p className="text-sm text-[#a08c7a] truncate">{user.email}</p>
           </div>
         </Link>
         <Link
           href="/pedidos"
-          className="group flex items-center gap-4 rounded-xl border border-[#e8ddd0] bg-white p-5 shadow-sm transition-all duration-300 hover:border-[#d4c4b0] hover:shadow-md"
+          className="group flex items-center gap-4 rounded-xl border border-[#e8ddd0] bg-white p-5 shadow-sm transition-all duration-200 hover:border-[#d4c4b0] hover:shadow-md"
         >
-          <div className="w-12 h-12 rounded-full bg-[#f9f6f1] border border-[#e8ddd0] flex items-center justify-center shrink-0 group-hover:border-[#d4c4b0] transition-colors">
+          <div className="w-12 h-12 rounded-full bg-[#f9f6f1] border border-[#e8ddd0] flex items-center justify-center shrink-0 transition-all duration-200 group-hover:border-[#d4c4b0]">
             <Package className="w-6 h-6 text-[#2d4a3e]" />
           </div>
           <div className="min-w-0 text-left">
-            <p className="font-semibold text-[#2a2a2a] group-hover:text-[#2d4a3e] transition-colors">Mis pedidos</p>
+            <p className="font-semibold text-[#2a2a2a] group-hover:text-[#2d4a3e] transition-all duration-200">Mis pedidos</p>
             <p className="text-sm text-[#a08c7a]">Historial y seguimiento</p>
+          </div>
+        </Link>
+        <Link
+          href="/cuenta/favoritos"
+          className="group flex items-center gap-4 rounded-xl border border-[#e8ddd0] bg-white p-5 shadow-sm transition-all duration-200 hover:border-[#d4c4b0] hover:shadow-md"
+        >
+          <div className="w-12 h-12 rounded-full bg-[#f9f6f1] border border-[#e8ddd0] flex items-center justify-center shrink-0 transition-all duration-200 group-hover:border-[#d4c4b0]">
+            <Heart className="w-6 h-6 text-[#2d4a3e]" />
+          </div>
+          <div className="min-w-0 text-left">
+            <p className="font-semibold text-[#2a2a2a] group-hover:text-[#2d4a3e] transition-all duration-200">Favoritos</p>
+            <p className="text-sm text-[#a08c7a]">Lista guardada</p>
+          </div>
+        </Link>
+        <Link
+          href="/cuenta/seguridad"
+          className="group flex items-center gap-4 rounded-xl border border-[#e8ddd0] bg-white p-5 shadow-sm transition-all duration-200 hover:border-[#d4c4b0] hover:shadow-md"
+        >
+          <div className="w-12 h-12 rounded-full bg-[#f9f6f1] border border-[#e8ddd0] flex items-center justify-center shrink-0 transition-all duration-200 group-hover:border-[#d4c4b0]">
+            <Shield className="w-6 h-6 text-[#2d4a3e]" />
+          </div>
+          <div className="min-w-0 text-left">
+            <p className="font-semibold text-[#2a2a2a] group-hover:text-[#2d4a3e] transition-all duration-200">Seguridad</p>
+            <p className="text-sm text-[#a08c7a]">Contraseña de acceso</p>
           </div>
         </Link>
       </div>

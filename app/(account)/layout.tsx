@@ -6,12 +6,16 @@ import { AccountDashboardLayout } from '@/components/account/AccountDashboardLay
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <Header />
-      <main className="min-h-screen">
+      <div className="print:hidden">
+        <Header />
+      </div>
+      <main className="min-h-screen print:min-h-0">
         <AccountDashboardLayout>{children}</AccountDashboardLayout>
       </main>
-      <Footer />
-      <CartDrawer />
+      <div className="print:hidden">
+        <Footer />
+        <CartDrawer />
+      </div>
     </>
   )
 }

@@ -2,6 +2,7 @@ import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Package, ChevronLeft, MapPin, Truck, CreditCard } from 'lucide-react'
+import PrintPedidoButton from '@/components/account/PrintPedidoButton'
 import { formatPrice, formatDate } from '@/lib/utils'
 import type { Order, OrderItem, ShippingAddress } from '@/lib/supabase/types'
 
@@ -44,8 +45,8 @@ export default async function PedidoDetailPage({ params }: Props) {
   const STEPS = ['Pendiente', 'Pagado', 'En proceso', 'Enviado', 'Entregado']
 
   return (
-    <div className="max-w-4xl lg:max-w-none">
-      <div className="text-sm text-[#a08c7a] mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+    <div className="max-w-4xl lg:max-w-none print:bg-white">
+      <div className="no-print text-sm text-[#a08c7a] mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
         <Link href="/cuenta" className="hover:text-[#2d4a3e] transition-colors duration-200">
           Mi cuenta
         </Link>
@@ -61,28 +62,44 @@ export default async function PedidoDetailPage({ params }: Props) {
         <span className="text-[#2a2a2a] font-medium">{order.order_number}</span>
       </div>
 
-      <div className="mb-8">
+      <div className="no-print mb-8">
         <Link
           href="/pedidos"
-          className="inline-flex items-center gap-1.5 text-sm text-[#a08c7a] hover:text-[#2d4a3e] transition-colors duration-200 mb-3"
+          className="inline-flex items-center gap-1.5 text-sm text-[#a08c7a] hover:text-[#2d4a3e] transition-all duration-200 mb-6"
         >
           <ChevronLeft className="w-4 h-4 shrink-0" aria-hidden /> Volver a la lista
         </Link>
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#2a2a2a]">{order.order_number}</h1>
-          <p className="text-sm text-[#a08c7a] mt-0.5">{formatDate(order.created_at)}</p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#2a2a2a]">{order.order_number}</h1>
+            <p className="text-sm text-[#a08c7a] mt-1">{formatDate(order.created_at)}</p>
+            <span
+              className={`inline-flex mt-3 text-sm font-semibold px-3.5 py-1.5 rounded-full ${status.bg} ${status.color}`}
+            >
+              {status.label}
+            </span>
+          </div>
+          <div className="flex shrink-0 items-start">
+            <PrintPedidoButton />
+          </div>
         </div>
-        <span className={`self-start sm:self-auto text-sm font-semibold px-3.5 py-1.5 rounded-full ${status.bg} ${status.color}`}>
-          {status.label}
-        </span>
       </div>
+
+      {/* Cabecera en impresión (sin navegación) */}
+      <div className="hidden print:block mb-6 border-b border-[#e8ddd0] pb-4">
+        <h1 className="text-2xl font-bold tracking-tight text-[#2a2a2a]">{order.order_number}</h1>
+        <p className="text-sm text-[#6b5344] mt-1">{formatDate(order.created_at)} · {status.label}</p>
+        {order.tracking_number && (
+          <p className="text-sm font-semibold mt-3 text-[#2a2a2a]">
+            Seguimiento: <span className="font-mono">{order.tracking_number}</span>
+          </p>
+        )}
       </div>
 
       {/* Progress tracker */}
       {order.status !== 'cancelled' && (
-        <div className="bg-white rounded-xl border border-[#e8ddd0] shadow-sm p-6 mb-6">
+        <div className="no-print bg-white rounded-xl border border-[#e8ddd0] shadow-sm p-6 mb-6">
           <div className="flex items-center justify-between relative">
             <div className="absolute left-0 right-0 top-4 h-0.5 bg-[#e8ddd0] -z-0" />
             <div
@@ -119,7 +136,14 @@ export default async function PedidoDetailPage({ params }: Props) {
           <div className="bg-white rounded-xl border border-[#e8ddd0] shadow-sm overflow-hidden">
             <div className="flex items-center gap-2 px-6 py-4 border-b border-[#e8ddd0]">
               <Package className="w-4 h-4 text-[#2d4a3e]" />
-              <h2 className="font-semibold text-[#2a2a2a]">Productos ({items.length})</h2>
+              <div>
+                <p className="text-[10px] tracking-[0.25em] uppercase text-[#a08c7a] font-medium">
+                  Pedido
+                </p>
+                <h2 className="font-semibold text-[#2a2a2a] text-lg tracking-tight">
+                  Productos ({items.length})
+                </h2>
+              </div>
             </div>
             <div className="divide-y divide-[#e8ddd0]">
               {items.map((item, i) => (
@@ -151,11 +175,17 @@ export default async function PedidoDetailPage({ params }: Props) {
 
           {/* Tracking */}
           {order.tracking_number && (
-            <div className="bg-[#2d4a3e]/5 border border-[#2d4a3e]/20 rounded-xl shadow-sm p-5 flex items-start gap-3">
-              <Truck className="w-5 h-5 text-[#2d4a3e] mt-0.5 shrink-0" />
-              <div>
-                <p className="font-semibold text-[#2d4a3e] text-sm">Número de seguimiento</p>
-                <p className="text-sm text-[#2a2a2a] font-mono mt-0.5">{order.tracking_number}</p>
+            <div className="rounded-xl border border-[#e8ddd0] bg-[#ebe4d8]/90 shadow-sm px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 transition-all duration-200">
+              <div className="flex items-start gap-3">
+                <Truck className="w-5 h-5 text-[#6b5344] mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-[10px] tracking-[0.25em] uppercase text-[#6b5344] font-semibold">
+                    Tracking
+                  </p>
+                  <p className="text-base md:text-lg text-[#2a2a2a] font-mono font-semibold tracking-wide mt-0.5">
+                    {order.tracking_number}
+                  </p>
+                </div>
               </div>
             </div>
           )}

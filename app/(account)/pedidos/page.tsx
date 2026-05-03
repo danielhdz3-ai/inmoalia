@@ -1,18 +1,9 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Package, ChevronRight } from 'lucide-react'
-import { formatPrice, formatDate } from '@/lib/utils'
-import type { Order, OrderItem } from '@/lib/supabase/types'
-
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  pending: { label: 'Pendiente', color: 'text-[#c9a84c]', bg: 'bg-[#c9a84c]/10' },
-  paid: { label: 'Pagado', color: 'text-[#2980b9]', bg: 'bg-[#2980b9]/10' },
-  processing: { label: 'En proceso', color: 'text-[#8e44ad]', bg: 'bg-[#8e44ad]/10' },
-  shipped: { label: 'Enviado', color: 'text-[#27ae60]', bg: 'bg-[#27ae60]/10' },
-  delivered: { label: 'Entregado', color: 'text-[#27ae60]', bg: 'bg-[#27ae60]/10' },
-  cancelled: { label: 'Cancelado', color: 'text-[#c0392b]', bg: 'bg-[#c0392b]/10' },
-}
+import { Package } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
+import PedidosListaClient from '@/components/account/PedidosListaClient'
+import type { Order } from '@/lib/supabase/types'
 
 export default async function PedidosPage() {
   const supabase = await createClient()
@@ -25,21 +16,25 @@ export default async function PedidosPage() {
     .select('*')
     .eq('customer_id', user.id)
     .order('created_at', { ascending: false })
-  const orders = rawOrders as unknown as Order[] | null
+
+  const orders = (rawOrders as unknown as Order[]) ?? []
 
   return (
     <div className="max-w-4xl lg:max-w-none">
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#2a2a2a]">Mis pedidos</h1>
+        <p className="text-[10px] tracking-[0.25em] uppercase text-[#a08c7a] mt-2 font-medium">
+          Historial
+        </p>
         <p className="text-sm text-[#a08c7a] mt-2 leading-relaxed">
           Consulta el estado y los detalles de cada compra.
         </p>
       </div>
 
-      {!orders || orders.length === 0 ? (
+      {orders.length === 0 ? (
         <div className="bg-white rounded-xl border border-[#e8ddd0] p-12 md:p-14 text-center shadow-sm">
           <Package className="w-12 h-12 text-[#e8ddd0] mx-auto mb-4" />
-          <h2 className="text-lg font-semibold text-[#2a2a2a] mb-2">No tienes pedidos aún</h2>
+          <h2 className="text-lg font-semibold text-[#2a2a2a] tracking-tight mb-2">No tienes pedidos aún</h2>
           <p className="text-[#a08c7a] mb-6 text-sm leading-relaxed max-w-sm mx-auto">
             Cuando realices tu primer pedido, aparecerá aquí.
           </p>
@@ -51,50 +46,8 @@ export default async function PedidosPage() {
           </Link>
         </div>
       ) : (
-        <div className="space-y-4">
-          {orders.map((order) => {
-            const status = STATUS_CONFIG[order.status] ?? { label: order.status, color: 'text-[#a08c7a]', bg: 'bg-[#a08c7a]/10' }
-            const items = order.items as unknown as OrderItem[]
-            const firstItem = items[0]
-
-            return (
-              <Link
-                key={order.id}
-                href={`/pedidos/${order.id}`}
-                className="block bg-white rounded-xl border border-[#e8ddd0] p-5 shadow-sm transition-all duration-300 hover:border-[#d4c4b0] hover:shadow-md"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="font-bold text-[#2a2a2a]">{order.order_number}</span>
-                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${status.bg} ${status.color}`}>
-                        {status.label}
-                      </span>
-                    </div>
-                    <p className="text-sm text-[#a08c7a] mb-2">{formatDate(order.created_at)}</p>
-                    {firstItem && (
-                      <p className="text-sm text-[#6b5344]">
-                        {firstItem.name}
-                        {items.length > 1 && ` y ${items.length - 1} producto${items.length > 2 ? 's' : ''} más`}
-                      </p>
-                    )}
-                    {order.tracking_number && (
-                      <p className="text-xs text-[#2d4a3e] mt-1 font-medium">
-                        Tracking: {order.tracking_number}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-lg font-bold text-[#2a2a2a]">{formatPrice(order.total)}</span>
-                    <ChevronRight className="w-4 h-4 text-[#a08c7a]" />
-                  </div>
-                </div>
-              </Link>
-            )
-          })}
-        </div>
+        <PedidosListaClient orders={orders} />
       )}
     </div>
   )
 }
-

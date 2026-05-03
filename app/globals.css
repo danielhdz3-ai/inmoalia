@@ -88,3 +88,10 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Impresión: ocultar UI no necesaria (complementa Tailwind print:hidden) */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

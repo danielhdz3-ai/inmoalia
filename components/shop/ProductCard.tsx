@@ -15,9 +15,11 @@ import type { Product } from '@/lib/supabase/types'
 interface ProductCardProps {
   product: Product
   priority?: boolean
+  /** Oculta el botón del corazón (p. ej. en /cuenta/favoritos con acciones propias) */
+  hideFavoriteButton?: boolean
 }
 
-export default function ProductCard({ product, priority = false }: ProductCardProps) {
+export default function ProductCard({ product, priority = false, hideFavoriteButton = false }: ProductCardProps) {
   const [imageIndex, setImageIndex] = useState(0)
   const addItem = useCartStore((s) => s.addItem)
   const toggleFavorite = useFavoritesStore((s) => s.toggleItem)
@@ -45,7 +47,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
 
   return (
     <Link href={`/productos/${product.slug}`} className="group block">
-      <div className="relative overflow-hidden rounded-xl bg-[#f9f6f1] border border-[#e8ddd0] hover:border-[#d4c4b0] transition-all duration-300 hover:shadow-md">
+      <div className="relative overflow-hidden rounded-xl bg-[#f9f6f1] border border-[#e8ddd0] hover:border-[#d4c4b0] transition-all duration-200 hover:shadow-md">
         {/* Image */}
         <div
           className="relative aspect-square overflow-hidden"
@@ -75,30 +77,34 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
           </div>
 
           {/* Wishlist */}
-          <button
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              toggleFavorite(product)
-            }}
-            className={cn(
-              'absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all shadow-sm',
-              isFavorite ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-            )}
-            aria-label={isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
-          >
-            <Heart
+          {!hideFavoriteButton && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                toggleFavorite(product)
+              }}
               className={cn(
-                'w-4 h-4 transition-colors',
-                isFavorite ? 'fill-[#c0392b] text-[#c0392b]' : 'text-[#6b5344]'
+                'absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-200 shadow-sm',
+                isFavorite ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
               )}
-            />
-          </button>
+              aria-label={isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+            >
+              <Heart
+                className={cn(
+                  'w-4 h-4 transition-colors duration-200',
+                  isFavorite ? 'fill-[#c0392b] text-[#c0392b]' : 'text-[#6b5344]'
+                )}
+              />
+            </button>
+          )}
 
           {/* Quick add */}
           {product.stock > 0 && (
             <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
               <Button
+                type="button"
                 onClick={handleAddToCart}
                 size="sm"
                 className="w-full gap-2 shadow-md"
