@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { fetchAwDropshipProducts } from '@/lib/providers/aw-dropship'
 import { syncDropXLProducts } from '@/lib/providers/dropxl'
 import { syncDropperyProducts } from '@/lib/providers/droppery'
 import { slugify } from '@/lib/utils'
@@ -90,6 +91,22 @@ export async function POST(req: NextRequest) {
       }
     } catch (err) {
       errors.push(`Droppery sync failed: ${err}`)
+    }
+  }
+
+  const AW_BATCH = 200
+  if (supplier === 'aw-dropship' || supplier === 'all') {
+    try {
+      const awProducts = await fetchAwDropshipProducts()
+
+      for (let i = 0; i < awProducts.length; i += AW_BATCH) {
+        const slice = awProducts.slice(i, i + AW_BATCH)
+        const { error } = await supabase.from('products').upsert(slice as never, { onConflict: 'slug' })
+        if (error) errors.push(`AW Dropship batch ${i}: ${error.message}`)
+        else productsUpserted += slice.length
+      }
+    } catch (err) {
+      errors.push(`AW Dropship sync failed: ${err}`)
     }
   }
 

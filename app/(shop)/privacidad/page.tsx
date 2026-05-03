@@ -14,7 +14,7 @@ export default function PrivacidadPage() {
       <div className="space-y-8 text-[#6b5344] leading-relaxed">
         <section>
           <h2 className="text-xl font-semibold text-[#2a2a2a] mb-3">1. Responsable del tratamiento</h2>
-          <p>INMOALIA S.L., con CIF B-XXXXXXXX y domicilio social en España, es la responsable del tratamiento de los datos personales recabados a través de este sitio web. Puedes contactarnos en <a href="mailto:info@inmoalia.com" className="text-[#2d4a3e] underline">info@inmoalia.com</a>.</p>
+          <p>INMOALIA S.L., con CIF B54560943 y domicilio social en España, es la responsable del tratamiento de los datos personales recabados a través de este sitio web. Puedes contactarnos en <a href="mailto:info@inmoalia.com" className="text-[#2d4a3e] underline">info@inmoalia.com</a>.</p>
         </section>
 
         <section>

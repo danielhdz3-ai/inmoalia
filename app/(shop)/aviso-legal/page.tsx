@@ -17,7 +17,7 @@ export default function AvisoLegalPage() {
           <dl className="grid grid-cols-[auto,1fr] gap-x-6 gap-y-2 text-sm">
             {[
               ['Denominación social', 'INMOALIA S.L.'],
-              ['CIF', 'B-XXXXXXXX'],
+              ['CIF', 'B54560943'],
               ['Domicilio social', 'España'],
               ['Actividad', 'Comercio electrónico de muebles, decoración y jardín'],
               ['Email', 'info@inmoalia.com'],

@@ -17,7 +17,7 @@ export default function TerminosPage() {
           <h2 className="text-xl font-semibold mb-3">1. Información general</h2>
           <p className="text-[#6b5344] leading-relaxed">
             INMOALIA es una tienda online de hogar, jardín y decoración premium que opera bajo el modelo de dropshipping.
-            El titular es INMOALIA SL, con domicilio en España. Al realizar una compra en nuestro sitio web aceptas estos términos y condiciones en su totalidad.
+            El titular es INMOALIA S.L., con CIF B54560943 y domicilio social en España. Al realizar una compra en nuestro sitio web aceptas estos términos y condiciones en su totalidad.
           </p>
         </section>
 

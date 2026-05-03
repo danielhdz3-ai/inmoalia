@@ -41,7 +41,7 @@ export default function ContactoPage() {
             icon: MapPin,
             title: 'Empresa',
             desc: 'INMOALIA S.L. — España',
-            value: 'CIF: B-XXXXXXXX',
+            value: 'CIF: B54560943',
             href: null,
           },
         ].map((item) => (
