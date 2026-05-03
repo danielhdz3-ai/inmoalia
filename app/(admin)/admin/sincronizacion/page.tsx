@@ -18,12 +18,9 @@ export default function SincronizacionPage() {
     setResults(null)
 
     try {
-      const res = await fetch('/api/sync', {
+      const res = await fetch('/api/admin/sync', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_SYNC_SECRET ?? 'dev-secret'}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ supplier }),
       })
 

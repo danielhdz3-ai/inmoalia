@@ -2,7 +2,7 @@ import { Resend } from 'resend'
 import type { Order, OrderItem, ShippingAddress } from '@/lib/supabase/types'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const FROM = process.env.RESEND_FROM_EMAIL || 'pedidos@inmoalia.com'
+const FROM = process.env.RESEND_FROM_EMAIL || 'info@inmoalia.com'
 
 export async function sendOrderConfirmation(order: Order) {
   const items = order.items as unknown as OrderItem[]
@@ -67,8 +67,8 @@ export async function sendOrderConfirmation(order: Order) {
         </div>
         
         <div style="text-align: center; color: #a08c7a; font-size: 12px; line-height: 1.6;">
-          <p>© 2024 INMOALIA — inmoalia.com</p>
-          <p>Si tienes preguntas, contáctanos en <a href="mailto:hola@inmoalia.com" style="color: #2d4a3e;">hola@inmoalia.com</a></p>
+          <p>© 2025 INMOALIA — inmoalia.com</p>
+          <p>Si tienes preguntas, contáctanos en <a href="mailto:info@inmoalia.com" style="color: #2d4a3e;">info@inmoalia.com</a></p>
         </div>
       </div>
     `,

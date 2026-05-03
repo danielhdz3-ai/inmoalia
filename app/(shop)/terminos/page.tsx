@@ -50,7 +50,7 @@ export default function TerminosPage() {
           <p className="text-[#6b5344] leading-relaxed">
             Dispones de 30 días naturales desde la recepción del pedido para ejercer tu derecho de desistimiento sin necesidad de justificación.
             El producto debe devolverse en su embalaje original y en perfecto estado. Los gastos de devolución corren a cargo del comprador salvo que el producto sea defectuoso o incorrecto.
-            Contacta con nosotros en <a href="mailto:hola@inmoalia.com" className="text-[#2d4a3e] underline">hola@inmoalia.com</a> para iniciar el proceso.
+            Contacta con nosotros en <a href="mailto:info@inmoalia.com" className="text-[#2d4a3e] underline">info@inmoalia.com</a> para iniciar el proceso.
           </p>
         </section>
 
@@ -72,7 +72,7 @@ export default function TerminosPage() {
           <h2 className="text-xl font-semibold mb-3">8. Protección de datos</h2>
           <p className="text-[#6b5344] leading-relaxed">
             Los datos personales facilitados durante el proceso de compra serán tratados conforme al Reglamento General de Protección de Datos (RGPD) y la Ley Orgánica de Protección de Datos (LOPD).
-            Puedes ejercer tus derechos de acceso, rectificación, supresión y portabilidad contactando en <a href="mailto:privacidad@inmoalia.com" className="text-[#2d4a3e] underline">privacidad@inmoalia.com</a>.
+            Puedes ejercer tus derechos de acceso, rectificación, supresión y portabilidad contactando en <a href="mailto:info@inmoalia.com" className="text-[#2d4a3e] underline">info@inmoalia.com</a>.
           </p>
         </section>
 
@@ -87,7 +87,7 @@ export default function TerminosPage() {
           <h2 className="text-xl font-semibold mb-3">10. Contacto</h2>
           <p className="text-[#6b5344] leading-relaxed">
             Para cualquier consulta relacionada con estos términos puedes contactarnos en{' '}
-            <a href="mailto:hola@inmoalia.com" className="text-[#2d4a3e] underline">hola@inmoalia.com</a>.
+            <a href="mailto:info@inmoalia.com" className="text-[#2d4a3e] underline">info@inmoalia.com</a>.
           </p>
         </section>
       </div>

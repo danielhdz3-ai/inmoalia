@@ -22,6 +22,7 @@ import { useCartStore } from '@/store/cart'
 import { formatPrice } from '@/lib/utils'
 import type { Product } from '@/lib/supabase/types'
 import ProductCard from './ProductCard'
+import WaitlistForm from './WaitlistForm'
 
 interface ProductDetailProps {
   product: Product
@@ -227,9 +228,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
             </div>
           ) : (
             <div className="mb-8">
-              <Button variant="secondary" size="lg" className="w-full">
-                Avisarme cuando haya stock
-              </Button>
+              <WaitlistForm productId={product.id} />
             </div>
           )}
 

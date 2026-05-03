@@ -10,15 +10,40 @@ interface Props {
   searchParams: Promise<{ sort?: string; min?: string; max?: string; material?: string }>
 }
 
-const CATEGORY_META: Record<string, { name: string; description: string }> = {
-  jardin: { name: 'Jardín y Exterior', description: 'Muebles y accesorios para transformar tu jardín y terraza en un espacio de lujo.' },
-  mesas: { name: 'Mesas', description: 'Mesas de comedor, jardín y auxiliares en madera, cerámica y más materiales.' },
-  sillas: { name: 'Sillas y Butacas', description: 'Sillas de comedor, butacas y taburetes para cada estancia.' },
-  iluminacion: { name: 'Iluminación', description: 'Lámparas de pie, apliques y colgantes para crear la atmósfera perfecta.' },
-  decoracion: { name: 'Decoración', description: 'Espejos, cuadros, jarrones y piezas únicas para personalizar tu hogar.' },
-  textil: { name: 'Textil Hogar', description: 'Cojines, alfombras, mantas y cortinas de materiales naturales premium.' },
-  muebles: { name: 'Muebles', description: 'Sofás, estanterías y muebles para completar tu hogar.' },
-  outlet: { name: 'Outlet', description: 'Las mejores ofertas de nuestra selección con descuentos especiales.' },
+interface CategoryEntry {
+  name: string
+  description: string
+  /** If set, filters by `subcategory` field using `dbSubcategory` value */
+  parent?: string
+  /** Exact value stored in the `subcategory` column of the DB */
+  dbSubcategory?: string
+}
+
+const CATEGORY_META: Record<string, CategoryEntry> = {
+  // Top-level categories (filter by `category`)
+  jardin:      { name: 'Jardín y Exterior',  description: 'Muebles y accesorios para transformar tu jardín y terraza en un espacio de lujo.' },
+  mesas:       { name: 'Mesas',              description: 'Mesas de comedor, jardín y auxiliares en madera, cerámica y más materiales.' },
+  sillas:      { name: 'Sillas y Butacas',   description: 'Sillas de comedor, butacas y taburetes para cada estancia.' },
+  iluminacion: { name: 'Iluminación',        description: 'Lámparas de pie, apliques y colgantes para crear la atmósfera perfecta.' },
+  decoracion:  { name: 'Decoración',         description: 'Espejos, cuadros, jarrones y piezas únicas para personalizar tu hogar.' },
+  textil:      { name: 'Textil Hogar',       description: 'Cojines, alfombras, mantas y cortinas de materiales naturales premium.' },
+  muebles:     { name: 'Muebles',            description: 'Sofás, estanterías y muebles para completar tu hogar.' },
+  outlet:      { name: 'Outlet',             description: 'Las mejores ofertas de nuestra selección con descuentos especiales.' },
+
+  // Subcategories of Muebles
+  'sofas-butacas': { name: 'Sofás y Butacas', description: 'Sofás, butacas y sillones para el salón y zonas de descanso.', parent: 'muebles', dbSubcategory: 'Sofás y butacas' },
+  estanterias:     { name: 'Estanterías',      description: 'Estanterías, librerías y módulos de almacenaje para el hogar.', parent: 'muebles', dbSubcategory: 'Estanterías' },
+
+  // Subcategories of Jardín
+  'conjuntos-exterior': { name: 'Conjuntos Exterior', description: 'Sets completos de mesa y sillas para terraza y jardín.', parent: 'jardin', dbSubcategory: 'Conjuntos exterior' },
+  tumbonas:             { name: 'Tumbonas',            description: 'Tumbonas y hamacas para disfrutar del jardín y la piscina.', parent: 'jardin', dbSubcategory: 'Tumbonas' },
+  pergolas:             { name: 'Pérgolas',            description: 'Pérgolas y cenadores para crear espacios de sombra en exterior.', parent: 'jardin', dbSubcategory: 'Pérgolas' },
+  barbacoas:            { name: 'Barbacoas',           description: 'Barbacoas, braseros y accesorios para disfrutar al aire libre.', parent: 'jardin', dbSubcategory: 'Barbacoas' },
+
+  // Subcategories of Decoración
+  espejos:  { name: 'Espejos',  description: 'Espejos decorativos para el salón, dormitorio y baño.', parent: 'decoracion', dbSubcategory: 'Espejos' },
+  cuadros:  { name: 'Cuadros',  description: 'Cuadros y láminas de arte para personalizar tus paredes.', parent: 'decoracion', dbSubcategory: 'Cuadros' },
+  jarrones: { name: 'Jarrones', description: 'Jarrones, figuras y piezas decorativas para el hogar.', parent: 'decoracion', dbSubcategory: 'Jarrones' },
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -43,7 +68,13 @@ export default async function CategoriaPage({ params, searchParams }: Props) {
     .from('products')
     .select('*')
     .eq('is_active', true)
-    .eq('category', categoria)
+
+  if (meta.parent && meta.dbSubcategory) {
+    // Subcategory page: filter by parent category + exact DB subcategory value
+    query = query.eq('category', meta.parent).eq('subcategory', meta.dbSubcategory)
+  } else {
+    query = query.eq('category', categoria)
+  }
 
   if (sp.min) query = query.gte('price', parseFloat(sp.min))
   if (sp.max) query = query.lte('price', parseFloat(sp.max))

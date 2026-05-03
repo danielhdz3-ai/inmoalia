@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { stripe } from '@/lib/stripe/client'
 import { formatPrice, formatDate } from '@/lib/utils'
 import type { OrderItem } from '@/lib/supabase/types'
+import CartClearer from './CartClearer'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,6 +43,7 @@ export default async function CheckoutExitoPage({ searchParams }: PageProps) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-16 md:py-24">
+      <CartClearer />
       {/* Icono y título */}
       <div className="text-center mb-10">
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-[#2d4a3e]/10 mb-6">

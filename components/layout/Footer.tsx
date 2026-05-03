@@ -101,7 +101,7 @@ export default function Footer() {
               <Globe className="w-4 h-4" />
             </a>
             <a
-              href="mailto:hola@inmoalia.com"
+              href="mailto:info@inmoalia.com"
               className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-white/60 hover:text-white"
               aria-label="Email"
             >

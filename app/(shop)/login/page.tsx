@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Loader2, Eye, EyeOff } from 'lucide-react'
@@ -16,6 +16,17 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [redirectTo, setRedirectTo] = useState('/cuenta')
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const redirect = params.get('redirect')
+    if (redirect && redirect.startsWith('/')) setRedirectTo(redirect)
+
+    const authError = params.get('error')
+    if (authError === 'link_expired') setError('El enlace ha caducado. Solicita uno nuevo.')
+    if (authError === 'auth_error') setError('Error de autenticación. Inténtalo de nuevo.')
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,7 +41,7 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/cuenta')
+    router.push(redirectTo)
     router.refresh()
   }
 
