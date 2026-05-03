@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -8,8 +8,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCart } from '@/hooks/useCart'
 import { formatPrice } from '@/lib/utils'
-import { Lock, Loader2 } from 'lucide-react'
+import { Lock, Loader2, Tag, X, CheckCircle } from 'lucide-react'
 import Image from 'next/image'
+import { createClient } from '@/lib/supabase/client'
 
 // IVA 21% extraído del total (precios con IVA incluido)
 const calcIva = (totalWithIva: number) => totalWithIva * 21 / 121
@@ -26,12 +27,24 @@ interface FormData {
   country: string
 }
 
+interface Coupon {
+  code: string
+  discount_type: 'percentage' | 'fixed'
+  discount_value: number
+  description: string | null
+}
+
 export default function CheckoutPage() {
   const router = useRouter()
   const { items, getSubtotal, shippingCost, hasFreeShipping } = useCart()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [termsAccepted, setTermsAccepted] = useState(false)
+  const [prefilled, setPrefilled] = useState(false)
+  const [couponCode, setCouponCode] = useState('')
+  const [couponLoading, setCouponLoading] = useState(false)
+  const [couponError, setCouponError] = useState<string | null>(null)
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null)
   const [form, setForm] = useState<FormData>({
     full_name: '',
     email: '',
@@ -44,8 +57,81 @@ export default function CheckoutPage() {
     country: 'España',
   })
 
+  // Pre-fill form with saved profile data
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        setForm((prev) => ({ ...prev, email: user.email ?? prev.email }))
+
+        const { data: customer } = await supabase
+          .from('customers')
+          .select('full_name, phone, address')
+          .eq('id', user.id)
+          .single()
+
+        if (!customer) return
+
+        const addr = customer.address as Record<string, string> | null
+        setForm((prev) => ({
+          ...prev,
+          full_name: customer.full_name ?? prev.full_name,
+          phone: customer.phone ?? prev.phone,
+          address_line1: addr?.address_line1 ?? prev.address_line1,
+          address_line2: addr?.address_line2 ?? prev.address_line2,
+          city: addr?.city ?? prev.city,
+          postal_code: addr?.postal_code ?? prev.postal_code,
+          province: addr?.province ?? prev.province,
+          country: addr?.country ?? prev.country,
+        }))
+        setPrefilled(true)
+      } catch {
+        // Non-critical — proceed with empty form
+      }
+    }
+    loadProfile()
+  }, [])
+
+  const applyCoupon = async () => {
+    const code = couponCode.trim().toUpperCase()
+    if (!code) return
+    setCouponLoading(true)
+    setCouponError(null)
+    try {
+      const res = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, subtotal: getSubtotal() }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Cupón no válido')
+      setAppliedCoupon(data.coupon)
+    } catch (err) {
+      setCouponError(err instanceof Error ? err.message : 'Cupón no válido')
+      setAppliedCoupon(null)
+    } finally {
+      setCouponLoading(false)
+    }
+  }
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null)
+    setCouponCode('')
+    setCouponError(null)
+  }
+
   const subtotal = getSubtotal()
-  const total = subtotal + shippingCost
+  const discountAmount = appliedCoupon
+    ? appliedCoupon.discount_type === 'percentage'
+      ? subtotal * appliedCoupon.discount_value / 100
+      : Math.min(appliedCoupon.discount_value, subtotal)
+    : 0
+  const discountedSubtotal = Math.max(0, subtotal - discountAmount)
+  const shippingCostFinal = discountedSubtotal >= 99 ? 0 : shippingCost
+  const total = discountedSubtotal + shippingCostFinal
   const ivaAmount = calcIva(total)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -65,7 +151,11 @@ export default function CheckoutPage() {
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items, shippingAddress: form }),
+        body: JSON.stringify({
+          items,
+          shippingAddress: form,
+          couponCode: appliedCoupon?.code ?? null,
+        }),
       })
 
       const data = await res.json()
@@ -84,7 +174,13 @@ export default function CheckoutPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-12">
-      <h1 className="text-2xl md:text-3xl font-bold text-[#2a2a2a] mb-8">Finalizar compra</h1>
+      <h1 className="text-2xl md:text-3xl font-bold text-[#2a2a2a] mb-2">Finalizar compra</h1>
+      {prefilled && (
+        <p className="text-xs text-[#27ae60] mb-6 flex items-center gap-1.5">
+          <CheckCircle className="w-3.5 h-3.5" />
+          Datos rellenados desde tu perfil guardado
+        </p>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* Form */}
@@ -217,6 +313,55 @@ export default function CheckoutPage() {
             </div>
           </div>
 
+          {/* Cupón de descuento */}
+          <div>
+            <h2 className="text-lg font-semibold text-[#2a2a2a] mb-3">Cupón de descuento</h2>
+            {appliedCoupon ? (
+              <div className="flex items-center justify-between bg-[#2d4a3e]/5 border border-[#2d4a3e]/20 rounded-xl px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-[#2d4a3e]" />
+                  <span className="text-sm font-medium text-[#2d4a3e]">{appliedCoupon.code}</span>
+                  <span className="text-xs text-[#6b5344]">
+                    {appliedCoupon.discount_type === 'percentage'
+                      ? `−${appliedCoupon.discount_value}%`
+                      : `−${formatPrice(appliedCoupon.discount_value)}`}
+                  </span>
+                  {appliedCoupon.description && (
+                    <span className="text-xs text-[#a08c7a]">· {appliedCoupon.description}</span>
+                  )}
+                </div>
+                <button onClick={removeCoupon} className="text-[#a08c7a] hover:text-[#c0392b] transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#a08c7a]" />
+                  <input
+                    type="text"
+                    value={couponCode}
+                    onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(null) }}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), applyCoupon())}
+                    placeholder="CÓDIGO"
+                    className="w-full h-10 pl-9 pr-3 rounded-lg border border-[#e8ddd0] text-sm text-[#2a2a2a] placeholder:text-[#a08c7a] focus:outline-none focus:ring-2 focus:ring-[#2d4a3e]/30 font-mono"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={applyCoupon}
+                  disabled={couponLoading || !couponCode.trim()}
+                  className="px-4 h-10 rounded-lg border border-[#e8ddd0] text-sm font-medium text-[#2a2a2a] hover:bg-[#f9f6f1] disabled:opacity-50 transition-colors"
+                >
+                  {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Aplicar'}
+                </button>
+              </div>
+            )}
+            {couponError && (
+              <p className="text-xs text-[#c0392b] mt-1.5">{couponError}</p>
+            )}
+          </div>
+
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
               {error}
@@ -261,7 +406,7 @@ export default function CheckoutPage() {
             ) : (
               <>
                 <Lock className="w-4 h-4" />
-                Pagar {formatPrice(total)} con Stripe
+                Pagar {formatPrice(total)}
               </>
             )}
           </Button>
@@ -300,10 +445,16 @@ export default function CheckoutPage() {
                 <span className="text-[#6b5344]">Subtotal</span>
                 <span className="text-[#2a2a2a]">{formatPrice(subtotal)}</span>
               </div>
+              {appliedCoupon && discountAmount > 0 && (
+                <div className="flex justify-between text-sm text-[#27ae60] font-medium">
+                  <span>Descuento ({appliedCoupon.code})</span>
+                  <span>−{formatPrice(discountAmount)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm">
                 <span className="text-[#6b5344]">Envío</span>
-                <span className={hasFreeShipping ? 'text-[#27ae60] font-medium' : 'text-[#2a2a2a]'}>
-                  {hasFreeShipping ? 'GRATIS' : formatPrice(shippingCost)}
+                <span className={shippingCostFinal === 0 ? 'text-[#27ae60] font-medium' : 'text-[#2a2a2a]'}>
+                  {shippingCostFinal === 0 ? 'GRATIS' : formatPrice(shippingCostFinal)}
                 </span>
               </div>
               <div className="flex justify-between text-xs text-[#a08c7a] pt-1">

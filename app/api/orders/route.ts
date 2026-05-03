@@ -1,13 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe/client'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import type { CartItem } from '@/store/cart'
 import type { ShippingAddress, Product } from '@/lib/supabase/types'
 
+function getAdminClient() {
+  return createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { items, shippingAddress }: { items: CartItem[]; shippingAddress: ShippingAddress } =
-      await req.json()
+    const { items, shippingAddress, couponCode }: {
+      items: CartItem[]
+      shippingAddress: ShippingAddress
+      couponCode?: string | null
+    } = await req.json()
 
     if (!items?.length) {
       return NextResponse.json({ error: 'El carrito está vacío' }, { status: 400 })
@@ -45,7 +56,41 @@ export async function POST(req: NextRequest) {
     }
 
     const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    const shippingCost = subtotal >= 99 ? 0 : 5.99
+
+    // Validar cupón server-side (second check — nunca confiar solo en el cliente)
+    let discountAmount = 0
+    let validatedCouponCode: string | null = null
+
+    if (couponCode) {
+      const adminClient = getAdminClient()
+      const { data: coupon } = await adminClient
+        .from('coupons')
+        .select('*')
+        .eq('code', couponCode.trim().toUpperCase())
+        .eq('is_active', true)
+        .single()
+
+      if (
+        coupon &&
+        (!coupon.expires_at || new Date(coupon.expires_at) >= new Date()) &&
+        (coupon.max_uses === null || coupon.uses_count < coupon.max_uses) &&
+        subtotal >= (coupon.min_order ?? 0)
+      ) {
+        discountAmount = coupon.discount_type === 'percentage'
+          ? subtotal * coupon.discount_value / 100
+          : Math.min(coupon.discount_value, subtotal)
+        validatedCouponCode = coupon.code
+
+        // Incrementar contador de usos
+        await adminClient
+          .from('coupons')
+          .update({ uses_count: coupon.uses_count + 1 } as never)
+          .eq('id', coupon.id)
+      }
+    }
+
+    const discountedSubtotal = Math.max(0, subtotal - discountAmount)
+    const shippingCost = discountedSubtotal >= 99 ? 0 : 5.99
 
     // Crear Stripe Checkout Session
     const orderItems = items.map((item) => {
@@ -88,10 +133,28 @@ export async function POST(req: NextRequest) {
       })
     }
 
+    // Línea de descuento en Stripe (si aplica)
+    // Stripe no soporta line items negativos: usamos un cupón dinámico de Stripe
+    const stripeDiscounts: { coupon: string }[] = []
+    if (discountAmount > 0 && validatedCouponCode) {
+      try {
+        const stripeCoupon = await stripe.coupons.create({
+          amount_off: Math.round(discountAmount * 100),
+          currency: 'eur',
+          duration: 'once',
+          name: `Cupón ${validatedCouponCode}`,
+        })
+        stripeDiscounts.push({ coupon: stripeCoupon.id })
+      } catch {
+        // Si falla crear el cupón de Stripe, continuamos sin descuento en Stripe
+      }
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
-      payment_method_types: ['card'],
+      payment_method_types: ['card', 'bizum'],
       line_items: lineItems,
+      ...(stripeDiscounts.length > 0 ? { discounts: stripeDiscounts } : {}),
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout/exito?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/carrito`,
       customer_email: user?.email ?? shippingAddress.email,
@@ -99,6 +162,8 @@ export async function POST(req: NextRequest) {
         customer_id: user?.id ?? '',
         items: JSON.stringify(orderItems),
         shipping_address: JSON.stringify(shippingAddress),
+        coupon_code: validatedCouponCode ?? '',
+        discount_amount: String(discountAmount),
       },
       shipping_address_collection: {
         allowed_countries: ['ES', 'PT', 'FR', 'DE', 'IT', 'NL', 'BE'],
