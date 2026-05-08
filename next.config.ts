@@ -28,6 +28,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "media.aiku.io",
       },
+      /* Fotos catálogo Grupo SDM (VENETTO y otros). */
+      {
+        protocol: "https",
+        hostname: "gruposdm.com",
+      },
     ],
   },
   experimental: {

@@ -1,6 +1,6 @@
--- Sofá VENETTO 2 plazas (proveedor operativas-sniper; referencia 290.SVENE2SNE).
+-- Sofá VENETTO 2 plazas (operativas-sniper / catálogo fabricante SDM; referencia 290.SVENE2SNE).
 -- PVP tienda 425 € · coste proveedor 345 €.
--- Imágenes placeholder Unsplash; reemplazar por fotos del fabricante cuando estén en CDN/host permitido.
+-- Fotos desde ficha pública gruposdm.com (mismo modelo); next.config debe permitir hostname gruposdm.com.
 
 insert into products (
   slug,
@@ -32,9 +32,8 @@ insert into products (
   425.00,
   345.00,
   array[
-    'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&q=85',
-    'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=1200&q=85',
-    'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1200&q=85'
+    'https://gruposdm.com/38580-thickbox_default/venetto-sofa-2-seater-stainless-steel-black-synthetic-leather.jpg',
+    'https://gruposdm.com/38581-thickbox_default/venetto-sofa-2-seater-stainless-steel-black-synthetic-leather.jpg'
   ]::text[],
   'muebles',
   'Sofás y butacas',
@@ -51,7 +50,7 @@ insert into products (
   true,
   'Sofá VENETTO 2 plazas acero inoxidable similpiel negra | INMOALIA',
   'Sofá de diseño VENETTO: estructura acero inoxidable, similpiel negra, 132×70×69 cm. Certificación UNE. Referencia 290.SVENE2SNE.',
-  null
+  'https://gruposdm.com/es/sofas-butacas-y-sillones/sofas-y-sillones/sofa-de-2-plazas/sofa-venetto-2-plazas-acero-inoxidable-similpiel-negra.html'
 )
 on conflict (slug) do update set
   name = excluded.name,
