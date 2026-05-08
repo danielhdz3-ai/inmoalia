@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
@@ -11,15 +11,19 @@ import {
   Shield,
   RotateCcw,
   ChevronRight,
+  ChevronLeft,
   Plus,
   Minus,
   Package,
   CheckCircle,
+  Maximize2,
+  X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useCartStore } from '@/store/cart'
 import { formatPrice } from '@/lib/utils'
+import { toastOk, toastErr } from '@/lib/toast-client'
 import type { Product } from '@/lib/supabase/types'
 import ProductCard from './ProductCard'
 import WaitlistForm from './WaitlistForm'
@@ -34,9 +38,63 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
   const [quantity, setQuantity] = useState(1)
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [added, setAdded] = useState(false)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
   const addItem = useCartStore((s) => s.addItem)
 
   const dimensions = product.dimensions as { width?: number; height?: number; depth?: number } | null
+
+  const activeImageSrc = product.images[selectedImage] ?? product.images[0] ?? ''
+
+  const handleShare = useCallback(async () => {
+    const url =
+      typeof window !== 'undefined'
+        ? `${window.location.origin}/productos/${product.slug}`
+        : ''
+    if (!url) return
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: product.name,
+          text: product.name,
+          url,
+        })
+        return
+      } catch (e: unknown) {
+        if ((e as { name?: string })?.name === 'AbortError') return
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url)
+      void toastOk('Enlace copiado al portapapeles')
+    } catch {
+      void toastErr('No se pudo copiar el enlace. Cópialo desde la barra de dirección.')
+    }
+  }, [product.name, product.slug])
+
+  useEffect(() => {
+    if (!lightboxOpen) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prevOverflow
+    }
+  }, [lightboxOpen])
+
+  useEffect(() => {
+    if (!lightboxOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxOpen(false)
+      if (product.images.length <= 1) return
+      if (e.key === 'ArrowRight') {
+        setSelectedImage((i) => (i + 1) % product.images.length)
+      }
+      if (e.key === 'ArrowLeft') {
+        setSelectedImage((i) => (i - 1 + product.images.length) % product.images.length)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [lightboxOpen, product.images.length])
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
@@ -78,26 +136,37 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16">
         {/* Images */}
         <div className="space-y-3">
-          <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#f9f6f1] border border-[#e8ddd0]">
-            <Image
-              src={product.images[selectedImage] ?? product.images[0] ?? ''}
-              alt={product.name}
-              fill
-              className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              priority
-            />
+          <button
+            type="button"
+            onClick={() => activeImageSrc && setLightboxOpen(true)}
+            className="relative w-full aspect-square rounded-2xl overflow-hidden bg-[#f9f6f1] border border-[#e8ddd0] text-left outline-none cursor-zoom-in ring-offset-2 focus-visible:ring-2 focus-visible:ring-[#2d4a3e] transition-all duration-200 hover:border-[#a08c7a]"
+            aria-label="Ver imagen a pantalla completa"
+          >
+            {activeImageSrc ? (
+              <Image
+                src={activeImageSrc}
+                alt={product.name}
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                priority
+              />
+            ) : null}
             {product.is_featured && (
-              <div className="absolute top-4 left-4">
+              <div className="absolute top-4 left-4 pointer-events-none">
                 <Badge variant="gold">Destacado</Badge>
               </div>
             )}
             {discountPct && (
-              <div className="absolute top-4 right-4">
+              <div className="absolute top-4 right-14 pointer-events-none">
                 <Badge variant="sale">-{discountPct}%</Badge>
               </div>
             )}
-          </div>
+            <span className="absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-black/55 text-white text-xs px-3 py-1.5 pointer-events-none backdrop-blur-sm">
+              <Maximize2 className="w-3.5 h-3.5" aria-hidden />
+              Pantalla completa
+            </span>
+          </button>
 
           {product.images.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-1">
@@ -105,11 +174,13 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
                 <button
                   key={i}
                   onClick={() => setSelectedImage(i)}
+                  type="button"
                   className={`relative shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
                     selectedImage === i
                       ? 'border-[#2d4a3e] shadow-md'
                       : 'border-[#e8ddd0] hover:border-[#a08c7a]'
                   }`}
+                  aria-label={`Imagen ${i + 1} de ${product.images.length}`}
                 >
                   <Image src={img} alt={`${product.name} ${i + 1}`} fill className="object-cover" sizes="80px" />
                 </button>
@@ -169,13 +240,30 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
             )}
           </div>
 
-          {/* Add to cart */}
-          {product.stock > 0 ? (
-            <div className="space-y-3 mb-8">
-              <div className="flex items-center gap-4">
-                {/* Quantity */}
+          {/* Add to cart / waitlist + acciones */}
+          <div className="space-y-3 mb-8">
+            <div className="flex gap-3">
+              <Button
+                variant="secondary"
+                size="sm"
+                type="button"
+                className="flex-1 gap-2 transition-all duration-200"
+                onClick={() => setIsWishlisted(!isWishlisted)}
+              >
+                <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-[#c0392b] text-[#c0392b]' : ''}`} />
+                {isWishlisted ? 'En favoritos' : 'Favoritos'}
+              </Button>
+              <Button variant="secondary" size="sm" type="button" className="flex-1 gap-2 transition-all duration-200" onClick={() => void handleShare()}>
+                <Share2 className="w-4 h-4" />
+                Compartir
+              </Button>
+            </div>
+
+            {product.stock > 0 ? (
+              <div className="flex items-center gap-4 flex-wrap pt-2">
                 <div className="flex items-center bg-[#f9f6f1] border border-[#e8ddd0] rounded-xl overflow-hidden">
                   <button
+                    type="button"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     className="w-11 h-11 flex items-center justify-center hover:bg-[#e8ddd0] transition-colors"
                   >
@@ -183,6 +271,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
                   </button>
                   <span className="w-10 text-center font-semibold text-[#2a2a2a]">{quantity}</span>
                   <button
+                    type="button"
                     onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
                     className="w-11 h-11 flex items-center justify-center hover:bg-[#e8ddd0] transition-colors"
                   >
@@ -193,7 +282,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
                 <Button
                   onClick={handleAddToCart}
                   size="lg"
-                  className="flex-1 gap-2"
+                  className="flex-1 min-w-[200px] gap-2"
                   variant={added ? 'secondary' : 'default'}
                 >
                   {added ? (
@@ -209,28 +298,10 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
                   )}
                 </Button>
               </div>
-
-              <div className="flex gap-3">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="flex-1 gap-2"
-                  onClick={() => setIsWishlisted(!isWishlisted)}
-                >
-                  <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-[#c0392b] text-[#c0392b]' : ''}`} />
-                  {isWishlisted ? 'En favoritos' : 'Favoritos'}
-                </Button>
-                <Button variant="secondary" size="sm" className="gap-2">
-                  <Share2 className="w-4 h-4" />
-                  Compartir
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="mb-8">
+            ) : (
               <WaitlistForm productId={product.id} />
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Benefits */}
           <div className="space-y-3 py-6 border-t border-[#e8ddd0]">
@@ -305,6 +376,82 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
           )}
         </div>
       </div>
+
+      {/* Lightbox pantalla completa */}
+      {lightboxOpen && activeImageSrc ? (
+        <div
+          className="fixed inset-0 z-[100] flex flex-col bg-black/96"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="product-lightbox-label"
+        >
+          <div className="flex items-center justify-between gap-4 px-4 py-3 text-white shrink-0">
+            <p id="product-lightbox-label" className="text-sm font-medium truncate pr-6">
+              {product.name}
+            </p>
+            <button
+              type="button"
+              onClick={() => setLightboxOpen(false)}
+              className="shrink-0 rounded-full bg-white/10 p-2.5 hover:bg-white/20 transition-all duration-200"
+              aria-label="Cerrar"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div
+            className="relative flex-1 flex items-center justify-center px-2 md:px-8 pb-6 min-h-0"
+            role="presentation"
+            onClick={() => setLightboxOpen(false)}
+          >
+            {product.images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedImage((i) => (i - 1 + product.images.length) % product.images.length)
+                  }}
+                  className="absolute left-2 md:left-6 z-20 rounded-full bg-white/15 p-3 hover:bg-white/25 transition-all duration-200 text-white hidden sm:flex items-center justify-center"
+                  aria-label="Imagen anterior"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedImage((i) => (i + 1) % product.images.length)
+                  }}
+                  className="absolute right-2 md:right-6 z-20 rounded-full bg-white/15 p-3 hover:bg-white/25 transition-all duration-200 text-white hidden sm:flex items-center justify-center"
+                  aria-label="Imagen siguiente"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              </>
+            )}
+
+            <div
+              className="relative z-10 w-full max-w-[min(100vw,1280px)] h-[min(85vh,calc(100vw-32px))] mx-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Image
+                src={activeImageSrc}
+                alt={product.name}
+                fill
+                className="object-contain"
+                sizes="100vw"
+                priority
+              />
+            </div>
+          </div>
+
+          <p className="text-white/65 text-xs text-center pb-3 px-4 shrink-0">
+            ESC para cerrar
+            {product.images.length > 1 ? ' · flechas ◀ ▶ para otras fotos' : ''}
+          </p>
+        </div>
+      ) : null}
 
       {/* Description */}
       {product.description && (
