@@ -14,6 +14,9 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import type { Customer } from '@/lib/supabase/types'
 
+// Evita pre-renderización estática en esta página dinámica
+export const dynamic = 'force-dynamic'
+
 // IVA 21% extraído del total (precios con IVA incluido)
 const calcIva = (totalWithIva: number) => totalWithIva * 21 / 121
 
