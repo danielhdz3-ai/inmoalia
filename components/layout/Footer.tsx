@@ -11,6 +11,7 @@ const FOOTER_LINKS = {
   ],
   'Atención al cliente': [
     { label: 'Contacto', href: '/contacto' },
+    { label: 'Información de envíos', href: '/envios' },
     { label: 'Seguimiento de pedido', href: '/pedidos' },
     { label: 'Devoluciones', href: '/devoluciones' },
     { label: 'Preguntas frecuentes', href: '/faq' },

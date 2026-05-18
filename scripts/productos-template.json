@@ -1,0 +1,61 @@
+{
+  "productos": [
+    {
+      "nombre": "Sillón PARADISE, giratorio, cromado, tapizado negro",
+      "slug": "sillon-paradise-cromado-negro",
+      "descripcion": "Sillón de oficina giratorio con estructura cromada y tapizado en negro. Regulación de altura mediante pistón de gas, respaldo ergonómico y base de 5 ruedas para máxima movilidad. Ideal para oficinas modernas y espacios de teletrabajo.",
+      "precio_venta": 129.90,
+      "precio_compra": 65.00,
+      "sku_inmoalia": "INMO-PARADISE-NE",
+      "sku_gruposdm": "712.SPARGSNE",
+      "categoria": "sillas-oficina",
+      "subcategoria": "sillones-giratorios",
+      "material": "Metal cromado, polipiel",
+      "color": "Negro",
+      "peso_kg": 12.5,
+      "stock_estimado": 10,
+      "imagenes": [
+        "URL_DE_LA_IMAGEN_1.jpg",
+        "URL_DE_LA_IMAGEN_2.jpg"
+      ],
+      "tags": ["sillon", "oficina", "giratorio", "negro", "cromado", "ergonomico"],
+      "destacado": true,
+      "meta_title": "Sillón de Oficina PARADISE Cromado Negro | INMOALIA",
+      "meta_description": "Sillón giratorio cromado con tapizado negro. Ergonómico, regulable en altura, perfecto para oficina. Envío gratis desde 600€."
+    },
+    {
+      "nombre": "Sillón de oficina DUKE, alto, gas, basculante, similpiel negra",
+      "slug": "sillon-duke-alto-similpiel-negra",
+      "descripcion": "Sillón de dirección alto con respaldo ergonómico y mecanismo basculante. Fabricado en similpiel negra de alta calidad, con reposabrazos acolchados y base de aluminio pulido.",
+      "precio_venta": 189.90,
+      "precio_compra": 95.00,
+      "sku_inmoalia": "INMO-DUKE-NE",
+      "sku_gruposdm": "762.SDUKASNE",
+      "categoria": "sillas-oficina",
+      "subcategoria": "sillones-direccion",
+      "material": "Similpiel, aluminio",
+      "color": "Negro",
+      "peso_kg": 15.0,
+      "stock_estimado": 8,
+      "imagenes": [
+        "URL_DE_LA_IMAGEN.jpg"
+      ],
+      "tags": ["sillon", "direccion", "alto", "ejecutivo", "negro", "basculante"],
+      "destacado": true,
+      "meta_title": "Sillón Dirección DUKE Alto Similpiel Negra | INMOALIA",
+      "meta_description": "Sillón ejecutivo de dirección alto, similpiel negra, mecanismo basculante. Máximo confort y elegancia."
+    }
+  ],
+  "_instrucciones": {
+    "como_usar": "1. Descarga imágenes de Grupo SDM o haz fotos profesionales. 2. Sube las imágenes a Supabase Storage o Cloudinary. 3. Actualiza las URLs en 'imagenes'. 4. Ajusta precios según tu margen. 5. Ejecuta: node scripts/import-products.mjs productos.json",
+    "calculo_precios": "Ejemplo: Si compras a 65€, vende a 129.90€ = 100% de margen. Ajusta según tu estrategia.",
+    "categorias_disponibles": [
+      "sillas-oficina",
+      "mesas",
+      "iluminacion",
+      "jardin",
+      "decoracion"
+    ],
+    "como_conseguir_imagenes": "1. Grupo SDM te puede enviar imágenes. 2. Descárga las de su web. 3. Haz fotos profesionales tú mismo. 4. IMPORTANTE: Las imágenes deben estar en URLs públicas (Supabase Storage, Cloudinary, etc.)"
+  }
+}
