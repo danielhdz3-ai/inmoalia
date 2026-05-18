@@ -56,6 +56,7 @@ export async function middleware(request: NextRequest) {
   // Protect /admin routes
   if (pathname.startsWith('/admin')) {
     if (!user) {
+      console.log('[MIDDLEWARE] Admin route without user, redirecting to login:', pathname)
       const loginUrl = request.nextUrl.clone()
       loginUrl.pathname = '/login'
       loginUrl.searchParams.set('redirect', pathname)
@@ -68,8 +69,11 @@ export async function middleware(request: NextRequest) {
       .filter(Boolean)
 
     if (adminEmails.length > 0 && !adminEmails.includes(user.email ?? '')) {
+      console.log('[MIDDLEWARE] Non-admin user trying to access admin:', user.email)
       return NextResponse.redirect(new URL('/', request.url))
     }
+    
+    console.log('[MIDDLEWARE] Admin access granted:', user.email, pathname)
   }
 
   // Protect /cuenta and /pedidos routes
@@ -78,11 +82,13 @@ export async function middleware(request: NextRequest) {
   const isNewPassword = pathname === '/cuenta/nueva-password'
   if (!isNewPassword && (pathname.startsWith('/cuenta') || pathname.startsWith('/pedidos'))) {
     if (!user) {
+      console.log('[MIDDLEWARE] Protected route without user, redirecting to login:', pathname)
       const loginUrl = request.nextUrl.clone()
       loginUrl.pathname = '/login'
       loginUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(loginUrl)
     }
+    console.log('[MIDDLEWARE] Account access granted:', user.email, pathname)
   }
 
   return supabaseResponse

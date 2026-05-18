@@ -58,20 +58,36 @@ export async function GET(request: NextRequest) {
             typeof meta.full_name === 'string' && meta.full_name.trim()
               ? meta.full_name.trim()
               : user.email.split('@')[0] ?? 'Cliente'
-          await sendWelcomeAccountEmail({ to: user.email, name })
-
-          const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-          if (serviceKey) {
-            const admin = createSupabaseAdmin(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey, {
-              auth: { autoRefreshToken: false, persistSession: false },
-            })
-            await admin.auth.admin.updateUserById(user.id, {
-              user_metadata: { ...meta, welcome_email_sent: true },
-            })
+          
+          console.log('[AUTH] Enviando email de bienvenida a:', user.email)
+          const result = await sendWelcomeAccountEmail({ to: user.email, name })
+          
+          if (result.success) {
+            console.log('[AUTH] Email de bienvenida enviado exitosamente:', result.id)
+            
+            const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+            if (serviceKey) {
+              const admin = createSupabaseAdmin(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey, {
+                auth: { autoRefreshToken: false, persistSession: false },
+              })
+              await admin.auth.admin.updateUserById(user.id, {
+                user_metadata: { ...meta, welcome_email_sent: true },
+              })
+              console.log('[AUTH] Marcado welcome_email_sent para:', user.email)
+            }
+          } else {
+            console.error('[AUTH] Error al enviar email de bienvenida:', result.error)
           }
         } catch (welcomeErr) {
-          console.error('Welcome email (Resend):', welcomeErr)
+          console.error('[AUTH] Excepción en envío de email de bienvenida:', welcomeErr)
         }
+      } else {
+        console.log('[AUTH] Email de bienvenida omitido:', {
+          hasEmail: !!user?.email,
+          recoveryFlow,
+          alreadySent: user?.user_metadata?.welcome_email_sent,
+          hasResendKey: !!process.env.RESEND_API_KEY
+        })
       }
 
       return NextResponse.redirect(`${origin}${next}`)

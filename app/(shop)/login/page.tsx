@@ -68,8 +68,12 @@ export default function LoginPage() {
       setLoading(false)
       return
     }
-    router.push(redirectTo)
-    router.refresh()
+    
+    // Esperar un momento para que las cookies de sesión se establezcan
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    // Forzar recarga completa para asegurar que el middleware tenga la sesión actualizada
+    window.location.href = redirectTo
   }
 
   const handleGoogle = async () => {

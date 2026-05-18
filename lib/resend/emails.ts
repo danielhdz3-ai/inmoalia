@@ -14,39 +14,50 @@ export type WelcomeAccountParams = {
 
 /** Bienvenida tras verificar el email (callback de auth). Desde INMOALIA vía Resend. */
 export async function sendWelcomeAccountEmail({ to, name }: WelcomeAccountParams) {
-  if (!isResendConfigured()) return
+  if (!isResendConfigured()) {
+    console.warn('[RESEND] API key no configurada, email de bienvenida no enviado')
+    return { success: false, error: 'API key no configurada' }
+  }
 
   const site = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://inmoalia.com'
   const firstName = name.trim() || 'Cliente'
 
-  await resend.emails.send({
-    from: `INMOALIA <${FROM}>`,
-    to,
-    subject: 'Bienvenido a INMOALIA — tu cuenta ya está activa',
-    html: `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; background: #fdfcfa; padding: 40px 20px;">
-        <div style="text-align: center; margin-bottom: 40px;">
-          <h1 style="font-size: 28px; font-weight: 700; color: #2a2a2a; letter-spacing: -0.5px; margin: 0;">INMOALIA</h1>
-          <p style="color: #a08c7a; font-size: 13px; margin: 4px 0 0;">Hogar & Jardín</p>
-        </div>
-        <div style="background: white; border-radius: 12px; padding: 32px; border: 1px solid #e8ddd0;">
-          <h2 style="color: #2a2a2a; font-size: 20px; margin: 0 0 12px;">Hola, ${escapeHtml(firstName)}</h2>
-          <p style="color: #6b5344; font-size: 15px; line-height: 1.7; margin: 0 0 20px;">
-            Gracias por unirte a INMOALIA. Tu cuenta ya está activa: puedes explorar el catálogo, guardar favoritos y realizar pedidos con total seguridad.
-          </p>
-          <p style="color: #6b5344; font-size: 15px; line-height: 1.7; margin: 0 0 24px;">
-            Si tienes cualquier duda, escríbenos a <a href="mailto:info@inmoalia.com" style="color: #2d4a3e;">info@inmoalia.com</a>.
-          </p>
-          <div style="text-align: center;">
-            <a href="${site}/productos" style="display: inline-block; background: #2d4a3e; color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 15px;">Ver productos</a>
+  try {
+    const result = await resend.emails.send({
+      from: `INMOALIA <${FROM}>`,
+      to,
+      subject: 'Bienvenido a INMOALIA — tu cuenta ya está activa',
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; background: #fdfcfa; padding: 40px 20px;">
+          <div style="text-align: center; margin-bottom: 40px;">
+            <h1 style="font-size: 28px; font-weight: 700; color: #2a2a2a; letter-spacing: -0.5px; margin: 0;">INMOALIA</h1>
+            <p style="color: #a08c7a; font-size: 13px; margin: 4px 0 0;">Hogar & Jardín</p>
           </div>
+          <div style="background: white; border-radius: 12px; padding: 32px; border: 1px solid #e8ddd0;">
+            <h2 style="color: #2a2a2a; font-size: 20px; margin: 0 0 12px;">Hola, ${escapeHtml(firstName)}</h2>
+            <p style="color: #6b5344; font-size: 15px; line-height: 1.7; margin: 0 0 20px;">
+              Gracias por unirte a INMOALIA. Tu cuenta ya está activa: puedes explorar el catálogo, guardar favoritos y realizar pedidos con total seguridad.
+            </p>
+            <p style="color: #6b5344; font-size: 15px; line-height: 1.7; margin: 0 0 24px;">
+              Si tienes cualquier duda, escríbenos a <a href="mailto:info@inmoalia.com" style="color: #2d4a3e;">info@inmoalia.com</a>.
+            </p>
+            <div style="text-align: center;">
+              <a href="${site}/productos" style="display: inline-block; background: #2d4a3e; color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 15px;">Ver productos</a>
+            </div>
+          </div>
+          <p style="text-align: center; color: #a08c7a; font-size: 12px; margin-top: 24px;">
+            © INMOALIA — inmoalia.com · Este mensaje lo envía el equipo de INMOALIA.
+          </p>
         </div>
-        <p style="text-align: center; color: #a08c7a; font-size: 12px; margin-top: 24px;">
-          © INMOALIA — inmoalia.com · Este mensaje lo envía el equipo de INMOALIA.
-        </p>
-      </div>
-    `,
-  })
+      `,
+    })
+
+    console.log('[RESEND] Email de bienvenida enviado:', { to, id: result.data?.id })
+    return { success: true, id: result.data?.id }
+  } catch (error) {
+    console.error('[RESEND] Error al enviar email de bienvenida:', error)
+    return { success: false, error: String(error) }
+  }
 }
 
 function escapeHtml(s: string): string {

@@ -29,7 +29,14 @@ export function useAuth() {
 
   const signIn = useCallback(async (email: string, password: string) => {
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { error, data } = await supabase.auth.signInWithPassword({ email, password })
+    
+    // Esperar a que la sesión se establezca en las cookies
+    if (!error && data.session) {
+      // Pequeña espera para asegurar que las cookies se escriban
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+    
     return {
       error,
       /** Código estable de Supabase (p. ej. email_not_confirmed) para mensajes UX */
