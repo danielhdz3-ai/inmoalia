@@ -80,7 +80,7 @@ export default function EnviosPage() {
               <h3 className="font-semibold text-[#2a2a2a]">Plazos de entrega</h3>
             </div>
             <p className="text-[#6b5344] text-sm leading-relaxed">
-              El tiempo estimado de entrega es de <strong>2 a 5 días laborables</strong> desde la confirmación del pedido para envíos a península. Las entregas se realizan de lunes a viernes en horario comercial.
+              <strong>Envío rápido en 24-48h</strong> para todos los productos en stock. Los pedidos se entregan de lunes a viernes en horario comercial.
             </p>
           </div>
 
@@ -115,27 +115,18 @@ export default function EnviosPage() {
           </div>
         </div>
 
-        {/* Notas importantes */}
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-8">
-          <h3 className="font-semibold text-[#2a2a2a] mb-3">Notas importantes</h3>
-          <ul className="space-y-2 text-sm text-[#6b5344]">
-            <li className="flex gap-2">
-              <span className="text-[#2d4a3e] font-bold">•</span>
-              <span>Los plazos de entrega son orientativos y pueden variar según disponibilidad y zona de entrega.</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-[#2d4a3e] font-bold">•</span>
-              <span>Es necesario que haya alguien para recibir el pedido en la dirección indicada.</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-[#2d4a3e] font-bold">•</span>
-              <span>Los artículos de gran volumen pueden requerir coordinación previa para la entrega.</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-[#2d4a3e] font-bold">•</span>
-              <span>Revisa tu pedido al recibirlo. En caso de daños o productos incorrectos, contacta inmediatamente con nosotros.</span>
-            </li>
-          </ul>
+        {/* Nota de recepción */}
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
+          <h3 className="font-semibold text-[#2a2a2a] mb-3">Al recibir tu pedido</h3>
+          <p className="text-[#6b5344] text-sm leading-relaxed mb-3">
+            Por favor, revisa tu pedido en el momento de la entrega. Si observas algún daño en el paquete, 
+            indícalo en el albarán del transportista antes de firmar.
+          </p>
+          <p className="text-[#6b5344] text-sm leading-relaxed">
+            Dispones de <strong>48 horas</strong> desde la recepción para notificarnos cualquier incidencia 
+            escribiendo a <a href="mailto:info@inmoalia.com" className="text-[#2d4a3e] underline">info@inmoalia.com</a>. 
+            Conserva el embalaje original para posibles devoluciones.
+          </p>
         </div>
 
         {/* CTA */}

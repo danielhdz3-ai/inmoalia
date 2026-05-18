@@ -128,6 +128,18 @@ export async function sendOrderConfirmation(order: Order) {
             ${address.country}
           </p>
           
+          <div style="background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 8px; padding: 16px; margin: 24px 0;">
+            <h3 style="color: #2a2a2a; font-size: 15px; margin: 0 0 12px;">
+              📦 Información de entrega
+            </h3>
+            <p style="color: #6b5344; font-size: 14px; line-height: 1.7; margin: 0 0 8px;">
+              <strong>Tiempo estimado:</strong> 24-48 horas (productos en stock)<br/>
+            </p>
+            <p style="color: #6b5344; font-size: 13px; line-height: 1.6; margin: 0;">
+              <strong>Importante:</strong> Revisa tu pedido al recibirlo. Si observas algún daño, contacta con nosotros en las primeras 48 horas escribiendo a info@inmoalia.com. Conserva el embalaje original.
+            </p>
+          </div>
+          
           <p style="color: #6b5344; font-size: 14px; line-height: 1.65; margin: 24px 0 0;">
             <strong>Devoluciones:</strong> puedes iniciar cambios hasta <strong>30 días naturales</strong> tras la entrega según nuestra
             <a href="${site}/devoluciones" style="color: #2d4a3e;"> política de devoluciones</a>.
@@ -175,6 +187,17 @@ export async function sendShippingNotification(
             <p style="color: #a08c7a; font-size: 13px; margin: 0 0 4px;">Número de seguimiento</p>
             <p style="color: #2a2a2a; font-size: 18px; font-weight: 700; margin: 0;">${trackingNumber}</p>
             ${trackingUrl ? `<a href="${trackingUrl}" style="color: #2d4a3e; font-size: 14px; text-decoration: none; display: inline-block; margin-top: 8px;">Rastrear envío →</a>` : ''}
+          </div>
+          
+          <div style="background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+            <h3 style="color: #2a2a2a; font-size: 15px; margin: 0 0 12px;">
+              📦 Consejos para la recepción
+            </h3>
+            <ul style="color: #6b5344; font-size: 13px; line-height: 1.7; margin: 0; padding-left: 20px;">
+              <li style="margin-bottom: 8px;">Revisa el paquete al recibirlo. Si observas daños, comunícalo al transportista.</li>
+              <li style="margin-bottom: 8px;">Dispones de 48 horas para reportar cualquier incidencia a <a href="mailto:info@inmoalia.com" style="color: #2196f3; text-decoration: underline;">info@inmoalia.com</a>.</li>
+              <li style="margin-bottom: 0;">Conserva el embalaje original para posibles devoluciones.</li>
+            </ul>
           </div>
           
           <p style="color: #6b5344; font-size: 15px; line-height: 1.6; margin: 0 0 20px;">

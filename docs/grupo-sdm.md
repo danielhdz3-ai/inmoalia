@@ -1,5 +1,17 @@
 # Guía de Trabajo con Grupo SDM
 
+## ⚠️ CONFIDENCIAL - SOLO PARA USO INTERNO
+
+**IMPORTANTE:** Esta información es SOLO para el administrador de INMOALIA. 
+Los clientes finales NUNCA deben saber que trabajamos con Grupo SDM.
+
+**Para el cliente:**
+- INMOALIA es el proveedor/fabricante directo
+- No mencionamos dropshipping ni mayoristas
+- Toda comunicación es marca INMOALIA
+
+---
+
 ## 📋 Información de contacto
 
 **Grupo SDM - Mayorista de muebles y decoración**
@@ -9,14 +21,24 @@
 - 📱 WhatsApp: 663 883 455 / 663 813 157
 - 📍 Dirección: Calle Ignacio Aldecoa, 15, 29004 Málaga
 
-## ⚠️ IMPORTANTE: No tienen API
+## ⚠️ IMPORTANTE: Dropshipping Confirmado
 
-Grupo SDM es un mayorista tradicional **sin API pública**. Todo se gestiona de forma manual:
+✅ **Grupo SDM SÍ hace dropshipping directo**
 
-1. **Pedidos**: Por email, teléfono o WhatsApp
-2. **Stock**: Consultar disponibilidad antes de vender
-3. **Precios**: Revisar catálogo o preguntar
-4. **Tracking**: Te lo envían cuando hagan el envío
+Según su web oficial:
+> "Envíos directos a tu cliente - Hacemos envíos sin intermediarios, directos a tu cliente con tus datos de distribuidor."
+
+**Ventajas:**
+- Envían directamente a tus clientes finales
+- No incluyen sus precios mayoristas
+- Pueden poner tus datos como distribuidor
+- Envíos rápidos en 24-48h para productos en stock
+
+**Lo que debes hacer:**
+1. Al recibir un pedido en INMOALIA, contacta con Grupo SDM
+2. Proporciona: SKUs, cantidades, dirección de envío de tu cliente
+3. Indica que el envío debe ir con tus datos (INMOALIA)
+4. Ellos envían directamente sin que tú tengas que tocar la mercancía
 
 ## 🛍️ Flujo de trabajo
 
@@ -84,13 +106,65 @@ node scripts/import-products.mjs productos.json
 
 ### 3. Gestión de stock
 
-⚠️ **IMPORTANTE:** Grupo SDM no tiene stock en tiempo real
+⚠️ **IMPORTANTE:** Grupo SDM no tiene stock en tiempo real por API
 
 **Mejores prácticas:**
 1. Contacta con ellos para saber qué tienen disponible
 2. Actualiza el stock en la base de datos manualmente
 3. Si un producto se agota, márcalo como `is_active = false`
-4. Revisa stock semanalmente
+4. Revisa stock semanalmente (llamada o email)
+5. Los productos en su web con "CONSULTAR" pueden tener stock limitado
+
+**Tiempos de envío:**
+- **Productos en stock**: 24-48h
+- **Productos bajo demanda**: Consultar plazo con Grupo SDM
+- **Productos fabricados a medida**: NO admiten devolución
+
+## 🛡️ Garantía y devoluciones
+
+### Garantía de 3 años
+
+Todos los productos tienen **garantía de 3 años** según Real Decreto-ley 7/2021:
+
+✅ **Cubre:**
+- Defectos de fabricación
+- Vicios ocultos del producto
+- Productos que no cumplen las especificaciones
+
+❌ **NO cubre:**
+- Mal uso o mantenimiento inadecuado
+- Componentes perecederos o sometidos a desgaste normal:
+  - Tapicerías, espumas, plásticos
+  - Bases, ruedas, herrajes, soportes
+  - Hidráulicos, mandos, mecanismos
+  - Elementos eléctricos, pistones
+  - Otros componentes de desgaste
+
+### Política de devoluciones
+
+⚠️ **Condiciones estrictas:**
+
+1. **Autorización previa obligatoria:**
+   - Solo se admiten devoluciones con autorización por escrito de INMOALIA
+   - El cliente debe solicitar devolución a info@inmoalia.com
+   - Tú solicitas autorización a Grupo SDM (comercial@gruposdm.com o logistica@gruposdm.com)
+
+2. **Embalaje original obligatorio:**
+   - No se admiten devoluciones sin el embalaje original
+   - El producto debe estar sin usar y en perfecto estado
+
+3. **Productos excluidos de devolución:**
+   - Productos fabricados bajo demanda
+   - Productos personalizados
+   - Productos con desprecintado (según categoría)
+
+4. **Procedimiento:**
+   ```
+   Cliente solicita devolución → INMOALIA revisa caso → 
+   Solicitas autorización a Grupo SDM → Te autorizan → 
+   Das autorización al cliente → Cliente envía producto → 
+   Verificas estado → Proceso reembolso
+   ```
 
 ## 💰 Configuración de precios
 
@@ -153,7 +227,12 @@ node scripts/import-products.mjs productos.json
 
 ## 🚚 Información de envíos
 
-**Costes actuales (según gruposdm):**
+**Tiempos de entrega:**
+- ✅ **24-48 horas** para productos en stock
+- 📍 Envíos a toda España Peninsular
+- 🚫 Baleares, Canarias, Ceuta y Melilla: consultar condiciones
+
+**Costes actuales (ya configurados en `lib/shop/shipping.ts`):**
 
 | Importe pedido | Coste envío |
 |----------------|-------------|
@@ -170,20 +249,95 @@ node scripts/import-products.mjs productos.json
 
 ## 📞 ¿Dropshipping directo?
 
-Pregunta a Grupo SDM si pueden:
-1. Enviar directamente a tus clientes
-2. No incluir albarán con sus precios
-3. Poner tu marca/logo en el paquete
-4. Condiciones especiales para dropshipping
+✅ **SÍ, Grupo SDM hace dropshipping directo** (ver sección anterior)
+
+Pregúntales para confirmar:
+1. ✅ Enviar directamente a tus clientes (CONFIRMADO)
+2. ✅ No incluir albarán con sus precios (CONFIRMADO - "con tus datos de distribuidor")
+3. ❓ Poner tu marca/logo en el paquete (consultar)
+4. ❓ Condiciones especiales para dropshipping (consultar descuentos por volumen)
+
+## 📦 Procedimiento de recepción (Referencia interna)
+
+### Información importante de Grupo SDM (para TI como dropshipper):
+
+1. **Revisión obligatoria a la descarga:**
+   - Grupo SDM requiere que se revise el paquete al recibirlo
+   - Si hay daños, debe indicarse en el albarán de la agencia
+   - Esto es un requisito de su seguro de transporte
+
+2. **Plazo de 24 horas para reclamaciones a Grupo SDM:**
+   - Si un cliente reporta daños, TÚ tienes 24h para reportar a Grupo SDM
+   - Email: logistica@gruposdm.com
+   - Incluir: fotos, descripción, número de envío
+
+3. **Los envíos de Grupo SDM van asegurados:**
+   - Cubren daños de transporte
+   - Pero necesitan el procedimiento correcto (reporte en 24h)
+
+4. **Embalaje original obligatorio:**
+   - Grupo SDM no acepta devoluciones sin embalaje original
+   - Por eso pedimos a los clientes conservarlo
+
+5. **Entrega en planta baja/portería:**
+   - El transportista de Grupo SDM solo entrega en planta baja
+   - No sube a pisos ni áticos
+   - No mencionar esto al cliente a menos que pregunte
+
+### Cómo manejar incidencias de clientes:
+
+**Si un cliente reporta daños en el pedido:**
+
+1. Pídele fotos del daño y del embalaje
+2. Verifica que fue en las 48h tras recepción (para el cliente)
+3. Contacta a Grupo SDM en 24h: logistica@gruposdm.com
+4. Grupo SDM gestiona con su seguro
+5. Tú gestionas al cliente (reembolso, reenvío, etc.)
+
+**Siempre bajo marca INMOALIA, nunca menciones Grupo SDM al cliente.**
 
 ## 📝 Checklist semanal
 
-- [ ] Revisar stock de productos más vendidos
+- [ ] Revisar stock de productos más vendidos (llamada/email a Grupo SDM)
 - [ ] Actualizar precios si Grupo SDM los cambia
-- [ ] Procesar pedidos pendientes
-- [ ] Actualizar tracking de envíos
-- [ ] Contactar Grupo SDM para novedades
+- [ ] Procesar pedidos pendientes (WhatsApp/Email a comercial@gruposdm.com)
+- [ ] Actualizar tracking de envíos en Supabase
+- [ ] Revisar incidencias de clientes (daños en transporte, 24h)
+- [ ] Contactar Grupo SDM para novedades del catálogo
 - [ ] Añadir nuevos productos al catálogo
+- [ ] Verificar que emails de confirmación incluyen instrucciones de recepción
+- [ ] Revisar devoluciones pendientes y solicitar autorizaciones
+
+## 📧 Comunicación con clientes
+
+### Email de confirmación de pedido
+
+El sistema ya envía automáticamente un email profesional. Incluye:
+
+- ✅ Número de pedido
+- ✅ Resumen de productos
+- ✅ Dirección de entrega
+- ✅ Total pagado
+- ✅ Tiempo estimado: 24-48h
+- ✅ Aviso simple: revisar paquete al recibirlo y conservar embalaje
+
+**NUNCA mencionar:**
+- ❌ Grupo SDM o cualquier proveedor
+- ❌ "Dropshipping" o "mayorista"
+- ❌ Procedimientos de albarán detallados
+- ❌ "Planta baja/portería" (es obvio, no hace falta decirlo)
+- ❌ Detalles logísticos internos
+
+### Email de envío con tracking
+
+Automático cuando actualizas el tracking en Supabase:
+
+- ✅ Número de seguimiento
+- ✅ Enlace de tracking (si disponible)
+- ✅ Tiempo estimado de entrega
+- ✅ Aviso simple sobre recepción
+
+**Marca INMOALIA siempre.**
 
 ## 🆘 Soporte
 
