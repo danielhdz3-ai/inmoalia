@@ -5,6 +5,10 @@ import ProductGrid from '@/components/shop/ProductGrid'
 import FilterSidebar from '@/components/shop/FilterSidebar'
 import SortSelector from '@/components/shop/SortSelector'
 import Pagination from '@/components/shop/Pagination'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { CATEGORY_META } from '@/lib/shop/category-meta'
+import { breadcrumbCategoryJsonLd } from '@/lib/seo/jsonld-builders'
+import { absoluteUrl } from '@/lib/site'
 import type { Product } from '@/lib/supabase/types'
 
 const PAGE_SIZE = 24
@@ -14,52 +18,20 @@ interface Props {
   searchParams: Promise<{ sort?: string; min?: string; max?: string; material?: string; page?: string }>
 }
 
-interface CategoryEntry {
-  name: string
-  description: string
-  /** If set, filters by `subcategory` field using `dbSubcategory` value */
-  parent?: string
-  /** Exact value stored in the `subcategory` column of the DB */
-  dbSubcategory?: string
-}
-
-const CATEGORY_META: Record<string, CategoryEntry> = {
-  // Top-level categories (filter by `category`)
-  jardin:      { name: 'Jardín y Exterior',  description: 'Muebles y accesorios para transformar tu jardín y terraza en un espacio de lujo.' },
-  mesas:       { name: 'Mesas',              description: 'Mesas de comedor, jardín y auxiliares en madera, cerámica y más materiales.' },
-  sillas:      { name: 'Sillas y Butacas',   description: 'Sillas de comedor, butacas y taburetes para cada estancia.' },
-  iluminacion: { name: 'Iluminación',        description: 'Lámparas de pie, apliques y colgantes para crear la atmósfera perfecta.' },
-  decoracion:  { name: 'Decoración',         description: 'Espejos, cuadros, jarrones y piezas únicas para personalizar tu hogar.' },
-  textil:      { name: 'Textil Hogar',       description: 'Cojines, alfombras, mantas y cortinas de materiales naturales premium.' },
-  muebles:     { name: 'Muebles',            description: 'Sofás, estanterías y muebles para completar tu hogar.' },
-  outlet:      { name: 'Outlet',             description: 'Las mejores ofertas de nuestra selección con descuentos especiales.' },
-
-  // Subcategories of Muebles
-  'sofas-butacas': { name: 'Sofás y Butacas', description: 'Sofás, butacas y sillones para el salón y zonas de descanso.', parent: 'muebles', dbSubcategory: 'Sofás y butacas' },
-  estanterias:     { name: 'Estanterías',      description: 'Estanterías, librerías y módulos de almacenaje para el hogar.', parent: 'muebles', dbSubcategory: 'Estanterías' },
-
-  // Subcategories of Jardín
-  'conjuntos-exterior': { name: 'Conjuntos Exterior', description: 'Sets completos de mesa y sillas para terraza y jardín.', parent: 'jardin', dbSubcategory: 'Conjuntos exterior' },
-  tumbonas:             { name: 'Tumbonas',            description: 'Tumbonas y hamacas para disfrutar del jardín y la piscina.', parent: 'jardin', dbSubcategory: 'Tumbonas' },
-  pergolas:             { name: 'Pérgolas',            description: 'Pérgolas y cenadores para crear espacios de sombra en exterior.', parent: 'jardin', dbSubcategory: 'Pérgolas' },
-  barbacoas:            { name: 'Barbacoas',           description: 'Barbacoas, braseros y accesorios para disfrutar al aire libre.', parent: 'jardin', dbSubcategory: 'Barbacoas' },
-
-  // Subcategories of Decoración
-  espejos:  { name: 'Espejos',  description: 'Espejos decorativos para el salón, dormitorio y baño.', parent: 'decoracion', dbSubcategory: 'Espejos' },
-  cuadros:  { name: 'Cuadros',  description: 'Cuadros y láminas de arte para personalizar tus paredes.', parent: 'decoracion', dbSubcategory: 'Cuadros' },
-  jarrones: { name: 'Jarrones', description: 'Jarrones, figuras y piezas decorativas para el hogar.', parent: 'decoracion', dbSubcategory: 'Jarrones' },
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { categoria } = await params
   const meta = CATEGORY_META[categoria]
   if (!meta) return { title: 'Categoría no encontrada' }
+  const canonicalPath = `/categorias/${categoria}`
+
   return {
     title: meta.name,
     description: meta.description,
+    alternates: {
+      canonical: absoluteUrl(canonicalPath),
+    },
   }
 }
-
 export default async function CategoriaPage({ params, searchParams }: Props) {
   const { categoria } = await params
   const sp = await searchParams
@@ -116,7 +88,10 @@ export default async function CategoriaPage({ params, searchParams }: Props) {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+    <>
+      <JsonLd data={breadcrumbCategoryJsonLd(categoria, meta.name)} />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-[#2a2a2a] mb-2">{meta.name}</h1>
         <p className="text-[#a08c7a] text-sm max-w-xl">{meta.description}</p>
@@ -146,6 +121,7 @@ export default async function CategoriaPage({ params, searchParams }: Props) {
           />
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

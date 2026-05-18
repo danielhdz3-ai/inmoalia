@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCart } from '@/hooks/useCart'
+import { getShippingCostEuros } from '@/lib/shop/shipping'
 import { formatPrice } from '@/lib/utils'
 import { Lock, Loader2, Tag, X, CheckCircle } from 'lucide-react'
 import Image from 'next/image'
@@ -37,7 +38,7 @@ interface Coupon {
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { items, getSubtotal, shippingCost, hasFreeShipping } = useCart()
+  const { items, getSubtotal } = useCart()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [termsAccepted, setTermsAccepted] = useState(false)
@@ -46,6 +47,7 @@ export default function CheckoutPage() {
   const [couponLoading, setCouponLoading] = useState(false)
   const [couponError, setCouponError] = useState<string | null>(null)
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null)
+  const [cartReminderConsent, setCartReminderConsent] = useState(false)
   const [form, setForm] = useState<FormData>({
     full_name: '',
     email: '',
@@ -133,7 +135,7 @@ export default function CheckoutPage() {
       : Math.min(appliedCoupon.discount_value, subtotal)
     : 0
   const discountedSubtotal = Math.max(0, subtotal - discountAmount)
-  const shippingCostFinal = discountedSubtotal >= 99 ? 0 : shippingCost
+  const shippingCostFinal = getShippingCostEuros(discountedSubtotal)
   const total = discountedSubtotal + shippingCostFinal
   const ivaAmount = calcIva(total)
 
@@ -149,6 +151,18 @@ export default function CheckoutPage() {
     }
     setLoading(true)
     setError(null)
+
+    if (cartReminderConsent && form.email.trim()) {
+      void fetch('/api/cart-reminder/snapshot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: form.email.trim(),
+          cart: items,
+          consentReminder: true,
+        }),
+      }).catch(() => {})
+    }
 
     try {
       const res = await fetch('/api/orders', {
@@ -392,6 +406,22 @@ export default function CheckoutPage() {
                 política de privacidad
               </Link>
               . Entiendo que mi pedido implica una obligación de pago. *
+            </span>
+          </label>
+
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={cartReminderConsent}
+              onChange={(e) => setCartReminderConsent(e.target.checked)}
+              className="mt-0.5 w-4 h-4 rounded border-[#a08c7a] text-[#2d4a3e] accent-[#2d4a3e] cursor-pointer shrink-0"
+            />
+            <span className="text-xs text-[#6b5344] leading-relaxed group-hover:text-[#2a2a2a] transition-colors">
+              Sí, quiero recibir como máximo un recordatorio si abandono la compra; guardáis mi carrito para enviarme un enlace de recuperación. Base legal:{' '}
+              <Link href="/privacidad" target="_blank" className="underline hover:text-[#2d4a3e]">
+                consentimiento
+              </Link>
+              .
             </span>
           </label>
 

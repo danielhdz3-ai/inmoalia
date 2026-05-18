@@ -1,0 +1,78 @@
+-- Sillón oficina CLAYTON (Grupo SDM · ref. 794.SCLAYNNNE).
+-- PVP tienda 149 €. Imágenes y URL ficha pública gruposdm.com.
+
+insert into products (
+  slug,
+  name,
+  description,
+  price,
+  cost_price,
+  images,
+  category,
+  subcategory,
+  tags,
+  sku,
+  supplier_sku,
+  supplier,
+  stock,
+  weight_kg,
+  dimensions,
+  material,
+  color,
+  is_active,
+  is_featured,
+  meta_title,
+  meta_desc,
+  supplier_product_url
+) values (
+  'sillon-oficina-clayton-negro-malla-tejido-negro',
+  'Sillón de oficina CLAYTON, negro · malla · tejido negro',
+  'Sillón de oficina moderno con cabezal. Regulación de altura mediante cilindro neumático. Mecanismo syncro con mando de ajuste de la intensidad. Armazón y base de polipropileno reforzado con fibra de vidrio de color negro. Brazos regulables en altura. Tapizado del respaldo en malla con diseño horizontal de color negro, asiento en tejido acrílico negro. Otros colores disponibles; bajo pedido se pueden suministrar otros acabados. Como silla de visita pueden coordinarse los modelos Clifford y Risley. Si lo desea, consultar suministro de topes en lugar de ruedas.
+
+Dimensiones (cm): ancho 69, fondo 61,5, alto 119–127. Embalaje: plástico y cartón. Unidad: 1 · volumen: 0,15 m³. Producto nuevo con certificado (test report) emitido por laboratorio internacional homologado, con detalle del cumplimiento de la norma UNE o su equivalente internacional.',
+  149.00,
+  null,
+  array[
+    'https://gruposdm.com/22319-thickbox_default/sillon-de-oficina-clayton-negro-malla-y-tejido-negro.jpg',
+    'https://gruposdm.com/22320-thickbox_default/sillon-de-oficina-clayton-negro-malla-y-tejido-negro.jpg'
+  ]::text[],
+  'sillas',
+  'Sillas de oficina',
+  array['oficina','sillón','ergonómico','malla','Clayton','dirección','escritorio']::text[],
+  'INM-SCLAYNNNE',
+  '794.SCLAYNNNE',
+  'gruposdm',
+  44,
+  null,
+  '{"width": 69, "height": 127, "depth": 61.5}'::jsonb,
+  'Polipropileno reforzado con fibra de vidrio, malla, tejido acrílico',
+  'Negro',
+  true,
+  true,
+  'Sillón de oficina CLAYTON negro malla y tejido | INMOALIA',
+  'Sillón ergonómico con cabezal, syncro y brazos regulables. 69×61,5×119–127 cm. Certificación UNE.',
+  'https://gruposdm.com/es/oficinas/sillas-de-oficinas/sillones-de-direccion/sillon-de-oficina-clayton-negro-malla-y-tejido-negro.html'
+)
+on conflict (slug) do update set
+  name = excluded.name,
+  description = excluded.description,
+  price = excluded.price,
+  cost_price = excluded.cost_price,
+  images = excluded.images,
+  category = excluded.category,
+  subcategory = excluded.subcategory,
+  tags = excluded.tags,
+  sku = excluded.sku,
+  supplier_sku = excluded.supplier_sku,
+  supplier = excluded.supplier,
+  stock = excluded.stock,
+  weight_kg = excluded.weight_kg,
+  dimensions = excluded.dimensions,
+  material = excluded.material,
+  color = excluded.color,
+  is_active = excluded.is_active,
+  is_featured = excluded.is_featured,
+  meta_title = excluded.meta_title,
+  meta_desc = excluded.meta_desc,
+  supplier_product_url = coalesce(products.supplier_product_url, excluded.supplier_product_url),
+  updated_at = now();

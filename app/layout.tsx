@@ -2,19 +2,27 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import CookieBanner from '@/components/layout/CookieBanner'
 import AppToaster from '@/components/providers/AppToaster'
+import FavoriteSync from '@/components/providers/FavoriteSync'
+import AnalyticsConsentGate from '@/components/analytics/AnalyticsConsentGate'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { organizationJsonLd, webSiteJsonLd } from '@/lib/seo/jsonld-builders'
+import { getSiteUrl, indexingRobotsMetadata } from '@/lib/site'
 import './globals.css'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
+  display: 'swap',
 })
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: {
     default: 'INMOALIA — Hogar, Jardín y Decoración Premium',
     template: '%s | INMOALIA',
@@ -27,7 +35,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'es_ES',
-    url: 'https://inmoalia.com',
+    url: '/',
     siteName: 'INMOALIA',
     title: 'INMOALIA — Hogar, Jardín y Decoración Premium',
     description: 'Muebles y decoración de calidad europea. Estilo nórdico y mediterráneo.',
@@ -36,14 +44,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     site: '@inmoalia',
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-    },
-  },
+  robots: indexingRobotsMetadata(),
 }
 
 export default function RootLayout({
@@ -54,9 +55,13 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <JsonLd data={organizationJsonLd()} />
+        <JsonLd data={webSiteJsonLd()} />
         {children}
         <AppToaster />
         <CookieBanner />
+        <AnalyticsConsentGate />
+        <FavoriteSync />
       </body>
     </html>
   )

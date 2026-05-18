@@ -52,10 +52,13 @@ async function fetchInventario(params: SearchParams) {
   const { data } = await q
   const rows = (data as unknown as Product[]) ?? []
 
+  const { data: dirSlugRows } = await supabase.from('suppliers').select('slug').eq('is_active', true)
+  const fromDirectory = (dirSlugRows as { slug: string }[] | null)?.map((r) => r.slug) ?? []
+
   const { data: supRows } = await supabase.from('products').select('supplier')
-  const supplierOptions = Array.from(
-    new Set((supRows as { supplier: string | null }[] | null)?.map((r) => r.supplier).filter(Boolean)),
-  ).sort() as string[]
+  const fromProducts = (supRows as { supplier: string | null }[] | null)?.map((r) => r.supplier).filter(Boolean) as string[]
+
+  const supplierOptions = Array.from(new Set([...fromDirectory, ...fromProducts])).sort()
 
   return { rows, supplierOptions }
 }

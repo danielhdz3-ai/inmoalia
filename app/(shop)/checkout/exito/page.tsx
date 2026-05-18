@@ -115,7 +115,7 @@ export default async function CheckoutExitoPage({ searchParams }: PageProps) {
         <ol className="space-y-3">
           {[
             'Recibirás un email de confirmación con el resumen del pedido.',
-            'Tramitamos tu pedido con el proveedor (24-48h laborables).',
+            'Preparamos tu pedido para envío (24-48 h laborables).',
             'Recibirás el número de seguimiento cuando salga de almacén.',
             'Entrega estimada: 2-5 días laborables en España.',
           ].map((step, i) => (

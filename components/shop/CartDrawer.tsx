@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Button } from '@/components/ui/button'
 import { useCart } from '@/hooks/useCart'
 import { formatPrice } from '@/lib/utils'
+import { FREE_SHIPPING_MIN_EUROS } from '@/lib/shop/shipping'
 
 export default function CartDrawer() {
   const {
@@ -45,12 +46,12 @@ export default function CartDrawer() {
           <div className="px-6 py-3 bg-[#f9f6f1] border-b border-[#e8ddd0]">
             <div className="flex justify-between text-xs text-[#6b5344] mb-2">
               <span>¡Te faltan <strong>{formatPrice(freeShippingRemaining)}</strong> para envío gratis!</span>
-              <span className="text-[#a08c7a]">99€</span>
+              <span className="text-[#a08c7a]">{FREE_SHIPPING_MIN_EUROS}€</span>
             </div>
             <div className="h-1.5 bg-[#e8ddd0] rounded-full overflow-hidden">
               <div
                 className="h-full bg-[#2d4a3e] rounded-full transition-all duration-500"
-                style={{ width: `${Math.min((subtotal / 99) * 100, 100)}%` }}
+                style={{ width: `${Math.min((subtotal / FREE_SHIPPING_MIN_EUROS) * 100, 100)}%` }}
               />
             </div>
           </div>

@@ -5,6 +5,11 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = process.env.RESEND_FROM_EMAIL || 'info@inmoalia.com'
 
 export async function POST(req: NextRequest) {
+  if (!process.env.RESEND_API_KEY?.trim()) {
+    console.warn('Newsletter: RESEND_API_KEY no configurada')
+    return NextResponse.json({ error: 'Envío de correo no disponible temporalmente' }, { status: 503 })
+  }
+
   try {
     const { email } = await req.json()
 

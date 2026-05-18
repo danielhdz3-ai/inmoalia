@@ -1,14 +1,84 @@
 'use client'
 
+import { Suspense, useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useCart } from '@/hooks/useCart'
+import { useCartStore } from '@/store/cart'
+import type { CartItem } from '@/store/cart'
 import { formatPrice } from '@/lib/utils'
+import { FREE_SHIPPING_MIN_EUROS } from '@/lib/shop/shipping'
 
-export default function CartPage() {
-  const { items, removeItem, updateQuantity, getSubtotal, shippingCost, hasFreeShipping, freeShippingRemaining } = useCart()
+function sanitizeCartPayload(rawList: unknown): CartItem[] {
+  if (!Array.isArray(rawList)) return []
+  const out: CartItem[] = []
+  for (const raw of rawList) {
+    if (!raw || typeof raw !== 'object') continue
+    const o = raw as Partial<CartItem>
+    if (!o.id || !o.slug || typeof o.name !== 'string' || typeof o.price !== 'number') continue
+    const stock = typeof o.stock === 'number' ? o.stock : 99
+    const qty = Math.max(1, Math.min(Number(o.quantity) || 1, stock))
+    out.push({
+      id: o.id,
+      slug: o.slug,
+      name: o.name,
+      price: o.price,
+      image: typeof o.image === 'string' ? o.image : '',
+      quantity: qty,
+      supplier_sku: o.supplier_sku ?? null,
+      supplier: o.supplier ?? null,
+      stock,
+    })
+  }
+  return out
+}
+
+function CartPageContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const recoveryToken = searchParams.get('recovery')
+  const [recoveryDone, setRecoveryDone] = useState(!recoveryToken)
+
+  const { items, removeItem, updateQuantity, getSubtotal, shippingCost, hasFreeShipping, freeShippingRemaining } =
+    useCart()
+
+  useEffect(() => {
+    if (!recoveryToken) return
+
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch(`/api/cart-reminder/restore?token=${encodeURIComponent(recoveryToken)}`)
+        if (cancelled || !res.ok) return
+        const data = (await res.json()) as { items?: unknown }
+        const cleaned = sanitizeCartPayload(data.items)
+        if (cleaned.length > 0) {
+          useCartStore.setState({ items: cleaned })
+          router.replace('/carrito')
+        }
+      } catch {
+        // silencioso
+      } finally {
+        if (!cancelled) setRecoveryDone(true)
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [recoveryToken, router])
+
+  if (!recoveryDone) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-24 text-center">
+        <p className="text-[#6b5344]">Recuperando tu carrito…</p>
+      </div>
+    )
+  }
+
   const subtotal = getSubtotal()
 
   if (items.length === 0) {
@@ -31,19 +101,19 @@ export default function CartPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Items */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Free shipping progress */}
           {!hasFreeShipping && (
             <div className="bg-[#f9f6f1] border border-[#e8ddd0] rounded-xl p-4">
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-[#6b5344]">
-                  ¡Te faltan <strong className="text-[#2a2a2a]">{formatPrice(freeShippingRemaining)}</strong> para envío gratis!
+                  ¡Te faltan <strong className="text-[#2a2a2a]">{formatPrice(freeShippingRemaining)}</strong> para
+                  envío gratis!
                 </span>
-                <span className="text-[#a08c7a]">99€</span>
+                <span className="text-[#a08c7a]">{FREE_SHIPPING_MIN_EUROS}€</span>
               </div>
               <div className="h-2 bg-[#e8ddd0] rounded-full">
                 <div
                   className="h-full bg-[#2d4a3e] rounded-full transition-all"
-                  style={{ width: `${Math.min((subtotal / 99) * 100, 100)}%` }}
+                  style={{ width: `${Math.min((subtotal / FREE_SHIPPING_MIN_EUROS) * 100, 100)}%` }}
                 />
               </div>
             </div>
@@ -68,6 +138,7 @@ export default function CartPage() {
                 <div className="flex items-center justify-between mt-3">
                   <div className="flex items-center bg-[#f9f6f1] border border-[#e8ddd0] rounded-lg overflow-hidden">
                     <button
+                      type="button"
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
                       className="w-9 h-9 flex items-center justify-center hover:bg-[#e8ddd0] transition-colors"
                     >
@@ -75,6 +146,7 @@ export default function CartPage() {
                     </button>
                     <span className="w-9 text-center text-sm font-semibold">{item.quantity}</span>
                     <button
+                      type="button"
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       disabled={item.quantity >= item.stock}
                       className="w-9 h-9 flex items-center justify-center hover:bg-[#e8ddd0] transition-colors disabled:opacity-40"
@@ -88,6 +160,7 @@ export default function CartPage() {
                       {formatPrice(item.price * item.quantity)}
                     </span>
                     <button
+                      type="button"
                       onClick={() => removeItem(item.id)}
                       className="p-1.5 text-[#a08c7a] hover:text-[#c0392b] transition-colors"
                     >
@@ -153,5 +226,17 @@ export default function CartPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CartPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="max-w-2xl mx-auto px-4 py-24 text-center text-[#6b5344]">Cargando carrito…</div>
+      }
+    >
+      <CartPageContent />
+    </Suspense>
   )
 }

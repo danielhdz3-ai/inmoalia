@@ -1,13 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { constructWebhookEvent, extractSessionData } from '@/lib/stripe/webhooks'
+import Stripe from 'stripe'
+import {
+  constructWebhookEvent,
+  extractSessionData,
+  paymentIntentIdFromCharge,
+} from '@/lib/stripe/webhooks'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import { sendOrderConfirmation } from '@/lib/resend/emails'
+import { sendOrderConfirmation, sendOrderRefundNotice } from '@/lib/resend/emails'
 import { createDropXLOrder } from '@/lib/providers/dropxl'
 import { createDropperyOrder } from '@/lib/providers/droppery'
 import { generateOrderNumber } from '@/lib/utils'
 import type { OrderItem, ShippingAddress, Order } from '@/lib/supabase/types'
 
 export const runtime = 'nodejs'
+
+function getSupabaseService() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
+
+async function handleChargeRefunded(event: Stripe.Event) {
+  const charge = event.data.object as Stripe.Charge
+  const pi = paymentIntentIdFromCharge(charge)
+  if (!pi) {
+    return NextResponse.json({ received: true })
+  }
+
+  const supabase = getSupabaseService()
+  const { data: orderRow } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('stripe_payment_id', pi)
+    .maybeSingle()
+
+  if (!orderRow) {
+    return NextResponse.json({ received: true })
+  }
+
+  const order = orderRow as unknown as Order
+  const refundedEUR = (charge.amount_refunded ?? 0) / 100
+  const isFull =
+    typeof charge.amount === 'number' &&
+    charge.amount > 0 &&
+    (charge.amount_refunded ?? 0) >= charge.amount
+
+  try {
+    await sendOrderRefundNotice(order, refundedEUR, isFull)
+  } catch (err) {
+    console.error('Error sending refund notice email:', err)
+  }
+
+  return NextResponse.json({ received: true })
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.text()
@@ -17,12 +63,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing stripe-signature header' }, { status: 400 })
   }
 
-  let event
+  let event: Stripe.Event
   try {
     event = await constructWebhookEvent(body, signature)
   } catch (err) {
     console.error('Webhook signature verification failed:', err)
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
+  }
+
+  if (event.type === 'charge.refunded') {
+    return handleChargeRefunded(event)
   }
 
   if (event.type !== 'checkout.session.completed') {
@@ -34,10 +84,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No session data' }, { status: 400 })
   }
 
-  const supabase = createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  const supabase = getSupabaseService()
 
   try {
     // Parsear items del metadata
@@ -52,11 +99,11 @@ export async function POST(req: NextRequest) {
     // Crear el pedido en Supabase
     const insertData = {
       order_number: generateOrderNumber(),
-      customer_id: customerId,
+      customer_id: customerId || null,
       customer_email: customerEmail,
       status: 'paid' as const,
       stripe_session_id: session.id,
-      stripe_payment_id: session.payment_intent as string,
+      stripe_payment_id: typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id ?? null,
       items: items as unknown as Order['items'],
       shipping_address: shippingAddress as unknown as Order['shipping_address'],
       subtotal,
@@ -100,7 +147,6 @@ export async function POST(req: NextRequest) {
       }
     } catch (stockErr) {
       console.error('Error decrementing stock:', stockErr)
-      // No fallar el webhook por error de stock
     }
 
     // Crear pedido en el proveedor según supplier
@@ -111,10 +157,10 @@ export async function POST(req: NextRequest) {
         let supplierOrderId: string | undefined
 
         if (supplier === 'dropxl') {
-          const dropxlOrder = await createDropXLOrder(order)
+          const dropxlOrder = await createDropXLOrder(order as unknown as Order)
           supplierOrderId = dropxlOrder.id
         } else if (supplier === 'droppery') {
-          const dropperyOrder = await createDropperyOrder(order)
+          const dropperyOrder = await createDropperyOrder(order as unknown as Order)
           supplierOrderId = dropperyOrder.order_id
         }
 
@@ -126,11 +172,9 @@ export async function POST(req: NextRequest) {
         }
       } catch (err) {
         console.error(`Error placing order with ${supplier}:`, err)
-        // No fallar el webhook por un error del proveedor — se reintentará manualmente
       }
     }
 
-    // Enviar email de confirmación
     try {
       await sendOrderConfirmation(order as unknown as Order)
     } catch (err) {

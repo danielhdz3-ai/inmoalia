@@ -4,6 +4,7 @@ import ProductGrid from '@/components/shop/ProductGrid'
 import { Search } from 'lucide-react'
 import type { Product } from '@/lib/supabase/types'
 import SearchInput from '@/components/shop/SearchInput'
+import { absoluteUrl } from '@/lib/site'
 
 interface PageProps {
   searchParams: Promise<{ q?: string }>
@@ -11,8 +12,19 @@ interface PageProps {
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const { q } = await searchParams
+  const query = q?.trim() ?? ''
+
+  let canonicalHref = absoluteUrl('/buscar')
+  if (query.length >= 2) {
+    canonicalHref = absoluteUrl(`/buscar?q=${encodeURIComponent(query)}`)
+  }
+
   return {
-    title: q ? `"${q}" — Búsqueda | INMOALIA` : 'Buscar productos | INMOALIA',
+    title: query ? `"${query}" — Búsqueda | INMOALIA` : 'Buscar productos | INMOALIA',
+    description: query
+      ? `Resultados de búsqueda en INMOALIA para "${query}". Muebles, decoración y jardín premium.`
+      : 'Busca muebles y decoración en INMOALIA por nombre, categoría o material.',
+    alternates: { canonical: canonicalHref },
   }
 }
 

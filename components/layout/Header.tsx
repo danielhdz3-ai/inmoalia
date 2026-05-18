@@ -71,7 +71,7 @@ export default function Header() {
     <>
       {/* Announcement bar */}
       <div className="bg-[#2d4a3e] text-white text-center py-2 px-4 text-xs font-medium tracking-wide">
-        Envío gratuito en pedidos superiores a 99€ · Entrega en 2-5 días laborables
+        Envío gratuito en pedidos desde 600€ · Entrega en 2-5 días laborables
       </div>
 
       <header

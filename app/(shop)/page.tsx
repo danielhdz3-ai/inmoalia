@@ -6,12 +6,16 @@ import { createClient } from '@/lib/supabase/server'
 import ProductCard from '@/components/shop/ProductCard'
 import NewsletterForm from '@/components/shop/NewsletterForm'
 import { Button } from '@/components/ui/button'
+import { absoluteUrl } from '@/lib/site'
 import type { Product } from '@/lib/supabase/types'
 
-export const metadata: Metadata = {
-  title: 'INMOALIA — Hogar, Jardín y Decoración Premium',
-  description:
-    'Descubre muebles y decoración de calidad europea. Selección curada de estilo nórdico y mediterráneo. Envío en 2-5 días laborables.',
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: 'INMOALIA — Hogar, Jardín y Decoración Premium',
+    description:
+      'Descubre muebles y decoración de calidad europea. Selección curada de estilo nórdico y mediterráneo. Envío en 2-5 días laborables.',
+    alternates: { canonical: absoluteUrl('/') },
+  }
 }
 
 const CATEGORIES = [
@@ -24,7 +28,7 @@ const CATEGORIES = [
 ]
 
 const BENEFITS = [
-  { icon: Truck, title: 'Envío gratis +99€', desc: 'Entrega en 2-5 días laborables en toda España.' },
+  { icon: Truck, title: 'Envío gratis desde 600€', desc: 'Entrega en 2-5 días laborables en toda España.' },
   { icon: Shield, title: 'Pago 100% seguro', desc: 'Stripe. Tarjeta, PayPal, Google Pay y más.' },
   { icon: RotateCcw, title: 'Devoluciones fáciles', desc: '30 días para devoluciones sin preguntas.' },
   { icon: Star, title: 'Calidad seleccionada', desc: 'Cada producto pasa por nuestro control de calidad.' },
@@ -79,6 +83,8 @@ export default async function HomePage() {
             className="object-cover"
             priority
             quality={90}
+            sizes="100vw"
+            fetchPriority="high"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#2a2a2a]/75 via-[#2a2a2a]/40 to-transparent" />
         </div>

@@ -18,7 +18,6 @@ const FOOTER_LINKS = {
   'Empresa': [
     { label: 'Sobre INMOALIA', href: '/sobre-nosotros' },
     { label: 'Blog', href: '/blog' },
-    { label: 'Proveedores', href: '/proveedores' },
     { label: 'Trabaja con nosotros', href: '/empleo' },
   ],
   'Legal': [

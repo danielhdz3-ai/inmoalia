@@ -1,8 +1,14 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { JsonLd } from '@/components/seo/JsonLd'
 import ProductDetail from '@/components/shop/ProductDetail'
+import { breadcrumbProductJsonLd, productJsonLd } from '@/lib/seo/jsonld-builders'
+import { absoluteUrl } from '@/lib/site'
 import type { Product } from '@/lib/supabase/types'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -37,14 +43,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProduct(slug)
   if (!product) return { title: 'Producto no encontrado' }
 
+  const canonicalPath = `/productos/${slug}`
+
   return {
     title: product.meta_title ?? product.name,
     description: product.meta_desc ?? product.description ?? '',
+    alternates: { canonical: absoluteUrl(canonicalPath) },
     openGraph: {
       title: product.meta_title ?? product.name,
       description: product.meta_desc ?? '',
-      images: product.images[0] ? [{ url: product.images[0] }] : [],
+      url: canonicalPath,
+      images: product.images[0] ? [{ url: product.images[0], alt: product.name }] : [],
       type: 'website',
+    },
+    twitter: {
+      card: product.images[0] ? 'summary_large_image' : 'summary',
+      images: product.images[0] ? [product.images[0]] : undefined,
     },
   }
 }
@@ -56,5 +70,12 @@ export default async function ProductPage({ params }: Props) {
 
   const related = await getRelatedProducts(product.category, product.id)
 
-  return <ProductDetail product={product} relatedProducts={related} />
+  return (
+    <>
+      <JsonLd data={productJsonLd(product)} />
+      <JsonLd data={breadcrumbProductJsonLd(product)} />
+
+      <ProductDetail product={product} relatedProducts={related} />
+    </>
+  )
 }

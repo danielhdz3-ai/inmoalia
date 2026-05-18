@@ -22,6 +22,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useCartStore } from '@/store/cart'
+import { useFavoritesStore } from '@/store/favorites'
 import { formatPrice } from '@/lib/utils'
 import { toastOk, toastErr } from '@/lib/toast-client'
 import type { Product } from '@/lib/supabase/types'
@@ -36,12 +37,34 @@ interface ProductDetailProps {
 export default function ProductDetail({ product, relatedProducts }: ProductDetailProps) {
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
-  const [isWishlisted, setIsWishlisted] = useState(false)
   const [added, setAdded] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const addItem = useCartStore((s) => s.addItem)
+  const toggleFavorite = useFavoritesStore((s) => s.toggleItem)
+  const isWishlisted = useFavoritesStore((s) => s.isFavorite(product.id))
 
   const dimensions = product.dimensions as { width?: number; height?: number; depth?: number } | null
+
+  /**
+   * Texto público sin datos de suministro (solo en admin).
+   * También recorta líneas sueltas que citen proveedor / marcas mayoristas.
+   */
+  const publicDescription = (() => {
+    let t = product.description ?? ''
+    t = t.replace(/\s*Referencia proveedor[^.]*\.?/gi, '')
+    t = t
+      .split(/\r?\n/)
+      .filter((line) => {
+        const lower = line.toLowerCase()
+        if (/proveedor/.test(lower)) return false
+        if (/gruposdm|grupo\s*sdm/i.test(line)) return false
+        return true
+      })
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
+    return t
+  })()
 
   const activeImageSrc = product.images[selectedImage] ?? product.images[0] ?? ''
 
@@ -248,7 +271,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
                 size="sm"
                 type="button"
                 className="flex-1 gap-2 transition-all duration-200"
-                onClick={() => setIsWishlisted(!isWishlisted)}
+                onClick={() => toggleFavorite(product)}
               >
                 <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-[#c0392b] text-[#c0392b]' : ''}`} />
                 {isWishlisted ? 'En favoritos' : 'Favoritos'}
@@ -306,7 +329,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
           {/* Benefits */}
           <div className="space-y-3 py-6 border-t border-[#e8ddd0]">
             {[
-              { icon: Truck, text: 'Envío gratis en pedidos superiores a 99€. Entrega en 2-5 días.' },
+              { icon: Truck, text: 'Envío gratis en pedidos desde 600€. Entrega en 2-5 días.' },
               { icon: Shield, text: 'Pago 100% seguro con cifrado SSL. Stripe certificado.' },
               { icon: RotateCcw, text: 'Devolución gratuita en 30 días sin preguntas.' },
             ].map((item) => (
@@ -347,12 +370,6 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
                 <>
                   <dt className="text-xs text-[#a08c7a]">Peso</dt>
                   <dd className="text-xs text-[#2a2a2a] font-medium">{product.weight_kg} kg</dd>
-                </>
-              )}
-              {product.supplier && (
-                <>
-                  <dt className="text-xs text-[#a08c7a]">Proveedor</dt>
-                  <dd className="text-xs text-[#2a2a2a] font-medium capitalize">{product.supplier}</dd>
                 </>
               )}
             </dl>
@@ -454,10 +471,10 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
       ) : null}
 
       {/* Description */}
-      {product.description && (
+      {publicDescription && (
         <section className="mt-16 max-w-3xl">
           <h2 className="text-xl font-bold text-[#2a2a2a] mb-4">Descripción del producto</h2>
-          <p className="text-[#6b5344] leading-relaxed text-base">{product.description}</p>
+          <p className="text-[#6b5344] leading-relaxed text-base">{publicDescription}</p>
         </section>
       )}
 

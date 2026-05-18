@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { assertAdmin } from '@/lib/admin/assert-admin'
+import { ProductImagesUrlsInput } from '@/components/admin/ProductImagesUrlsInput'
 import type { Product } from '@/lib/supabase/types'
 
 export const dynamic = 'force-dynamic'
@@ -32,6 +33,12 @@ function parseOptionalFloat(formData: FormData, key: string): number | null {
   return Number.isFinite(n) ? n : null
 }
 
+function dimField(product: Product | null, key: 'width' | 'height' | 'depth'): string {
+  if (!product?.dimensions || typeof product.dimensions !== 'object') return ''
+  const v = (product.dimensions as Record<string, unknown>)[key]
+  return typeof v === 'number' && Number.isFinite(v) ? String(v) : ''
+}
+
 async function saveProduct(formData: FormData) {
   'use server'
   await assertAdmin()
@@ -42,6 +49,14 @@ async function saveProduct(formData: FormData) {
   const name = (formData.get('name') as string).trim()
   const slugRaw = (formData.get('slug') as string).trim()
   const slug = slugRaw || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+
+  const dimW = parseOptionalFloat(formData, 'dim_width')
+  const dimH = parseOptionalFloat(formData, 'dim_height')
+  const dimD = parseOptionalFloat(formData, 'dim_depth')
+  const dimensions =
+    dimW != null && dimH != null && dimD != null
+      ? ({ width: dimW, height: dimH, depth: dimD })
+      : null
 
   const data = {
     name,
@@ -58,6 +73,7 @@ async function saveProduct(formData: FormData) {
     stock: parseInt(formData.get('stock') as string, 10) || 0,
     material: (formData.get('material') as string) || null,
     color: (formData.get('color') as string) || null,
+    dimensions: dimensions as never,
     weight_kg: parseOptionalFloat(formData, 'weight_kg'),
     is_active: formData.get('is_active') === 'true',
     is_featured: formData.get('is_featured') === 'true',
@@ -83,6 +99,7 @@ async function saveProduct(formData: FormData) {
 
   revalidatePath('/admin/productos')
   revalidatePath('/admin/inventario')
+  revalidatePath('/admin/proveedores')
   revalidatePath(`/productos/${slug}`)
   redirect('/admin/productos')
 }
@@ -101,6 +118,16 @@ export default async function EditProductPage({ params }: Props) {
     if (!data) notFound()
     product = data as unknown as Product
   }
+
+  const { data: rawSupplierRows } = await createAdminClient()
+    .from('suppliers')
+    .select('slug,name')
+    .eq('is_active', true)
+    .order('name', { ascending: true })
+  const supplierRows = (rawSupplierRows as { slug: string; name: string }[] | null) ?? []
+  const supplierSlugs = new Set(supplierRows.map((r) => r.slug))
+  const orphanSupplier =
+    !isNew && product?.supplier && !supplierSlugs.has(product.supplier) ? product.supplier : null
 
   const title = isNew ? 'Nuevo producto' : 'Editar producto'
 
@@ -141,20 +168,57 @@ export default async function EditProductPage({ params }: Props) {
             <Field label="Stock" name="stock" type="number" defaultValue={String(product?.stock ?? 0)} />
           </div>
           <Field label="Peso (kg)" name="weight_kg" type="number" step="0.01" defaultValue={product?.weight_kg != null ? String(product.weight_kg) : ''} />
+
+          <p className="text-xs font-medium text-[#6b5344]">Dimensiones paquete (cm)</p>
+          <div className="grid grid-cols-3 gap-4">
+            <Field label="Ancho" name="dim_width" type="number" step="0.1" defaultValue={dimField(product, 'width')} />
+            <Field label="Alto" name="dim_height" type="number" step="0.1" defaultValue={dimField(product, 'height')} />
+            <Field label="Fondo" name="dim_depth" type="number" step="0.1" defaultValue={dimField(product, 'depth')} />
+          </div>
+          <p className="text-[11px] text-[#a08c7a] -mt-2">Dejar las tres vacías para no guardar dimensiones.</p>
         </section>
 
         {/* Proveedor */}
         <section className="bg-white rounded-2xl border border-[#e8ddd0] p-6 space-y-5">
-          <h2 className="font-semibold text-[#2a2a2a] text-sm uppercase tracking-wide">Proveedor</h2>
-          <p className="text-xs text-[#a08c7a]">Identificadores dropshipping y enlace directo a la ficha en el portal del proveedor (útil sobre todo en AW Dropship).</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Field label="Código técnico (supplier slug)" name="supplier" defaultValue={product?.supplier ?? ''} placeholder="aw-dropship, dropxl, droppery" />
-            <Field label="SKU proveedor" name="supplier_sku" defaultValue={product?.supplier_sku ?? ''} placeholder="Ej. HPS-05" />
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <h2 className="font-semibold text-[#2a2a2a] text-sm uppercase tracking-wide">Proveedor</h2>
+            <Link href="/admin/proveedores" className="text-xs text-[#2d4a3e] hover:underline font-medium">
+              Directorio de proveedores →
+            </Link>
+          </div>
+          <p className="text-xs text-[#a08c7a]">
+            Elige el proveedor del catálogo interno (slug guardado en el producto). SKU y URL de ficha del mayorista siguen abajo.
+          </p>
+          <div>
+            <label className="block text-xs font-medium text-[#6b5344] mb-1.5">Proveedor del catálogo</label>
+            <select
+              name="supplier"
+              defaultValue={
+                product?.supplier ??
+                (supplierRows.some((r) => r.slug === 'gruposdm') ? 'gruposdm' : supplierRows[0]?.slug ?? '')
+              }
+              className="w-full h-10 px-3 rounded-lg border border-[#e8ddd0] bg-white text-sm text-[#2a2a2a] focus:outline-none focus:ring-2 focus:ring-[#2d4a3e]/30"
+            >
+              <option value="">— Sin proveedor —</option>
+              {supplierRows.map((r) => (
+                <option key={r.slug} value={r.slug}>
+                  {r.name} ({r.slug})
+                </option>
+              ))}
+              {orphanSupplier ? (
+                <option value={orphanSupplier}>
+                  {orphanSupplier} (no está en el directorio; edita o crea la ficha)
+                </option>
+              ) : null}
+            </select>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="SKU proveedor" name="supplier_sku" defaultValue={product?.supplier_sku ?? ''} placeholder="Ej. 290.SVENE2SNE" />
             <Field
               label="URL ficha proveedor"
               name="supplier_product_url"
               defaultValue={product?.supplier_product_url ?? ''}
-              placeholder="https://www.aw-dropship.es/..."
+              placeholder="https://gruposdm.com/..."
             />
           </div>
         </section>
@@ -191,13 +255,7 @@ export default async function EditProductPage({ params }: Props) {
         {/* Imágenes */}
         <section className="bg-white rounded-2xl border border-[#e8ddd0] p-6 space-y-4">
           <h2 className="font-semibold text-[#2a2a2a] text-sm uppercase tracking-wide">Imágenes</h2>
-          <FieldTextarea
-            label="URLs de imágenes (una por línea)"
-            name="images"
-            defaultValue={product?.images?.join('\n') ?? ''}
-            rows={4}
-            placeholder="https://images.unsplash.com/..."
-          />
+          <ProductImagesUrlsInput defaultValue={product?.images?.join('\n') ?? ''} />
         </section>
 
         {/* SEO */}

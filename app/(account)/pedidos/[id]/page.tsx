@@ -1,7 +1,7 @@
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Package, ChevronLeft, MapPin, Truck, CreditCard } from 'lucide-react'
+import { Package, ChevronLeft, MapPin, Truck, CreditCard, RotateCcw } from 'lucide-react'
 import PrintPedidoButton from '@/components/account/PrintPedidoButton'
 import { formatPrice, formatDate } from '@/lib/utils'
 import type { Order, OrderItem, ShippingAddress } from '@/lib/supabase/types'
@@ -233,6 +233,25 @@ export default async function PedidoDetailPage({ params }: Props) {
                 <span>{formatPrice(order.total)}</span>
               </div>
             </div>
+          </div>
+          {/* Devoluciones (alineado con email y FAQ públicas) */}
+          <div className="bg-white rounded-xl border border-[#e8ddd0] shadow-sm p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <RotateCcw className="w-4 h-4 text-[#2d4a3e]" />
+              <h3 className="font-semibold text-[#2a2a2a] text-sm">Cambios y devoluciones</h3>
+            </div>
+            <p className="text-sm text-[#6b5344] leading-relaxed">
+              Disfrutas de un plazo de <strong>hasta 30 días naturales</strong> para devoluciones, según nuestras condiciones públicas y el equipo operativo disponible ese día para gestionar cada caso (producto debe llegar íntegro y en embalaje adecuado salvo reclamaciones por defecto).
+            </p>
+            <p className="text-sm mt-3">
+              <Link href="/devoluciones" className="font-medium text-[#2d4a3e] hover:underline underline-offset-2">
+                Leer política de devoluciones
+              </Link>
+              <span className="text-[#a08c7a] mx-2">·</span>
+              <a href="mailto:info@inmoalia.com" className="font-medium text-[#2d4a3e] hover:underline underline-offset-2">
+                Escríbenos si necesitas etiqueta de vuelta
+              </a>
+            </p>
           </div>
         </div>
       </div>

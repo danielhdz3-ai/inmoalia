@@ -3,7 +3,12 @@
   "buildCommand": "pnpm build",
   "installCommand": "pnpm install",
   "regions": ["cdg1"],
-  "crons": [],
+  "crons": [
+    {
+      "path": "/api/cron/abandoned-cart",
+      "schedule": "0 10 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/api/stripe/webhook",

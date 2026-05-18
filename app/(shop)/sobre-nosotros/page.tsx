@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 }
 
 const VALUES = [
-  { icon: Leaf, title: 'Sostenibilidad', desc: 'Seleccionamos proveedores comprometidos con la fabricación responsable y el uso de materiales de fuentes sostenibles.' },
+  { icon: Leaf, title: 'Sostenibilidad', desc: 'Priorizamos materiales y procesos de fabricación con el menor impacto posible, sin renunciar a la estética ni a la longevidad del mueble.' },
   { icon: Shield, title: 'Calidad garantizada', desc: 'Cada producto pasa por un proceso de selección riguroso. Si no cumple nuestros estándares, no entra en el catálogo.' },
   { icon: Truck, title: 'Envío sin complicaciones', desc: 'Trabajamos con los mejores transportistas para que tu pedido llegue en perfectas condiciones y en el tiempo prometido.' },
   { icon: Heart, title: 'Cliente primero', desc: 'Nuestro equipo está siempre disponible para ayudarte. Tu satisfacción es nuestra razón de ser.' },
@@ -37,7 +37,7 @@ export default function SobreNosotrosPage() {
               INMOALIA nació de la pasión por el diseño de interiores y la convicción de que una casa bien equipada cambia la vida de las personas.
             </p>
             <p>
-              Somos una tienda online especializada en muebles, iluminación, decoración y accesorios de jardín. Trabajamos con los mejores proveedores europeos para ofrecer productos de calidad a precios competitivos, con la comodidad del comercio electrónico y la confianza de un equipo humano detrás.
+              Somos una tienda online especializada en muebles, iluminación, decoración y accesorios de jardín. Apostamos por un catálogo claro, productos bien descritos y precios justos, con la comodidad del comercio electrónico y la confianza de un equipo humano detrás.
             </p>
             <p>
               Nuestro modelo de negocio nos permite mantener los precios ajustados sin sacrificar la calidad: trabajamos directamente con fabricantes y distribuidores, sin intermediarios innecesarios.

@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { revalidatePath } from 'next/cache'
 import { ShoppingCart, ChevronLeft } from 'lucide-react'
 import { formatPrice, formatDate } from '@/lib/utils'
-import { sendShippingNotification } from '@/lib/resend/emails'
+import { sendShippingNotification, sendOrderCancelledNotice } from '@/lib/resend/emails'
+import { assertAdmin } from '@/lib/admin/assert-admin'
 import type { Order, OrderItem } from '@/lib/supabase/types'
 
 export const dynamic = 'force-dynamic'
@@ -35,6 +36,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 async function updateOrderStatus(formData: FormData) {
   'use server'
+  await assertAdmin()
   const id = formData.get('id') as string
   const status = formData.get('status') as string
   const trackingNumber = (formData.get('tracking_number') as string).trim()
@@ -67,6 +69,25 @@ async function updateOrderStatus(formData: FormData) {
       await sendShippingNotification(prevOrder, trackingNumber)
     } catch (err) {
       console.error('Error sending shipping notification:', err)
+    }
+  }
+
+  const paidLike: Order['status'][] = ['paid', 'processing', 'shipped', 'delivered']
+  if (
+    status === 'cancelled' &&
+    prevOrder &&
+    prevOrder.status !== 'cancelled' &&
+    paidLike.includes(prevOrder.status) &&
+    !prevOrder.order_closure_notice_sent_at
+  ) {
+    try {
+      await sendOrderCancelledNotice(prevOrder)
+      await supabase
+        .from('orders')
+        .update({ order_closure_notice_sent_at: new Date().toISOString() } as never)
+        .eq('id', id)
+    } catch (err) {
+      console.error('Error sending cancellation notice:', err)
     }
   }
 
@@ -200,6 +221,9 @@ export default async function AdminPedidosPage() {
                               placeholder="Ej: GLS1234567890"
                               className="w-full text-sm border border-[#e8ddd0] rounded-lg px-3 py-2 bg-white text-[#2a2a2a] placeholder-[#a08c7a] focus:outline-none focus:ring-2 focus:ring-[#2d4a3e]/30"
                             />
+                            <p className="text-[11px] text-[#a08c7a] mt-1.5 leading-snug">
+                              Al guardar estado <strong>Enviado</strong> con un número de tracking, el cliente recibe automáticamente un email si Resend está configurado.
+                            </p>
                           </div>
                           <button
                             type="submit"

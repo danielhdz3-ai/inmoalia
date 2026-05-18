@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import type { CartItem } from '@/store/cart'
 import type { ShippingAddress, Product } from '@/lib/supabase/types'
+import { getShippingCostEuros } from '@/lib/shop/shipping'
 
 function getAdminClient() {
   return createServiceClient(
@@ -90,7 +91,7 @@ export async function POST(req: NextRequest) {
     }
 
     const discountedSubtotal = Math.max(0, subtotal - discountAmount)
-    const shippingCost = discountedSubtotal >= 99 ? 0 : 5.99
+    const shippingCost = getShippingCostEuros(discountedSubtotal)
 
     // Crear Stripe Checkout Session
     const orderItems = items.map((item) => {
@@ -172,6 +173,19 @@ export async function POST(req: NextRequest) {
       },
       locale: 'es',
     })
+
+    const emailNorm = (shippingAddress.email ?? user?.email ?? '').trim().toLowerCase()
+    if (emailNorm) {
+      try {
+        await getAdminClient()
+          .from('abandoned_cart_snapshots')
+          .update({ discarded_at: new Date().toISOString() } as never)
+          .eq('email', emailNorm)
+          .is('discarded_at', null)
+      } catch {
+        // Migración opcional: ignorar si la tabla no existe aún
+      }
+    }
 
     return NextResponse.json({ sessionId: session.id, url: session.url })
   } catch (err) {

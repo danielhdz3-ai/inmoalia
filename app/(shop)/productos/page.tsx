@@ -4,10 +4,17 @@ import ProductGrid from '@/components/shop/ProductGrid'
 import FilterSidebar from '@/components/shop/FilterSidebar'
 import { SlidersHorizontal } from 'lucide-react'
 import type { Product } from '@/lib/supabase/types'
+import { absoluteUrl } from '@/lib/site'
 
-export const metadata: Metadata = {
-  title: 'Catálogo de Productos',
-  description: 'Explora nuestra selección de muebles, decoración y jardín. Filtros por categoría, precio, material y color.',
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: 'Catálogo de Productos',
+    description:
+      'Explora nuestra selección de muebles, decoración y jardín. Filtros por categoría, precio, material y color.',
+    alternates: {
+      canonical: absoluteUrl('/productos'),
+    },
+  }
 }
 
 interface SearchParams {

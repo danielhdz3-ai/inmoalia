@@ -1,10 +1,11 @@
 import Link from 'next/link'
-import { LayoutDashboard, Package, ClipboardList, ShoppingCart, RefreshCw, ArrowLeft } from 'lucide-react'
+import { LayoutDashboard, Package, ClipboardList, ShoppingCart, RefreshCw, ArrowLeft, Building2 } from 'lucide-react'
 
 const NAV = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/inventario', label: 'Inventario', icon: ClipboardList },
   { href: '/admin/productos', label: 'Productos', icon: Package },
+  { href: '/admin/proveedores', label: 'Proveedores', icon: Building2 },
   { href: '/admin/pedidos', label: 'Pedidos', icon: ShoppingCart },
   { href: '/admin/sincronizacion', label: 'Sincronización', icon: RefreshCw },
 ]

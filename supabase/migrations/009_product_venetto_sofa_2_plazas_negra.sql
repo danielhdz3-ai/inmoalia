@@ -1,4 +1,4 @@
--- Sofá VENETTO 2 plazas (operativas-sniper / catálogo fabricante SDM; referencia 290.SVENE2SNE).
+-- Sofá VENETTO 2 plazas (Grupo SDM; referencia 290.SVENE2SNE).
 -- PVP tienda 425 € · coste proveedor 345 €.
 -- Fotos desde ficha pública gruposdm.com (mismo modelo); next.config debe permitir hostname gruposdm.com.
 
@@ -28,7 +28,7 @@ insert into products (
 ) values (
   'sofa-venetto-2-plazas-acero-inoxidable-similpiel-negra',
   'Sofá VENETTO, 2 plazas · acero inoxidable · similpiel negra',
-  'Sofá de diseño, 2 plazas. Estructura tubular de acero inoxidable. Interior de espuma de gran densidad. Tapizado en similpiel negra; otros acabados bajo pedido. Disponible sofá de 3 plazas a juego en catálogo. Dimensiones (cm): ancho 132, fondo 70, alto 69. Embalaje: plástico y cartón. Unidades: 1; volumen: 0,666 m³. Producto nuevo con certificado (test report) de laboratorio internacional homologado (normativa UNE o equivalente internacional). Referencia proveedor 290.SVENE2SNE.',
+  'Sofá de diseño, 2 plazas. Estructura tubular de acero inoxidable. Interior de espuma de gran densidad. Tapizado en similpiel negra; otros acabados bajo pedido. Disponible sofá de 3 plazas a juego en catálogo. Dimensiones (cm): ancho 132, fondo 70, alto 69. Embalaje: plástico y cartón. Unidades: 1; volumen: 0,666 m³. Producto nuevo con certificado (test report) de laboratorio internacional homologado (normativa UNE o equivalente internacional).',
   425.00,
   345.00,
   array[
@@ -40,7 +40,7 @@ insert into products (
   array['venetto','sofá','salón','similpiel','acero inoxidable','diseño','muebles'],
   'INM-SVENE2SNE',
   '290.SVENE2SNE',
-  'operativas-sniper',
+  'gruposdm',
   5,
   null,
   '{"width": 132, "height": 69, "depth": 70}'::jsonb,
@@ -49,7 +49,7 @@ insert into products (
   true,
   true,
   'Sofá VENETTO 2 plazas acero inoxidable similpiel negra | INMOALIA',
-  'Sofá de diseño VENETTO: estructura acero inoxidable, similpiel negra, 132×70×69 cm. Certificación UNE. Referencia 290.SVENE2SNE.',
+  'Sofá de diseño VENETTO: estructura acero inoxidable, similpiel negra, 132×70×69 cm. Certificación UNE.',
   'https://gruposdm.com/es/sofas-butacas-y-sillones/sofas-y-sillones/sofa-de-2-plazas/sofa-venetto-2-plazas-acero-inoxidable-similpiel-negra.html'
 )
 on conflict (slug) do update set

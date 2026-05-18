@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { getShippingCostEuros } from '@/lib/shop/shipping'
 
 export interface CartItem {
   id: string
@@ -86,8 +87,7 @@ export const useCartStore = create<CartState>()(
 
       getTotal: () => {
         const subtotal = get().getSubtotal()
-        const shipping = subtotal >= 99 ? 0 : 5.99
-        return subtotal + shipping
+        return subtotal + getShippingCostEuros(subtotal)
       },
 
       getSubtotal: () => {

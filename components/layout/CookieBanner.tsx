@@ -32,10 +32,14 @@ export default function CookieBanner() {
   }, [])
 
   const save = (c: ConsentState) => {
+    const payload = { ...c, savedAt: new Date().toISOString() }
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...c, savedAt: new Date().toISOString() }))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
     } catch {}
     setVisible(false)
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('inmoalia-cookie-consent', { detail: c }))
+    }
   }
 
   const acceptAll = () => save({ necessary: true, analytics: true, marketing: true })
@@ -94,7 +98,7 @@ export default function CookieBanner() {
               />
               <ToggleRow
                 label="Cookies analíticas"
-                description="Nos ayudan a entender cómo usas la tienda (tráfico, páginas visitadas)."
+                description="Nos ayudan a entender cómo usas la tienda (p. ej. con Google Analytics solo si lo activáis en configuración)."
                 checked={consent.analytics}
                 onChange={(v) => setConsent((c) => ({ ...c, analytics: v }))}
               />

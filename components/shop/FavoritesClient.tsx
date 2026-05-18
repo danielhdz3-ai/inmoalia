@@ -35,6 +35,7 @@ export default function FavoritesClient() {
 
         if (!productIds?.length) {
           setDbProducts([])
+          void useFavoritesStore.getState().syncWithServer()
           setLoading(false)
           return
         }
@@ -47,6 +48,7 @@ export default function FavoritesClient() {
           .eq('is_active', true)
 
         setDbProducts((data as unknown as Product[]) ?? [])
+        void useFavoritesStore.getState().syncWithServer()
       } catch {
         setDbProducts([])
       } finally {
@@ -59,6 +61,7 @@ export default function FavoritesClient() {
 
   const handleRemoveDb = async (productId: string) => {
     setDbProducts((prev) => prev?.filter((p) => p.id !== productId) ?? [])
+    useFavoritesStore.getState().removeItem(productId)
     await fetch('/api/favorites', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },

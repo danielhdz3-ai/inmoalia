@@ -11,7 +11,7 @@ const FAQS = [
     section: 'Envíos',
     items: [
       { q: '¿Cuánto tarda en llegar mi pedido?', a: 'El plazo de entrega estimado es de 2 a 5 días laborables en España peninsular. Para Baleares, Canarias, Ceuta y Melilla puede variar entre 5 y 10 días.' },
-      { q: '¿Cuánto cuesta el envío?', a: 'El envío es completamente gratuito en pedidos superiores a 99 €. Para pedidos inferiores, el coste es de 5,99 €.' },
+      { q: '¿Cuánto cuesta el envío?', a: 'El envío es gratuito en pedidos iguales o superiores a 600 €. Por debajo de ese importe, el transporte se calcula por tramos según el total del carrito (entre 22 € y 59 €); verás el importe exacto en el carrito y al pagar.' },
       { q: '¿Puedo seguir mi pedido?', a: 'Sí. Una vez que tu pedido salga de almacén, recibirás un email con el número de seguimiento y el enlace del transportista.' },
       { q: '¿Hacéis envíos internacionales?', a: 'Actualmente solo enviamos a España peninsular, Baleares, Canarias, Ceuta y Melilla. Estamos trabajando para ampliar a Europa próximamente.' },
     ],
@@ -36,7 +36,7 @@ const FAQS = [
   {
     section: 'Productos',
     items: [
-      { q: '¿Los productos son de calidad?', a: 'Seleccionamos cuidadosamente cada producto de proveedores europeos de confianza. Trabajamos con dropXL (especializado en muebles de volumen) y Droppery (productos boutique premium).' },
+      { q: '¿Los productos son de calidad?', a: 'Cada artículo pasa un criterio estricto de materiales, acabados y trazabilidad antes de publicarse. Solo aceptamos piezas que cumplen nuestras exigencias de durabilidad y diseño.' },
       { q: '¿Puedo ver el producto antes de comprarlo?', a: 'Somos una tienda 100% online, por lo que no tenemos tienda física. Sin embargo, nuestras fotos son detalladas y las descripciones muy completas. Además, tienes 30 días para devolverlo.' },
       { q: '¿Cómo sé si un producto tiene stock?', a: 'En cada ficha de producto indicamos el stock disponible. Si un producto está agotado, puedes apuntarte a la lista de espera y te avisaremos cuando vuelva a estar disponible.' },
     ],

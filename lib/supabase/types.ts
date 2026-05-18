@@ -49,6 +49,11 @@ export interface Database {
         Insert: Partial<CouponRow> & Pick<CouponRow, 'code' | 'discount_type' | 'discount_value'>
         Update: Partial<CouponRow>
       }
+      suppliers: {
+        Row: Supplier
+        Insert: Partial<Supplier> & Pick<Supplier, 'slug' | 'name'>
+        Update: Partial<Supplier>
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -95,6 +100,24 @@ export interface Category {
   is_active: boolean
 }
 
+/** Directorio interno de proveedores (admin). `products.supplier` debe coincidir con `slug`. */
+export interface Supplier {
+  id: string
+  slug: string
+  name: string
+  legal_name: string | null
+  contact_name: string | null
+  phone: string | null
+  email: string | null
+  website: string | null
+  shipping_info: string | null
+  delivery_time: string | null
+  notes: string | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 export interface Customer {
   id: string
   full_name: string | null
@@ -119,6 +142,7 @@ export interface Order {
   supplier_order_id: string | null
   tracking_number: string | null
   notes: string | null
+  order_closure_notice_sent_at: string | null
   created_at: string
   updated_at: string
 }

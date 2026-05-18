@@ -32,7 +32,7 @@ export default function TerminosPage() {
         <section>
           <h2 className="text-xl font-semibold mb-3">3. Precios y pagos</h2>
           <p className="text-[#6b5344] leading-relaxed">
-            Todos los precios se muestran en euros (€) e incluyen el IVA aplicable. El envío es gratuito para pedidos superiores a 99 €; para pedidos de menor importe se aplican gastos de envío de 5,99 €.
+            Todos los precios se muestran en euros (€) e incluyen el IVA aplicable. El envío es gratuito para pedidos iguales o superiores a 600 €. En pedidos inferiores, los gastos de envío se calculan por tramos en función del importe total del pedido y se muestran antes de formalizar el pago.
             El pago se realiza íntegramente mediante Stripe, que admite tarjeta de crédito/débito, Google Pay y Apple Pay.
           </p>
         </section>
@@ -64,7 +64,7 @@ export default function TerminosPage() {
         <section>
           <h2 className="text-xl font-semibold mb-3">7. Propiedad intelectual</h2>
           <p className="text-[#6b5344] leading-relaxed">
-            Todos los contenidos de este sitio web (textos, imágenes, logotipos, diseño) son propiedad de INMOALIA o de sus proveedores y están protegidos por la legislación de propiedad intelectual. Queda prohibida su reproducción total o parcial sin autorización expresa.
+            Todos los contenidos de este sitio web (textos, imágenes, logotipos, diseño) son propiedad de INMOALIA o de sus licenciantes y están protegidos por la legislación de propiedad intelectual. Queda prohibida su reproducción total o parcial sin autorización expresa.
           </p>
         </section>
 

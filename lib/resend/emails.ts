@@ -1,8 +1,11 @@
 import { Resend } from 'resend'
 import type { Order, OrderItem, ShippingAddress } from '@/lib/supabase/types'
+import { isResendConfigured } from '@/lib/resend/config'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = process.env.RESEND_FROM_EMAIL || 'info@inmoalia.com'
+
+/** Recuperación de contraseña: plantilla y envío vía Supabase Auth (no Resend salvo que lo personalicéis en el panel de Supabase). */
 
 export type WelcomeAccountParams = {
   to: string
@@ -11,6 +14,8 @@ export type WelcomeAccountParams = {
 
 /** Bienvenida tras verificar el email (callback de auth). Desde INMOALIA vía Resend. */
 export async function sendWelcomeAccountEmail({ to, name }: WelcomeAccountParams) {
+  if (!isResendConfigured()) return
+
   const site = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://inmoalia.com'
   const firstName = name.trim() || 'Cliente'
 
@@ -49,6 +54,9 @@ function escapeHtml(s: string): string {
 }
 
 export async function sendOrderConfirmation(order: Order) {
+  if (!isResendConfigured()) return
+
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://inmoalia.com'
   const items = order.items as unknown as OrderItem[]
   const address = order.shipping_address as unknown as ShippingAddress
 
@@ -108,6 +116,15 @@ export async function sendOrderConfirmation(order: Order) {
             ${address.postal_code} ${address.city}, ${address.province}<br/>
             ${address.country}
           </p>
+          
+          <p style="color: #6b5344; font-size: 14px; line-height: 1.65; margin: 24px 0 0;">
+            <strong>Devoluciones:</strong> puedes iniciar cambios hasta <strong>30 días naturales</strong> tras la entrega según nuestra
+            <a href="${site}/devoluciones" style="color: #2d4a3e;"> política de devoluciones</a>.
+            Gastos habituales por devoluciones no preferentes pueden ser a cargo del comprador salvo defecto de fabricación o error nuestro.
+          </p>
+          <p style="color: #6b5344; font-size: 14px; line-height: 1.65; margin: 14px 0 0;">
+            Sigue tu pedido en <a href="${site}/pedidos" style="color: #2d4a3e;">Mis pedidos</a> dentro de <a href="${site}/cuenta" style="color: #2d4a3e;">Mi cuenta</a>.
+          </p>
         </div>
         
         <div style="text-align: center; color: #a08c7a; font-size: 12px; line-height: 1.6;">
@@ -124,7 +141,10 @@ export async function sendShippingNotification(
   trackingNumber: string,
   trackingUrl?: string
 ) {
+  if (!isResendConfigured()) return
+
   const address = order.shipping_address as unknown as ShippingAddress
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://inmoalia.com'
 
   await resend.emails.send({
     from: `INMOALIA <${FROM}>`,
@@ -146,9 +166,145 @@ export async function sendShippingNotification(
             ${trackingUrl ? `<a href="${trackingUrl}" style="color: #2d4a3e; font-size: 14px; text-decoration: none; display: inline-block; margin-top: 8px;">Rastrear envío →</a>` : ''}
           </div>
           
-          <p style="color: #6b5344; font-size: 15px; line-height: 1.6; margin: 0;">
+          <p style="color: #6b5344; font-size: 15px; line-height: 1.6; margin: 0 0 20px;">
             Hola ${address.full_name}, tu pedido está en camino. 
             El tiempo estimado de entrega es de 2-5 días laborables.
+          </p>
+          <p style="color: #6b5344; font-size: 14px; line-height: 1.65; margin: 0;">
+            Para devoluciones o incidencias, consulta <a href="${site}/devoluciones" style="color: #2d4a3e;">devoluciones</a> y tu historial en <a href="${site}/pedidos" style="color: #2d4a3e;">Mis pedidos</a>.
+          </p>
+        </div>
+      </div>
+    `,
+  })
+}
+
+/** Reembolso vía Stripe (total o parcial). No marca el pedido — solo comunicación. */
+export async function sendOrderRefundNotice(order: Order, refundedAmountEUR: number, isFullRefund: boolean) {
+  if (!isResendConfigured()) return
+
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://inmoalia.com'
+  const address = order.shipping_address as unknown as ShippingAddress
+  const who = escapeHtml(address.full_name?.trim() || order.customer_email)
+
+  const headline = isFullRefund
+    ? 'Reembolso completado'
+    : 'Actualización sobre tu reembolso'
+
+  await resend.emails.send({
+    from: `INMOALIA <${FROM}>`,
+    to: order.customer_email,
+    subject: isFullRefund
+      ? `Reembolso procesado — pedido ${order.order_number}`
+      : `Reembolso parcial — pedido ${order.order_number}`,
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; background: #fdfcfa; padding: 40px 20px;">
+        <div style="text-align: center; margin-bottom: 28px;">
+          <h1 style="font-size: 26px; font-weight: 700; color: #2a2a2a; margin: 0;">INMOALIA</h1>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 28px; border: 1px solid #e8ddd0;">
+          <h2 style="color: #2a2a2a; font-size: 20px; margin: 0 0 12px;">${headline}</h2>
+          <p style="color: #6b5344; font-size: 15px; line-height: 1.65; margin: 0 0 16px;">
+            Hola ${who},
+          </p>
+          <p style="color: #6b5344; font-size: 15px; line-height: 1.65; margin: 0 0 16px;">
+            ${isFullRefund
+              ? `Hemos procesado el reembolso completo de tu pedido <strong>${escapeHtml(order.order_number)}</strong> por un importe de <strong>${formatPrice(refundedAmountEUR)}</strong>. El plazo de acreditación en tu tarjeta depende de tu entidad (habitualmente unos días laborables).`
+              : `Se ha registrado un reembolso parcial de <strong>${formatPrice(refundedAmountEUR)}</strong> sobre el pedido <strong>${escapeHtml(order.order_number)}</strong>. Si quedara importe pendiente, te avisaremos cuando se complete.`}
+          </p>
+          <p style="color: #6b5344; font-size: 14px; line-height: 1.6; margin: 0 0 20px;">
+            Condiciones y devoluciones: <a href="${site}/devoluciones" style="color: #2d4a3e;">${site}/devoluciones</a>
+          </p>
+          <p style="color: #6b5344; font-size: 14px; line-height: 1.6; margin: 0;">
+            Dudas: <a href="mailto:info@inmoalia.com" style="color: #2d4a3e;">info@inmoalia.com</a>
+          </p>
+        </div>
+        <p style="text-align: center; color: #a08c7a; font-size: 12px; margin-top: 20px;">© INMOALIA</p>
+      </div>
+    `,
+  })
+}
+
+/** Cancelación operativa (p. ej. desde el panel) sobre un pedido que ya estaba pagado o en curso. */
+export async function sendOrderCancelledNotice(order: Order) {
+  if (!isResendConfigured()) return
+
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://inmoalia.com'
+  const address = order.shipping_address as unknown as ShippingAddress
+  const who = escapeHtml(address.full_name?.trim() || order.customer_email)
+
+  await resend.emails.send({
+    from: `INMOALIA <${FROM}>`,
+    to: order.customer_email,
+    subject: `Pedido cancelado — ${order.order_number}`,
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; background: #fdfcfa; padding: 40px 20px;">
+        <div style="text-align: center; margin-bottom: 28px;">
+          <h1 style="font-size: 26px; font-weight: 700; color: #2a2a2a; margin: 0;">INMOALIA</h1>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 28px; border: 1px solid #e8ddd0;">
+          <h2 style="color: #2a2a2a; font-size: 20px; margin: 0 0 12px;">Tu pedido ha sido cancelado</h2>
+          <p style="color: #6b5344; font-size: 15px; line-height: 1.65; margin: 0 0 16px;">
+            Hola ${who},
+          </p>
+          <p style="color: #6b5344; font-size: 15px; line-height: 1.65; margin: 0 0 16px;">
+            Te informamos de que el pedido <strong>${escapeHtml(order.order_number)}</strong> figura como <strong>cancelado</strong> en nuestro sistema.
+            Si procede un reembolso, recibirás un correo aparte cuando el importe se haya tramitado con la pasarela de pago.
+          </p>
+          <p style="color: #6b5344; font-size: 14px; line-height: 1.6; margin: 0;">
+            <a href="${site}/pedidos" style="color: #2d4a3e;">Ver mis pedidos</a>
+            · <a href="mailto:info@inmoalia.com" style="color: #2d4a3e;">info@inmoalia.com</a>
+          </p>
+        </div>
+        <p style="text-align: center; color: #a08c7a; font-size: 12px; margin-top: 20px;">© INMOALIA</p>
+      </div>
+    `,
+  })
+}
+
+export type AbandonedCartReminderParams = {
+  to: string
+  resumeUrl: string
+  productNames: string[]
+}
+
+/** Solo con consentimiento explícito de marketing (checkbox en checkout). */
+export async function sendAbandonedCartReminder({ to, resumeUrl, productNames }: AbandonedCartReminderParams) {
+  if (!isResendConfigured()) return
+
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://inmoalia.com'
+  const preview =
+    escapeHtml(productNames.slice(0, 4).join(', ')) + (productNames.length > 4 ? '…' : '')
+
+  await resend.emails.send({
+    from: `INMOALIA <${FROM}>`,
+    to,
+    subject: 'Has dejado productos en tu carrito — INMOALIA',
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; background: #fdfcfa; padding: 40px 20px;">
+        <div style="text-align: center; margin-bottom: 28px;">
+          <h1 style="font-size: 26px; font-weight: 700; color: #2a2a2a; margin: 0;">INMOALIA</h1>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 28px; border: 1px solid #e8ddd0;">
+          <h2 style="color: #2a2a2a; font-size: 20px; margin: 0 0 12px;">¿Seguimos con tu pedido?</h2>
+          <p style="color: #6b5344; font-size: 15px; line-height: 1.65; margin: 0 0 16px;">
+            Dejaste artículos en el carrito: <strong>${preview || 'varios productos'}</strong>.
+          </p>
+          <p style="color: #6b5344; font-size: 14px; line-height: 1.6; margin: 0 0 22px;">
+            Puedes retomarlo con este enlace (válido mientras conservemos la copia y no completes la compra):
+          </p>
+          <div style="text-align: center;">
+            <a href="${resumeUrl}"
+               style="display: inline-block; background: #2d4a3e; color: white; text-decoration: none; padding: 14px 24px; border-radius: 8px; font-weight: 600; font-size: 15px;">
+              Volver al carrito
+            </a>
+          </div>
+          <p style="color: #a08c7a; font-size: 11px; line-height: 1.55; margin: 24px 0 0;">
+            Recibes este mensaje porque aceptaste un recordatorio de carrito abandonado en el checkout.
+            Ley de información: marketing en base a consentimiento. Puedes dejar de recibir correos dejando de usar esta función o escribiendo a info@inmoalia.com.
+          </p>
+          <p style="color: #6b5344; font-size: 13px; margin: 12px 0 0;">
+            <a href="${site}/privacidad" style="color: #2d4a3e;">Privacidad</a>
           </p>
         </div>
       </div>

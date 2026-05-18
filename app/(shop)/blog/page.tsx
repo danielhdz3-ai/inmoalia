@@ -1,10 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { PenLine } from 'lucide-react'
+import { absoluteUrl } from '@/lib/site'
 
-export const metadata: Metadata = {
-  title: 'Blog de decoración — INMOALIA',
-  description: 'Ideas, tendencias y consejos de decoración para tu hogar y jardín.',
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: 'Blog de decoración — INMOALIA',
+    description: 'Ideas, tendencias y consejos de decoración para tu hogar y jardín.',
+    alternates: { canonical: absoluteUrl('/blog') },
+  }
 }
 
 export default function BlogPage() {

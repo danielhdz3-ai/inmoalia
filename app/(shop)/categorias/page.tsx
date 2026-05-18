@@ -3,10 +3,16 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Category } from '@/lib/supabase/types'
+import { absoluteUrl } from '@/lib/site'
 
-export const metadata: Metadata = {
-  title: 'Todas las categorías — INMOALIA',
-  description: 'Explora todas nuestras categorías: jardín, mesas, sillas, iluminación, decoración, textil y más.',
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: 'Todas las categorías — INMOALIA',
+    description: 'Explora todas nuestras categorías: jardín, mesas, sillas, iluminación, decoración, textil y más.',
+    alternates: {
+      canonical: absoluteUrl('/categorias'),
+    },
+  }
 }
 
 export default async function CategoriasPage() {

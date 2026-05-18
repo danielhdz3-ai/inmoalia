@@ -20,3 +20,10 @@ export function extractSessionData(event: Stripe.Event): Stripe.Checkout.Session
   if (event.type !== 'checkout.session.completed') return null
   return event.data.object as Stripe.Checkout.Session
 }
+
+/** ID del PaymentIntent asociado al cargo (Stripe expande a veces el objeto). */
+export function paymentIntentIdFromCharge(charge: Stripe.Charge): string | null {
+  const pi = charge.payment_intent
+  if (!pi) return null
+  return typeof pi === 'string' ? pi : pi.id
+}

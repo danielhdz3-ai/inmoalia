@@ -10,6 +10,7 @@ const SUPPLIER_PORTAL: Record<string, string> = {
   'aw-dropship': 'https://www.aw-dropship.es',
   dropxl: 'https://www.dropxl.com',
   droppery: 'https://droppery.com',
+  gruposdm: 'https://www.gruposdm.com',
 }
 
 export function resolveSupplierHref(p: ProductLinkFields): string | null {
@@ -26,6 +27,8 @@ export function formatSupplierLabel(supplier: string | null): string {
     'aw-dropship': 'AW Dropship',
     dropxl: 'dropXL',
     droppery: 'Droppery',
+    gruposdm: 'Grupo SDM',
+    'operativas-sniper': 'Grupo SDM',
   }
   return map[supplier] ?? supplier
 }
