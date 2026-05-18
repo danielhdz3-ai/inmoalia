@@ -62,7 +62,7 @@ export function generateGrupoSDMOrderText(order: Order): string {
   text += `📦 PRODUCTOS:\n`
   items.forEach((item, idx) => {
     text += `${idx + 1}. ${item.name}\n`
-    text += `   SKU: ${item.supplier_sku || item.sku || 'N/A'}\n`
+    text += `   SKU: ${item.supplier_sku || 'N/A'}\n`
     text += `   Cantidad: ${item.quantity}\n\n`
   })
 
