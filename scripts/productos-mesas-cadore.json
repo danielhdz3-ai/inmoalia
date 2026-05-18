@@ -1,0 +1,96 @@
+{
+  "productos": [
+    {
+      "nombre": "Mesa de oficina CADORE, vidrio templado super blanco, 180 x 85 cm",
+      "slug": "mesa-oficina-cadore-vidrio-blanco-180x85",
+      "descripcion": "Mesa de oficina moderna con forma bivalente (trabajo y reunión). Sólida estructura de acero inoxidable con acabado pulido brillante. Tapa de vidrio templado de 12 mm de espesor con acabado super blanco. Faldón de chapa de acero perforada con acabado en color blanco. Ideal para despachos profesionales y oficinas ejecutivas.",
+      "precio_venta": 329.00,
+      "precio_compra": 246.75,
+      "sku_inmoalia": "INMO-CADORE-BL-180",
+      "sku_gruposdm": "714.MCAD180BL",
+      "categoria": "mesas-oficina",
+      "subcategoria": "mesas-direccion",
+      "material": "Vidrio templado 12mm, acero inoxidable pulido",
+      "color": "Blanco",
+      "peso_kg": 55.4,
+      "peso_bruto_kg": 61.4,
+      "volumen_m3": 0.229,
+      "dimensiones": {
+        "largo_cm": 180,
+        "fondo_cm": 85,
+        "altura_cm": 75
+      },
+      "stock_estimado": 8,
+      "imagenes": [
+        "https://www.gruposdm.com/3826-large_default/mesa-de-oficina-cadore-vidrio-templado-super-blanco-180-x-85-cms.jpg",
+        "https://www.gruposdm.com/3827-large_default/mesa-de-oficina-cadore-vidrio-templado-super-blanco-180-x-85-cms.jpg",
+        "https://www.gruposdm.com/3828-large_default/mesa-de-oficina-cadore-vidrio-templado-super-blanco-180-x-85-cms.jpg",
+        "https://www.gruposdm.com/3829-large_default/mesa-de-oficina-cadore-vidrio-templado-super-blanco-180-x-85-cms.jpg"
+      ],
+      "tags": ["mesa", "oficina", "vidrio", "blanco", "ejecutiva", "direccion", "moderna", "acero"],
+      "destacado": true,
+      "embalaje": "Jaula de madera, plástico y cartón",
+      "caracteristicas": [
+        "Estructura de acero inoxidable con acabado pulido brillante",
+        "Tapa de vidrio templado de 12 mm de espesor",
+        "Acabado super blanco",
+        "Faldón de chapa de acero perforada",
+        "Forma bivalente (trabajo y reunión)",
+        "Dimensiones: 180 x 85 x 75 cm",
+        "Peso neto: 55,4 kg"
+      ],
+      "meta_title": "Mesa Oficina CADORE Vidrio Blanco 180x85cm | INMOALIA",
+      "meta_description": "Mesa de oficina ejecutiva CADORE con vidrio templado super blanco y estructura de acero inoxidable. 180x85cm. Diseño moderno y elegante. Envío 24-48h."
+    },
+    {
+      "nombre": "Mesa de oficina MAGNA, forma a izquierda, vidrio templado negro, 180 x 85 cm",
+      "slug": "mesa-oficina-magna-vidrio-negro-180x85",
+      "descripcion": "Mesa de oficina con forma bivalente (trabajo y reunión) con forma a izquierda. Estructura de acero inoxidable con acabado pulido y negro. Tapa de vidrio templado de 12 mm de espesor con acabado negro y bordes transparentes. Faldón de chapa de acero perforado con acabado negro. Perfecta para espacios de trabajo modernos y sofisticados.",
+      "precio_venta": 316.00,
+      "precio_compra": 237.75,
+      "sku_inmoalia": "INMO-MAGNA-NE-180",
+      "sku_gruposdm": "714.MMAGF180",
+      "categoria": "mesas-oficina",
+      "subcategoria": "mesas-direccion",
+      "material": "Vidrio templado 12mm, acero inoxidable",
+      "color": "Negro",
+      "peso_kg": 49.2,
+      "peso_bruto_kg": 58.2,
+      "volumen_m3": 0.255,
+      "dimensiones": {
+        "largo_cm": 180,
+        "fondo_cm": 85,
+        "altura_cm": 75
+      },
+      "stock_estimado": 6,
+      "imagenes": [
+        "https://www.gruposdm.com/3824-large_default/mesa-de-oficina-magna-forma-a-izquierda-vidrio-templado-negro-180-x-85-cms.jpg",
+        "https://www.gruposdm.com/3825-large_default/mesa-de-oficina-magna-forma-a-izquierda-vidrio-templado-negro-180-x-85-cms.jpg",
+        "https://www.gruposdm.com/3823-large_default/mesa-de-oficina-magna-forma-a-izquierda-vidrio-templado-negro-180-x-85-cms.jpg"
+      ],
+      "tags": ["mesa", "oficina", "vidrio", "negro", "ejecutiva", "direccion", "moderna", "forma-izquierda"],
+      "destacado": true,
+      "embalaje": "Jaula de madera, plástico y cartón",
+      "caracteristicas": [
+        "Forma bivalente (trabajo y reunión) con forma a izquierda",
+        "Estructura de acero inoxidable pulido y negro",
+        "Tapa de vidrio templado de 12 mm de espesor",
+        "Acabado negro con bordes transparentes",
+        "Faldón de chapa de acero perforado negro",
+        "Dimensiones: 180 x 85 x 75 cm",
+        "Peso neto: 49,2 kg"
+      ],
+      "meta_title": "Mesa Oficina MAGNA Vidrio Negro 180x85cm Forma Izquierda | INMOALIA",
+      "meta_description": "Mesa de oficina ejecutiva MAGNA con vidrio templado negro y estructura de acero. Forma a izquierda. 180x85cm. Diseño elegante. Envío 24-48h."
+    }
+  ],
+  "_notas": {
+    "fecha_creacion": "2026-05-18",
+    "proveedor": "Grupo SDM",
+    "descuento_aplicado": "25% sobre PVP original (329€ → 246,75€ y 316€ → 237,75€)",
+    "margen_sugerido": "~33% sobre precio compra",
+    "stock": "Verificado en web Grupo SDM - 8 unidades blanca disponibles",
+    "imagenes": "URLs de Grupo SDM - verificar permiso de uso o descargar y resubir a Supabase Storage",
+    "importante": "Estos productos son de alta gama. Verificar precios finales con Grupo SDM antes de publicar."
+  }
+}

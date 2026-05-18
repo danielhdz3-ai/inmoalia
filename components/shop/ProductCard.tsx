@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { ShoppingCart, Heart } from 'lucide-react'
+import { ShoppingCart, Heart, ChevronLeft, ChevronRight, Info } from 'lucide-react'
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -21,9 +21,13 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, priority = false, hideFavoriteButton = false }: ProductCardProps) {
   const [imageIndex, setImageIndex] = useState(0)
+  const [showDetails, setShowDetails] = useState(false)
   const addItem = useCartStore((s) => s.addItem)
   const toggleFavorite = useFavoritesStore((s) => s.toggleItem)
   const isFavorite = useFavoritesStore((s) => s.isFavorite(product.id))
+
+  const images = product.images.filter(Boolean)
+  const hasMultipleImages = images.length > 1
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -40,9 +44,27 @@ export default function ProductCard({ product, priority = false, hideFavoriteBut
     })
   }
 
+  const nextImage = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setImageIndex((prev) => (prev + 1) % images.length)
+  }
+
+  const prevImage = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setImageIndex((prev) => (prev - 1 + images.length) % images.length)
+  }
+
   const hasDiscount = product.cost_price && product.cost_price > product.price
   const discountPct = hasDiscount
     ? Math.round(((product.cost_price! - product.price) / product.cost_price!) * 100)
+    : null
+
+  // Extraer dimensiones del JSON si existen
+  const dimensions = product.dimensions as any
+  const dimensionText = dimensions?.largo_cm 
+    ? `${dimensions.largo_cm}×${dimensions.fondo_cm}×${dimensions.altura_cm} cm`
     : null
 
   return (
@@ -51,17 +73,78 @@ export default function ProductCard({ product, priority = false, hideFavoriteBut
         {/* Image */}
         <div
           className="relative aspect-square overflow-hidden"
-          onMouseEnter={() => product.images[1] && setImageIndex(1)}
-          onMouseLeave={() => setImageIndex(0)}
+          onMouseEnter={() => setShowDetails(true)}
+          onMouseLeave={() => setShowDetails(false)}
         >
           <Image
-            src={product.images[imageIndex] ?? product.images[0] ?? ''}
+            src={images[imageIndex] ?? images[0] ?? ''}
             alt={product.name}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             priority={priority}
           />
+
+          {/* Image navigation */}
+          {hasMultipleImages && showDetails && (
+            <>
+              <button
+                type="button"
+                onClick={prevImage}
+                className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-md transition-all duration-200 z-10"
+                aria-label="Imagen anterior"
+              >
+                <ChevronLeft className="w-4 h-4 text-[#2a2a2a]" />
+              </button>
+              <button
+                type="button"
+                onClick={nextImage}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-md transition-all duration-200 z-10"
+                aria-label="Siguiente imagen"
+              >
+                <ChevronRight className="w-4 h-4 text-[#2a2a2a]" />
+              </button>
+
+              {/* Image indicators */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                {images.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setImageIndex(idx)
+                    }}
+                    className={cn(
+                      'w-1.5 h-1.5 rounded-full transition-all duration-200',
+                      idx === imageIndex ? 'bg-white w-4' : 'bg-white/50 hover:bg-white/75'
+                    )}
+                    aria-label={`Ver imagen ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Details overlay */}
+          {showDetails && (product.description || dimensionText) && (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end p-4 transition-opacity duration-300">
+              <div className="text-white space-y-1">
+                {dimensionText && (
+                  <p className="text-xs font-medium flex items-center gap-1">
+                    <Info className="w-3 h-3" />
+                    {dimensionText}
+                  </p>
+                )}
+                {product.description && (
+                  <p className="text-xs line-clamp-2 opacity-90">
+                    {product.description}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
