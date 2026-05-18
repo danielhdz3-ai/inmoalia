@@ -31,6 +31,10 @@ const nextConfig: NextConfig = {
       /* Fotos catálogo Grupo SDM (VENETTO y otros). */
       {
         protocol: "https",
+        hostname: "*.gruposdm.com",
+      },
+      {
+        protocol: "https",
         hostname: "gruposdm.com",
       },
     ],
