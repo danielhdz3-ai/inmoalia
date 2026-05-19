@@ -252,7 +252,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
               <>
                 <CheckCircle className="w-4 h-4 text-[#27ae60]" />
                 <span className="text-sm text-[#27ae60] font-medium">
-                  {product.stock > 10 ? 'En stock' : `Solo quedan ${product.stock} unidades`}
+                  En stock ({product.stock} {product.stock === 1 ? 'unidad' : 'unidades'})
                 </span>
               </>
             ) : (
