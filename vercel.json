@@ -3,6 +3,20 @@
   "buildCommand": "pnpm build",
   "installCommand": "pnpm install",
   "regions": ["cdg1"],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "inmoalia.com"
+        }
+      ],
+      "destination": "https://www.inmoalia.com/:path*",
+      "permanent": true,
+      "statusCode": 301
+    }
+  ],
   "crons": [
     {
       "path": "/api/cron/abandoned-cart",
