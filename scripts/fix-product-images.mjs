@@ -20,11 +20,10 @@ const supabase = createClient(
 const correctImages = {
   'mesa-oficina-cadore-vidrio-blanco-180x85': {
     // SKU: 714.MCAD180BL
-    // Estas URLs necesitan ser verificadas manualmente del sitio
+    // URLs CORRECTAS verificadas de la página oficial (36545, 36546)
     images: [
-      'https://gruposdm.com/3826-large_default/mesa-de-oficina-cadore-vidrio-templado-super-blanco-180-x-85-cms.jpg',
-      'https://gruposdm.com/3827-large_default/mesa-de-oficina-cadore-vidrio-templado-super-blanco-180-x-85-cms.jpg',
-      'https://gruposdm.com/3828-large_default/mesa-de-oficina-cadore-vidrio-templado-super-blanco-180-x-85-cms.jpg'
+      'https://gruposdm.com/36545-large_default/mesa-de-oficina-cadore-vidrio-templado-super-blanco-180-x-85-cms.jpg',
+      'https://gruposdm.com/36546-large_default/mesa-de-oficina-cadore-vidrio-templado-super-blanco-180-x-85-cms.jpg'
     ]
   },
   'mesa-oficina-magna-vidrio-negro-180x85': {
