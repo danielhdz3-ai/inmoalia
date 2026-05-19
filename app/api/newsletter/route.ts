@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+let resendInstance: Resend | null = null
+
+function getResendInstance(): Resend {
+  if (!resendInstance) {
+    resendInstance = new Resend(process.env.RESEND_API_KEY || '')
+  }
+  return resendInstance
+}
+
 const FROM = process.env.RESEND_FROM_EMAIL || 'info@inmoalia.com'
 
 export async function POST(req: NextRequest) {
@@ -21,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     // Si hay audience configurada, añadir como contacto
     if (audienceId) {
-      await resend.contacts.create({
+      await getResendInstance().contacts.create({
         email,
         audienceId,
         unsubscribed: false,
@@ -29,7 +37,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Enviar email de bienvenida al suscriptor
-    await resend.emails.send({
+    await getResendInstance().emails.send({
       from: `INMOALIA <${FROM}>`,
       to: email,
       subject: '¡Bienvenido a INMOALIA! Ya eres parte de nuestra comunidad',
@@ -79,3 +87,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Error al suscribirse' }, { status: 500 })
   }
 }
+

@@ -2,7 +2,15 @@ import { Resend } from 'resend'
 import type { Order, OrderItem, ShippingAddress } from '@/lib/supabase/types'
 import { isResendConfigured } from '@/lib/resend/config'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+let resendInstance: Resend | null = null
+
+function getResendInstance(): Resend {
+  if (!resendInstance) {
+    resendInstance = new Resend(process.env.RESEND_API_KEY || '')
+  }
+  return resendInstance
+}
+
 const FROM = process.env.RESEND_FROM_EMAIL || 'info@inmoalia.com'
 
 /** Recuperación de contraseña: plantilla y envío vía Supabase Auth (no Resend salvo que lo personalicéis en el panel de Supabase). */
@@ -23,7 +31,7 @@ export async function sendWelcomeAccountEmail({ to, name }: WelcomeAccountParams
   const firstName = name.trim() || 'Cliente'
 
   try {
-    const result = await resend.emails.send({
+    const result = await getResendInstance().emails.send({
       from: `INMOALIA <${FROM}>`,
       to,
       subject: 'Bienvenido a INMOALIA — tu cuenta ya está activa',
@@ -78,7 +86,7 @@ export async function sendOrderConfirmation(order: Order) {
     )
     .join('\n')
 
-  await resend.emails.send({
+  await getResendInstance().emails.send({
     from: `INMOALIA <${FROM}>`,
     to: order.customer_email,
     subject: `Pedido confirmado #${order.order_number} — INMOALIA`,
@@ -169,7 +177,7 @@ export async function sendShippingNotification(
   const address = order.shipping_address as unknown as ShippingAddress
   const site = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://inmoalia.com'
 
-  await resend.emails.send({
+  await getResendInstance().emails.send({
     from: `INMOALIA <${FROM}>`,
     to: order.customer_email,
     subject: `Tu pedido #${order.order_number} está en camino 🚚`,
@@ -225,7 +233,7 @@ export async function sendOrderRefundNotice(order: Order, refundedAmountEUR: num
     ? 'Reembolso completado'
     : 'Actualización sobre tu reembolso'
 
-  await resend.emails.send({
+  await getResendInstance().emails.send({
     from: `INMOALIA <${FROM}>`,
     to: order.customer_email,
     subject: isFullRefund
@@ -267,7 +275,7 @@ export async function sendOrderCancelledNotice(order: Order) {
   const address = order.shipping_address as unknown as ShippingAddress
   const who = escapeHtml(address.full_name?.trim() || order.customer_email)
 
-  await resend.emails.send({
+  await getResendInstance().emails.send({
     from: `INMOALIA <${FROM}>`,
     to: order.customer_email,
     subject: `Pedido cancelado — ${order.order_number}`,
@@ -310,7 +318,7 @@ export async function sendAbandonedCartReminder({ to, resumeUrl, productNames }:
   const preview =
     escapeHtml(productNames.slice(0, 4).join(', ')) + (productNames.length > 4 ? '…' : '')
 
-  await resend.emails.send({
+  await getResendInstance().emails.send({
     from: `INMOALIA <${FROM}>`,
     to,
     subject: 'Has dejado productos en tu carrito — INMOALIA',
@@ -352,3 +360,4 @@ function formatPrice(amount: number): string {
     currency: 'EUR',
   }).format(amount)
 }
+
