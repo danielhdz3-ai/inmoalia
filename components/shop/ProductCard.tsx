@@ -141,7 +141,7 @@ export default function ProductCard({ product, priority = false, hideFavoriteBut
                   {product.stock > 0 ? (
                     <span className="bg-green-500/80 backdrop-blur-sm px-2 py-0.5 rounded flex items-center gap-1">
                       <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
-                      {product.stock > 20 ? 'En stock' : `${product.stock} disponibles`}
+                      En stock ({product.stock})
                     </span>
                   ) : (
                     <span className="bg-red-500/80 backdrop-blur-sm px-2 py-0.5 rounded">
