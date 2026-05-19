@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { useCart } from '@/hooks/useCart'
 import { getShippingCostEuros } from '@/lib/shop/shipping'
 import { formatPrice } from '@/lib/utils'
-import { Lock, Loader2, Tag, X, CheckCircle } from 'lucide-react'
+import { Lock, Loader2, Tag, X, CheckCircle, Truck, Clock, Shield } from 'lucide-react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import type { Customer } from '@/lib/supabase/types'
@@ -453,7 +453,82 @@ export default function CheckoutPage() {
         </form>
 
         {/* Order summary */}
-        <div>
+        <div className="space-y-6">
+          {/* Información de envíos */}
+          <div className="bg-gradient-to-br from-[#2d4a3e]/5 to-[#2d4a3e]/10 border border-[#2d4a3e]/20 rounded-2xl p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Truck className="w-5 h-5 text-[#2d4a3e]" />
+              <h3 className="text-base font-semibold text-[#2a2a2a]">Información de envío</h3>
+            </div>
+
+            {/* Tabla de costos */}
+            <div className="bg-white rounded-xl p-4 mb-4">
+              <p className="text-xs font-medium text-[#2a2a2a] mb-3">Costos de envío según importe del pedido:</p>
+              <div className="space-y-2">
+                {[
+                  { range: 'Hasta 60€', cost: '22€' },
+                  { range: '60€ - 120€', cost: '28€' },
+                  { range: '120€ - 190€', cost: '33€' },
+                  { range: '190€ - 300€', cost: '39€' },
+                  { range: '300€ - 400€', cost: '45€' },
+                  { range: '400€ - 500€', cost: '49€' },
+                  { range: '500€ - 599€', cost: '59€' },
+                ].map(({ range, cost }) => {
+                  const isCurrentRange = 
+                    (range === 'Hasta 60€' && discountedSubtotal <= 60) ||
+                    (range === '60€ - 120€' && discountedSubtotal > 60 && discountedSubtotal <= 120) ||
+                    (range === '120€ - 190€' && discountedSubtotal > 120 && discountedSubtotal <= 190) ||
+                    (range === '190€ - 300€' && discountedSubtotal > 190 && discountedSubtotal <= 300) ||
+                    (range === '300€ - 400€' && discountedSubtotal > 300 && discountedSubtotal <= 400) ||
+                    (range === '400€ - 500€' && discountedSubtotal > 400 && discountedSubtotal <= 500) ||
+                    (range === '500€ - 599€' && discountedSubtotal > 500 && discountedSubtotal < 600)
+                  
+                  return (
+                    <div 
+                      key={range} 
+                      className={`flex justify-between text-xs py-1.5 px-2 rounded ${
+                        isCurrentRange ? 'bg-[#2d4a3e]/10 font-medium text-[#2d4a3e]' : 'text-[#6b5344]'
+                      }`}
+                    >
+                      <span>{range}</span>
+                      <span>{cost}</span>
+                    </div>
+                  )
+                })}
+                <div className="flex justify-between text-sm py-2 px-2 rounded bg-gradient-to-r from-[#27ae60]/10 to-[#27ae60]/5 border border-[#27ae60]/20 font-bold text-[#27ae60]">
+                  <span>600€ o más</span>
+                  <span className="flex items-center gap-1">
+                    ✨ GRATIS
+                  </span>
+                </div>
+              </div>
+              {discountedSubtotal < 600 && (
+                <p className="text-xs text-[#a08c7a] mt-3 text-center">
+                  ¡Solo te faltan {formatPrice(600 - discountedSubtotal)} para envío gratis! 🎉
+                </p>
+              )}
+            </div>
+
+            {/* Detalles de entrega */}
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <Clock className="w-4 h-4 text-[#2d4a3e] mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs font-medium text-[#2a2a2a]">Tiempo de entrega</p>
+                  <p className="text-xs text-[#6b5344]">5-7 días laborables a toda España</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Shield className="w-4 h-4 text-[#2d4a3e] mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs font-medium text-[#2a2a2a]">Transportista certificado</p>
+                  <p className="text-xs text-[#6b5344]">Empresa nacional con seguimiento incluido</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Resumen del pedido */}
           <div className="bg-[#f9f6f1] border border-[#e8ddd0] rounded-2xl p-6">
             <h2 className="text-lg font-semibold text-[#2a2a2a] mb-5">Resumen del pedido</h2>
 
