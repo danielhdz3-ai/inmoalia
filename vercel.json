@@ -13,8 +13,7 @@
         }
       ],
       "destination": "https://www.inmoalia.com/:path*",
-      "permanent": true,
-      "statusCode": 301
+      "permanent": true
     }
   ],
   "crons": [
