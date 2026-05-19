@@ -39,6 +39,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [imageZoom, setImageZoom] = useState({ x: 0, y: 0, isZooming: false })
   const addItem = useCartStore((s) => s.addItem)
   const toggleFavorite = useFavoritesStore((s) => s.toggleItem)
   const isWishlisted = useFavoritesStore((s) => s.isFavorite(product.id))
@@ -141,6 +142,17 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
     ? Math.round(((product.cost_price! - product.price) / product.cost_price!) * 100)
     : null
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width) * 100
+    const y = ((e.clientY - rect.top) / rect.height) * 100
+    setImageZoom({ x, y, isZooming: true })
+  }
+
+  const handleMouseLeave = () => {
+    setImageZoom({ x: 0, y: 0, isZooming: false })
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10">
       {/* Breadcrumb */}
@@ -159,10 +171,13 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16">
         {/* Images */}
         <div className="space-y-3">
-          <button
-            type="button"
+          <div
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
             onClick={() => activeImageSrc && setLightboxOpen(true)}
-            className="relative w-full aspect-square rounded-2xl overflow-hidden bg-[#f9f6f1] border border-[#e8ddd0] text-left outline-none cursor-zoom-in ring-offset-2 focus-visible:ring-2 focus-visible:ring-[#2d4a3e] transition-all duration-200 hover:border-[#a08c7a]"
+            className="relative w-full aspect-square rounded-2xl overflow-hidden bg-[#f9f6f1] border border-[#e8ddd0] cursor-zoom-in ring-offset-2 focus-visible:ring-2 focus-visible:ring-[#2d4a3e] transition-all duration-200 hover:border-[#a08c7a]"
+            role="button"
+            tabIndex={0}
             aria-label="Ver imagen a pantalla completa"
           >
             {activeImageSrc ? (
@@ -170,7 +185,11 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
                 src={activeImageSrc}
                 alt={product.name}
                 fill
-                className="object-cover"
+                className="object-cover transition-transform duration-200 ease-out"
+                style={{
+                  transform: imageZoom.isZooming ? 'scale(2)' : 'scale(1)',
+                  transformOrigin: `${imageZoom.x}% ${imageZoom.y}%`,
+                }}
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 priority
               />
@@ -189,7 +208,7 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
               <Maximize2 className="w-3.5 h-3.5" aria-hidden />
               Pantalla completa
             </span>
-          </button>
+          </div>
 
           {product.images.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-1">
