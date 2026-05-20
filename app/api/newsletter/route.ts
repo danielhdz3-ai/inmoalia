@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
             </p>
 
             <div style="text-align: left; margin-bottom: 28px;">
-              ${['Nuevas colecciones y productos antes que nadie', 'Ofertas y descuentos exclusivos para suscriptores', 'Inspiración y consejos de decoración', 'Liquidaciones y acceso prioritario al outlet'].map(item => `
+              ${['Nuevas colecciones y productos antes que nadie', 'Ofertas y descuentos exclusivos para suscriptores', 'Inspiración y consejos de decoración', 'Liquidaciones y acceso prioritario a ofertas'].map(item => `
                 <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
                   <span style="color: #2d4a3e; font-size: 16px; margin-top: 2px;">◆</span>
                   <span style="color: #6b5344; font-size: 14px; line-height: 1.5;">${item}</span>

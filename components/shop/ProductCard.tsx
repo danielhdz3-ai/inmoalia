@@ -10,6 +10,7 @@ import { useCartStore } from '@/store/cart'
 import { useFavoritesStore } from '@/store/favorites'
 import { formatPrice } from '@/lib/utils'
 import { cn } from '@/lib/utils'
+import { getDiscountPercent, getListPrice } from '@/lib/shop/product-pricing'
 import type { Product } from '@/lib/supabase/types'
 
 interface ProductCardProps {
@@ -56,10 +57,8 @@ export default function ProductCard({ product, priority = false, hideFavoriteBut
     setImageIndex((prev) => (prev - 1 + images.length) % images.length)
   }
 
-  const hasDiscount = product.cost_price && product.cost_price > product.price
-  const discountPct = hasDiscount
-    ? Math.round(((product.cost_price! - product.price) / product.cost_price!) * 100)
-    : null
+  const listPrice = getListPrice(product)
+  const discountPct = getDiscountPercent(product)
 
   // Extraer dimensiones del JSON si existen
   const dimensions = product.dimensions as any
@@ -131,6 +130,9 @@ export default function ProductCard({ product, priority = false, hideFavoriteBut
 
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+            {product.category === 'ofertas' && (
+              <Badge variant="sale" className="text-[10px] py-0.5">Oferta</Badge>
+            )}
             {product.is_featured && (
               <Badge variant="gold" className="text-[10px] py-0.5">Destacado</Badge>
             )}
@@ -196,9 +198,9 @@ export default function ProductCard({ product, priority = false, hideFavoriteBut
               <span className="text-base font-bold text-[#2a2a2a]">
                 {formatPrice(product.price)}
               </span>
-              {hasDiscount && (
+              {listPrice != null && (
                 <span className="text-xs text-[#a08c7a] line-through">
-                  {formatPrice(product.cost_price!)}
+                  {formatPrice(listPrice)}
                 </span>
               )}
             </div>

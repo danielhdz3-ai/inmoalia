@@ -12,19 +12,19 @@ export const CATEGORY_META: Record<string, CategoryEntry> = {
   sillas: { name: 'Sillas y Butacas', description: 'Sillas de comedor, butacas y taburetes para cada estancia.' },
   iluminacion: { name: 'Iluminación', description: 'Lámparas de pie, apliques y colgantes para crear la atmósfera perfecta.' },
   textil: { name: 'Textil Hogar', description: 'Cojines, alfombras, mantas y cortinas de materiales naturales premium.' },
-  muebles: { name: 'Muebles', description: 'Sofás, estanterías y muebles para completar tu hogar.' },
-  outlet: { name: 'Outlet', description: 'Las mejores ofertas de nuestra selección con descuentos especiales.' },
+  muebles: { name: 'Muebles', description: 'Sofás, muebles de salón y piezas para completar tu hogar.' },
+  ofertas: { name: 'Ofertas', description: 'Las mejores ofertas de nuestra selección con descuentos especiales.' },
   'sofas-butacas': {
     name: 'Sofás y Butacas',
     description: 'Sofás, butacas y sillones para el salón y zonas de descanso.',
     parent: 'muebles',
     dbSubcategory: 'Sofás y butacas',
   },
-  estanterias: {
-    name: 'Estanterías',
-    description: 'Estanterías, librerías y módulos de almacenaje para el hogar.',
+  salon: {
+    name: 'Salón',
+    description: 'Muebles de TV, mesas bajas y complementos para el salón con acabados premium.',
     parent: 'muebles',
-    dbSubcategory: 'Estanterías',
+    dbSubcategory: 'Salón',
   },
   'conjuntos-exterior': {
     name: 'Conjuntos Exterior',

@@ -5,6 +5,26 @@
   "regions": ["cdg1"],
   "redirects": [
     {
+      "source": "/categorias/estanterias",
+      "destination": "/categorias/salon",
+      "permanent": true
+    },
+    {
+      "source": "/categorias/estanterias/:path*",
+      "destination": "/categorias/salon/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/categorias/outlet",
+      "destination": "/categorias/ofertas",
+      "permanent": true
+    },
+    {
+      "source": "/categorias/outlet/:path*",
+      "destination": "/categorias/ofertas/:path*",
+      "permanent": true
+    },
+    {
       "source": "/:path*",
       "has": [
         {

@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { revalidatePath } from 'next/cache'
-import { Package, ChevronLeft, Eye, EyeOff, ExternalLink, Pencil, Plus } from 'lucide-react'
+import { Package, ChevronLeft, Eye, EyeOff, ExternalLink, Pencil, Plus, Tag } from 'lucide-react'
 import { formatPrice, formatDate } from '@/lib/utils'
+import { getDiscountPercent } from '@/lib/shop/product-pricing'
 import type { Product } from '@/lib/supabase/types'
 import { assertAdmin } from '@/lib/admin/assert-admin'
 
@@ -26,9 +27,45 @@ async function toggleProductActive(formData: FormData) {
   revalidatePath('/admin/inventario')
 }
 
+async function toggleProductOfertas(formData: FormData) {
+  'use server'
+  await assertAdmin()
+  const id = formData.get('id') as string
+  const category = formData.get('category') as string
+  const tagsRaw = formData.get('tags') as string
+  const tags = tagsRaw ? (JSON.parse(tagsRaw) as string[]) : []
+
+  const supabase = createAdminClient()
+  const isOfertas = category === 'ofertas'
+
+  if (isOfertas) {
+    const prevTag = tags.find((t) => t.startsWith('prev_cat:'))
+    const restoreCategory = prevTag?.replace('prev_cat:', '') || 'sillas'
+    const newTags = tags.filter((t) => !t.startsWith('prev_cat:'))
+    await supabase.from('products').update({ category: restoreCategory, tags: newTags }).eq('id', id)
+  } else {
+    const newTags = [...tags.filter((t) => !t.startsWith('prev_cat:')), `prev_cat:${category}`]
+    const { data: row } = await supabase.from('products').select('price, tags').eq('id', id).single()
+    const price = Number((row as { price: number } | null)?.price ?? 0)
+    const rowTags = (row as { tags: string[] } | null)?.tags ?? []
+    const hasPvpRef = rowTags.some((t) => t.startsWith('pvp_ref:'))
+    const update: Record<string, unknown> = { category: 'ofertas', tags: newTags }
+    if (!hasPvpRef && price > 0) {
+      const ref = Math.round(price * 1.18 * 100) / 100
+      update.tags = [...newTags.filter((t) => !t.startsWith('pvp_ref:')), `pvp_ref:${ref}`]
+    }
+    await supabase.from('products').update(update).eq('id', id)
+  }
+
+  revalidatePath('/admin/productos')
+  revalidatePath('/admin/inventario')
+  revalidatePath('/categorias/ofertas')
+  revalidatePath('/productos')
+}
+
 const STATUS_MAP: Record<string, string> = {
   jardin: 'Jardín', mesas: 'Mesas', sillas: 'Sillas', iluminacion: 'Iluminación',
-  decoracion: 'Decoración', textil: 'Textil', muebles: 'Muebles', outlet: 'Outlet',
+  decoracion: 'Decoración', textil: 'Textil', muebles: 'Muebles', ofertas: 'Ofertas',
 }
 
 export default async function AdminProductosPage() {
@@ -108,6 +145,7 @@ export default async function AdminProductosPage() {
                   <th className="text-left px-6 py-3 font-medium text-[#a08c7a]">Producto</th>
                   <th className="text-left px-4 py-3 font-medium text-[#a08c7a] hidden md:table-cell">Categoría</th>
                   <th className="text-right px-4 py-3 font-medium text-[#a08c7a]">Precio</th>
+                  <th className="text-center px-4 py-3 font-medium text-[#a08c7a] hidden md:table-cell">Descuento</th>
                   <th className="text-right px-4 py-3 font-medium text-[#a08c7a] hidden sm:table-cell">Stock</th>
                   <th className="text-left px-4 py-3 font-medium text-[#a08c7a] hidden lg:table-cell">Actualizado</th>
                   <th className="text-center px-4 py-3 font-medium text-[#a08c7a]">Estado</th>
@@ -115,7 +153,10 @@ export default async function AdminProductosPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#e8ddd0]">
-                {products.map((product) => (
+                {products.map((product) => {
+                  const discountPct = getDiscountPercent(product)
+                  const isOfertas = product.category === 'ofertas'
+                  return (
                   <tr key={product.id} className={`hover:bg-[#f9f6f1] transition-colors ${!product.is_active ? 'opacity-60' : ''}`}>
                     <td className="px-6 py-3">
                       <div className="flex items-center gap-3">
@@ -139,6 +180,16 @@ export default async function AdminProductosPage() {
                     </td>
                     <td className="px-4 py-3 text-right font-semibold text-[#2a2a2a]">
                       {formatPrice(product.price)}
+                    </td>
+                    <td className="px-4 py-3 text-center hidden md:table-cell">
+                      {discountPct ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#c0392b]">
+                          <span aria-hidden>·</span>
+                          -{discountPct}%
+                        </span>
+                      ) : (
+                        <span className="text-xs text-[#e8ddd0]">—</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-right hidden sm:table-cell">
                       <span className={`font-medium ${product.stock === 0 ? 'text-[#c0392b]' : product.stock < 5 ? 'text-[#c9a84c]' : 'text-[#27ae60]'}`}>
@@ -175,6 +226,22 @@ export default async function AdminProductosPage() {
                         >
                           <Pencil className="w-4 h-4" />
                         </Link>
+                        <form action={toggleProductOfertas}>
+                          <input type="hidden" name="id" value={product.id} />
+                          <input type="hidden" name="category" value={product.category} />
+                          <input type="hidden" name="tags" value={JSON.stringify(product.tags ?? [])} />
+                          <button
+                            type="submit"
+                            title={isOfertas ? 'Quitar de ofertas' : 'Añadir a ofertas'}
+                            className={`p-0.5 rounded transition-colors ${
+                              isOfertas
+                                ? 'text-[#c9a84c] hover:text-[#a88a3a]'
+                                : 'text-[#a08c7a] hover:text-[#2d4a3e]'
+                            }`}
+                          >
+                            <Tag className="w-4 h-4" />
+                          </button>
+                        </form>
                         <Link
                           href={`/productos/${product.slug}`}
                           target="_blank"
@@ -186,7 +253,8 @@ export default async function AdminProductosPage() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  )
+                })}
               </tbody>
             </table>
           </div>

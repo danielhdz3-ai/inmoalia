@@ -25,6 +25,7 @@ import { useCartStore } from '@/store/cart'
 import { useFavoritesStore } from '@/store/favorites'
 import { formatPrice } from '@/lib/utils'
 import { toastOk, toastErr } from '@/lib/toast-client'
+import { getDiscountAmount, getDiscountPercent, getListPrice } from '@/lib/shop/product-pricing'
 import type { Product } from '@/lib/supabase/types'
 import ProductCard from './ProductCard'
 import WaitlistForm from './WaitlistForm'
@@ -137,10 +138,9 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
     setTimeout(() => setAdded(false), 2000)
   }
 
-  const hasDiscount = product.cost_price && product.cost_price > product.price
-  const discountPct = hasDiscount
-    ? Math.round(((product.cost_price! - product.price) / product.cost_price!) * 100)
-    : null
+  const listPrice = getListPrice(product)
+  const discountPct = getDiscountPercent(product)
+  const discountAmount = getDiscountAmount(product)
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
@@ -255,12 +255,14 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
             <span className="text-3xl font-bold text-[#2a2a2a]">
               {formatPrice(product.price)}
             </span>
-            {hasDiscount && (
+            {listPrice != null && discountAmount != null && (
               <>
                 <span className="text-lg text-[#a08c7a] line-through">
-                  {formatPrice(product.cost_price!)}
+                  {formatPrice(listPrice)}
                 </span>
-                <Badge variant="sale">Ahorras {formatPrice(product.cost_price! - product.price)}</Badge>
+                <Badge variant="sale">
+                  {discountPct != null ? `-${discountPct}%` : `Ahorras ${formatPrice(discountAmount)}`}
+                </Badge>
               </>
             )}
           </div>

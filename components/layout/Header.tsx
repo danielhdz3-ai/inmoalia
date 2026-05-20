@@ -16,7 +16,7 @@ const NAV_LINKS = [
       { label: 'Mesas', href: '/categorias/mesas' },
       { label: 'Sillas', href: '/categorias/sillas' },
       { label: 'Sofás y butacas', href: '/categorias/sofas-butacas' },
-      { label: 'Estanterías', href: '/categorias/estanterias' },
+      { label: 'Salón', href: '/categorias/salon' },
     ],
   },
   {
@@ -34,8 +34,8 @@ const NAV_LINKS = [
     href: '/categorias/iluminacion',
   },
   {
-    label: 'Outlet',
-    href: '/categorias/outlet',
+    label: 'Ofertas',
+    href: '/categorias/ofertas',
   },
 ]
 

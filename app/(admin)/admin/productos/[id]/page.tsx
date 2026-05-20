@@ -33,6 +33,13 @@ function parseOptionalFloat(formData: FormData, key: string): number | null {
   return Number.isFinite(n) ? n : null
 }
 
+function pvpRefDefault(product: Product | null): string {
+  if (!product) return ''
+  if (product.compare_at_price != null) return String(product.compare_at_price)
+  const tag = product.tags?.find((t) => t.startsWith('pvp_ref:'))
+  return tag ? tag.replace('pvp_ref:', '') : ''
+}
+
 function dimField(product: Product | null, key: 'width' | 'height' | 'depth'): string {
   if (!product?.dimensions || typeof product.dimensions !== 'object') return ''
   const v = (product.dimensions as Record<string, unknown>)[key]
@@ -57,6 +64,14 @@ async function saveProduct(formData: FormData) {
     dimW != null && dimH != null && dimD != null
       ? ({ width: dimW, height: dimH, depth: dimD })
       : null
+
+  const compareAt = parseOptionalFloat(formData, 'compare_at_price')
+  let tags = (formData.get('tags') as string)
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean)
+    .filter((t) => !t.startsWith('pvp_ref:'))
+  if (compareAt != null) tags.push(`pvp_ref:${compareAt}`)
 
   const data = {
     name,
@@ -83,10 +98,7 @@ async function saveProduct(formData: FormData) {
       .split('\n')
       .map((u) => u.trim())
       .filter(Boolean),
-    tags: (formData.get('tags') as string)
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean),
+    tags,
   }
 
   if (isNew) {
@@ -104,7 +116,7 @@ async function saveProduct(formData: FormData) {
   redirect('/admin/productos')
 }
 
-const CATEGORIES = ['jardin', 'mesas', 'sillas', 'iluminacion', 'decoracion', 'textil', 'muebles', 'outlet']
+const CATEGORIES = ['jardin', 'mesas', 'sillas', 'iluminacion', 'decoracion', 'textil', 'muebles', 'ofertas']
 
 export default async function EditProductPage({ params }: Props) {
   const { id } = await params
@@ -162,11 +174,13 @@ export default async function EditProductPage({ params }: Props) {
         {/* Precio y stock */}
         <section className="bg-white rounded-2xl border border-[#e8ddd0] p-6 space-y-5">
           <h2 className="font-semibold text-[#2a2a2a] text-sm uppercase tracking-wide">Precio y stock</h2>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <Field label="Precio venta (€) *" name="price" type="number" step="0.01" defaultValue={String(product?.price ?? '')} required />
+            <Field label="PVP referencia (€)" name="compare_at_price" type="number" step="0.01" defaultValue={pvpRefDefault(product)} />
             <Field label="Coste proveedor (€)" name="cost_price" type="number" step="0.01" defaultValue={product?.cost_price != null ? String(product.cost_price) : ''} />
             <Field label="Stock" name="stock" type="number" defaultValue={String(product?.stock ?? 0)} />
           </div>
+          <p className="text-[11px] text-[#a08c7a] -mt-2">PVP referencia: precio tachado y % de descuento en ofertas (no afecta al coste proveedor).</p>
           <Field label="Peso (kg)" name="weight_kg" type="number" step="0.01" defaultValue={product?.weight_kg != null ? String(product.weight_kg) : ''} />
 
           <p className="text-xs font-medium text-[#6b5344]">Dimensiones paquete (cm)</p>

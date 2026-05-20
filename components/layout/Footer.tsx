@@ -6,7 +6,7 @@ const FOOTER_LINKS = {
   'Tienda': [
     { label: 'Novedades', href: '/productos?sort=newest' },
     { label: 'Más vendidos', href: '/productos?sort=popular' },
-    { label: 'Outlet', href: '/categorias/outlet' },
+    { label: 'Ofertas', href: '/categorias/ofertas' },
     { label: 'Todas las categorías', href: '/categorias' },
   ],
   'Atención al cliente': [

@@ -68,6 +68,7 @@ export interface Product {
   description: string | null
   price: number
   cost_price: number | null
+  compare_at_price: number | null
   images: string[]
   category: string
   subcategory: string | null
