@@ -13,7 +13,6 @@ const CATEGORIES = [
   { slug: 'mesas', name: 'Mesas' },
   { slug: 'sillas', name: 'Sillas y butacas' },
   { slug: 'iluminacion', name: 'Iluminación' },
-  { slug: 'decoracion', name: 'Decoración' },
   { slug: 'textil', name: 'Textil hogar' },
   { slug: 'muebles', name: 'Muebles' },
 ]

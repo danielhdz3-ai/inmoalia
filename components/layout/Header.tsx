@@ -34,16 +34,6 @@ const NAV_LINKS = [
     href: '/categorias/iluminacion',
   },
   {
-    label: 'Decoración',
-    href: '/categorias/decoracion',
-    children: [
-      { label: 'Espejos', href: '/categorias/espejos' },
-      { label: 'Cuadros', href: '/categorias/cuadros' },
-      { label: 'Jarrones', href: '/categorias/jarrones' },
-      { label: 'Textil', href: '/categorias/textil' },
-    ],
-  },
-  {
     label: 'Outlet',
     href: '/categorias/outlet',
   },

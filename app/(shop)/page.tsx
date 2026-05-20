@@ -23,7 +23,6 @@ const CATEGORIES = [
   { slug: 'mesas', name: 'Mesas', emoji: '🪑', image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80' },
   { slug: 'sillas', name: 'Sillas', emoji: '🛋️', image: 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&q=80' },
   { slug: 'iluminacion', name: 'Iluminación', emoji: '💡', image: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&q=80' },
-  { slug: 'decoracion', name: 'Decoración', emoji: '🏺', image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=80' },
   { slug: 'textil', name: 'Textil', emoji: '🧶', image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80' },
 ]
 
