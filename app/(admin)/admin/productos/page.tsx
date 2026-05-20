@@ -65,7 +65,7 @@ async function toggleProductOfertas(formData: FormData) {
 
 const STATUS_MAP: Record<string, string> = {
   jardin: 'Jardín', mesas: 'Mesas', sillas: 'Sillas', iluminacion: 'Iluminación',
-  decoracion: 'Decoración', textil: 'Textil', muebles: 'Muebles', ofertas: 'Ofertas',
+  decoracion: 'Decoración', textil: 'Textil', hogar: 'Hogar', ofertas: 'Ofertas',
 }
 
 export default async function AdminProductosPage() {

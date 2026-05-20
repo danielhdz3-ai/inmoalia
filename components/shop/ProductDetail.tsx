@@ -26,16 +26,30 @@ import { useFavoritesStore } from '@/store/favorites'
 import { formatPrice } from '@/lib/utils'
 import { toastOk, toastErr } from '@/lib/toast-client'
 import { getDiscountAmount, getDiscountPercent, getListPrice } from '@/lib/shop/product-pricing'
+import type { ProductFaqItem } from '@/lib/seo/product-faq'
 import type { Product } from '@/lib/supabase/types'
 import ProductCard from './ProductCard'
 import WaitlistForm from './WaitlistForm'
+import WhatsAppButton from './WhatsAppButton'
+import ProductFaqAccordion from './ProductFaqAccordion'
 
 interface ProductDetailProps {
   product: Product
   relatedProducts: Product[]
+  collectionProducts?: Product[]
+  collectionName?: string | null
+  collectionSlug?: string | null
+  faqs?: ProductFaqItem[]
 }
 
-export default function ProductDetail({ product, relatedProducts }: ProductDetailProps) {
+export default function ProductDetail({
+  product,
+  relatedProducts,
+  collectionProducts = [],
+  collectionName,
+  collectionSlug,
+  faqs = [],
+}: ProductDetailProps) {
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
@@ -268,19 +282,26 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
           </div>
 
           {/* Stock */}
-          <div className="flex items-center gap-2 mb-6">
-            {product.stock > 0 ? (
-              <>
-                <CheckCircle className="w-4 h-4 text-[#27ae60]" />
-                <span className="text-sm text-[#27ae60] font-medium">
-                  En stock ({product.stock} {product.stock === 1 ? 'unidad' : 'unidades'})
-                </span>
-              </>
-            ) : (
-              <>
-                <Package className="w-4 h-4 text-[#a08c7a]" />
-                <span className="text-sm text-[#a08c7a]">Sin stock — Añadir a lista de espera</span>
-              </>
+          <div className="flex flex-col gap-2 mb-6">
+            <div className="flex items-center gap-2">
+              {product.stock > 0 ? (
+                <>
+                  <CheckCircle className="w-4 h-4 text-[#27ae60]" />
+                  <span className="text-sm text-[#27ae60] font-medium">
+                    En stock ({product.stock} {product.stock === 1 ? 'unidad' : 'unidades'})
+                  </span>
+                </>
+              ) : (
+                <>
+                  <Package className="w-4 h-4 text-[#a08c7a]" />
+                  <span className="text-sm text-[#a08c7a]">Sin stock — Añadir a lista de espera</span>
+                </>
+              )}
+            </div>
+            {product.stock > 0 && product.stock <= 5 && (
+              <p className="text-xs font-medium text-[#c0392b] bg-[#c0392b]/5 border border-[#c0392b]/20 rounded-lg px-3 py-2">
+                ⚡ Quedan solo {product.stock} — unidades limitadas
+              </p>
             )}
           </div>
 
@@ -302,6 +323,8 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
                 Compartir
               </Button>
             </div>
+
+            <WhatsAppButton productName={product.name} productSlug={product.slug} className="w-full" />
 
             {product.stock > 0 ? (
               <div className="flex items-center gap-4 flex-wrap pt-2">
@@ -496,6 +519,29 @@ export default function ProductDetail({ product, relatedProducts }: ProductDetai
         <section className="mt-16 max-w-3xl">
           <h2 className="text-xl font-bold text-[#2a2a2a] mb-4">Descripción del producto</h2>
           <p className="text-[#6b5344] leading-relaxed text-base">{publicDescription}</p>
+        </section>
+      )}
+
+      {/* FAQ */}
+      {faqs.length > 0 && <ProductFaqAccordion faqs={faqs} />}
+
+      {/* Colección */}
+      {collectionProducts.length > 0 && collectionSlug && collectionName && (
+        <section className="mt-16 pt-12 border-t border-[#e8ddd0]">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-xl font-bold text-[#2a2a2a]">De la {collectionName}</h2>
+            <Link
+              href={`/colecciones/${collectionSlug}`}
+              className="text-sm text-[#2d4a3e] hover:text-[#1e3329] font-medium transition-colors"
+            >
+              Ver colección →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {collectionProducts.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
         </section>
       )}
 

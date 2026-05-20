@@ -116,7 +116,7 @@ for (const cfg of PRODUCTS) {
     price,
     cost_price: cfg.cost_price,
     images: localImages,
-    category: 'muebles',
+    category: 'hogar',
     subcategory: 'Sofás y butacas',
     tags: ['LARIOS', 'sofá', 'salón', 'muebles', 'diseño', scraped.color?.toLowerCase()].filter(Boolean),
     sku,

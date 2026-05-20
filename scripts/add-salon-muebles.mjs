@@ -139,7 +139,7 @@ for (const cfg of PRODUCTS) {
     price,
     cost_price: cfg.cost_price,
     images: localImages,
-    category: isMesa ? 'mesas' : 'muebles',
+    category: isMesa ? 'mesas' : 'hogar',
     subcategory: isMesa ? 'Mesas auxiliares' : 'Salón',
     tags: [
       'salon',

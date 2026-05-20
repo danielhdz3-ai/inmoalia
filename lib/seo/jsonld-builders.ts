@@ -1,4 +1,5 @@
 import { absoluteUrl, getSiteUrl } from '@/lib/site'
+import { productImageAbsoluteUrl } from '@/lib/seo/product-images'
 import { CATEGORY_META } from '@/lib/shop/category-meta'
 import type { Product } from '@/lib/supabase/types'
 
@@ -59,7 +60,9 @@ export function productJsonLd(product: Product) {
   const base = getSiteUrl()
   const url = `${base}/productos/${encodeURIComponent(product.slug)}`
   const images = Array.isArray(product.images)
-    ? product.images.filter((x): x is string => typeof x === 'string' && x.length > 0)
+    ? product.images
+        .map((x) => (typeof x === 'string' && x.length > 0 ? productImageAbsoluteUrl(x) : undefined))
+        .filter((x): x is string => Boolean(x))
     : []
   const availability =
     product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'
@@ -83,6 +86,56 @@ export function productJsonLd(product: Product) {
       availability,
       itemCondition: 'https://schema.org/NewCondition',
     },
+  }
+}
+
+export function faqPageJsonLd(faqs: { question: string; answer: string }[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: { '@type': 'Answer', text: f.answer },
+    })),
+  }
+}
+
+export function articleJsonLd(post: {
+  slug: string
+  title: string
+  excerpt: string
+  publishedAt: string
+}) {
+  const base = getSiteUrl()
+  const url = `${base}/blog/${encodeURIComponent(post.slug)}`
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.excerpt,
+    datePublished: post.publishedAt,
+    author: { '@type': 'Organization', name: 'INMOALIA' },
+    publisher: {
+      '@type': 'Organization',
+      name: 'INMOALIA',
+      logo: { '@type': 'ImageObject', url: absoluteUrl('/file.svg') },
+    },
+    mainEntityOfPage: url,
+    url,
+  }
+}
+
+export function breadcrumbCollectionJsonLd(slug: string, title: string) {
+  const base = getSiteUrl()
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: `${base}/` },
+      { '@type': 'ListItem', position: 2, name: 'Colecciones', item: `${base}/colecciones` },
+      { '@type': 'ListItem', position: 3, name: title, item: `${base}/colecciones/${encodeURIComponent(slug)}` },
+    ],
   }
 }
 

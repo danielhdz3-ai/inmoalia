@@ -5,6 +5,16 @@
   "regions": ["cdg1"],
   "redirects": [
     {
+      "source": "/categorias/muebles",
+      "destination": "/categorias/hogar",
+      "permanent": true
+    },
+    {
+      "source": "/categorias/muebles/:path*",
+      "destination": "/categorias/hogar/:path*",
+      "permanent": true
+    },
+    {
       "source": "/categorias/estanterias",
       "destination": "/categorias/salon",
       "permanent": true

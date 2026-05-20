@@ -51,7 +51,7 @@ export default async function CategoriaPage({ params, searchParams }: Props) {
     if (categoria === 'mesas') {
       q = q.or('category.eq.mesas,tags.cs.{mesas}')
     } else if (categoria === 'salon') {
-      q = q.or('and(category.eq.muebles,subcategory.eq.Salón),tags.cs.{salon}')
+      q = q.or('and(category.eq.hogar,subcategory.eq.Salón),tags.cs.{salon}')
     } else if (meta.parent && meta.dbSubcategory) {
       q = q.eq('category', meta.parent).eq('subcategory', meta.dbSubcategory)
     } else {

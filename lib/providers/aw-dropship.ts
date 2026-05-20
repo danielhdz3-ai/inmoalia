@@ -115,7 +115,7 @@ function mapAwCategory(row: Record<string, string>): string {
     blob.includes('-furniture') ||
     blob.includes('sd-furniture')
   ) {
-    return 'muebles'
+    return 'hogar'
   }
   if (blob.includes('textile') || blob.includes('textil') || blob.includes('bolso') || blob.includes('ropa')) {
     return 'textil'

@@ -3,7 +3,16 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { JsonLd } from '@/components/seo/JsonLd'
 import ProductDetail from '@/components/shop/ProductDetail'
-import { breadcrumbProductJsonLd, productJsonLd } from '@/lib/seo/jsonld-builders'
+import ProductBundleBlock from '@/components/shop/ProductBundleBlock'
+import {
+  breadcrumbProductJsonLd,
+  faqPageJsonLd,
+  productJsonLd,
+} from '@/lib/seo/jsonld-builders'
+import { buildProductFaqs } from '@/lib/seo/product-faq'
+import { productOpenGraphImages } from '@/lib/seo/product-images'
+import { bundlesForProduct } from '@/lib/content/bundles'
+import { getEnhancedRelatedProducts, getProductsBySlugs } from '@/lib/shop/product-discovery'
 import { absoluteUrl } from '@/lib/site'
 import type { Product } from '@/lib/supabase/types'
 
@@ -26,24 +35,13 @@ async function getProduct(slug: string): Promise<Product | null> {
   return data as unknown as Product
 }
 
-async function getRelatedProducts(category: string, currentId: string): Promise<Product[]> {
-  const supabase = await createClient()
-  const { data } = await supabase
-    .from('products')
-    .select('*')
-    .eq('category', category)
-    .eq('is_active', true)
-    .neq('id', currentId)
-    .limit(4)
-  return (data as unknown as Product[]) ?? []
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const product = await getProduct(slug)
   if (!product) return { title: 'Producto no encontrado' }
 
   const canonicalPath = `/productos/${slug}`
+  const ogImages = productOpenGraphImages(product)
 
   return {
     title: product.meta_title ?? product.name,
@@ -52,13 +50,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: product.meta_title ?? product.name,
       description: product.meta_desc ?? '',
-      url: canonicalPath,
-      images: product.images[0] ? [{ url: product.images[0], alt: product.name }] : [],
+      url: absoluteUrl(canonicalPath),
+      images: ogImages,
       type: 'website',
     },
     twitter: {
-      card: product.images[0] ? 'summary_large_image' : 'summary',
-      images: product.images[0] ? [product.images[0]] : undefined,
+      card: ogImages.length ? 'summary_large_image' : 'summary',
+      images: ogImages.map((i) => i.url),
     },
   }
 }
@@ -68,14 +66,37 @@ export default async function ProductPage({ params }: Props) {
   const product = await getProduct(slug)
   if (!product) notFound()
 
-  const related = await getRelatedProducts(product.category, product.id)
+  const faqs = buildProductFaqs(product)
+  const { related, collection, collectionName, collectionSlug } = await getEnhancedRelatedProducts(product)
+
+  const productBundles = bundlesForProduct(slug)
+  const bundleBlocks = await Promise.all(
+    productBundles.map(async (b) => ({
+      bundle: b,
+      products: await getProductsBySlugs(b.productSlugs),
+    })),
+  )
 
   return (
     <>
       <JsonLd data={productJsonLd(product)} />
       <JsonLd data={breadcrumbProductJsonLd(product)} />
+      <JsonLd data={faqPageJsonLd(faqs)} />
 
-      <ProductDetail product={product} relatedProducts={related} />
+      <ProductDetail
+        product={product}
+        relatedProducts={related}
+        collectionProducts={collection}
+        collectionName={collectionName}
+        collectionSlug={collectionSlug}
+        faqs={faqs}
+      />
+
+      {bundleBlocks.map(({ bundle, products }) => (
+        <div key={bundle.slug} className="max-w-7xl mx-auto px-4 sm:px-6">
+          <ProductBundleBlock bundle={bundle} products={products} currentSlug={slug} />
+        </div>
+      ))}
     </>
   )
 }

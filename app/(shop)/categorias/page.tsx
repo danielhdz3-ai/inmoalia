@@ -8,7 +8,7 @@ import { absoluteUrl } from '@/lib/site'
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: 'Todas las categorías — INMOALIA',
-    description: 'Explora todas nuestras categorías: jardín, mesas, sillas, iluminación, textil, muebles y más.',
+    description: 'Explora todas nuestras categorías: jardín, mesas, sillas, iluminación, textil, hogar y más.',
     alternates: {
       canonical: absoluteUrl('/categorias'),
     },

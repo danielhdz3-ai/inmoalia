@@ -14,7 +14,7 @@ const CATEGORIES = [
   { slug: 'sillas', name: 'Sillas y butacas' },
   { slug: 'iluminacion', name: 'Iluminación' },
   { slug: 'textil', name: 'Textil hogar' },
-  { slug: 'muebles', name: 'Muebles' },
+  { slug: 'hogar', name: 'Hogar' },
 ]
 
 const PRICE_RANGES = [

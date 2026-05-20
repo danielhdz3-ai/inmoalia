@@ -1,12 +1,15 @@
 import Link from 'next/link'
 import { Globe, Mail, MessageCircle } from 'lucide-react'
 import NewsletterForm from '@/components/shop/NewsletterForm'
+import { getWhatsAppUrl } from '@/lib/contact'
 
 const FOOTER_LINKS = {
   'Tienda': [
     { label: 'Novedades', href: '/productos?sort=newest' },
     { label: 'Más vendidos', href: '/productos?sort=popular' },
     { label: 'Ofertas', href: '/categorias/ofertas' },
+    { label: 'Colecciones', href: '/colecciones' },
+    { label: 'Sillas de oficina', href: '/colecciones/sillas-oficina' },
     { label: 'Todas las categorías', href: '/categorias' },
   ],
   'Atención al cliente': [
@@ -108,7 +111,7 @@ export default function Footer() {
               <Mail className="w-4 h-4" />
             </a>
             <a
-              href="https://wa.me/34600000000"
+              href={getWhatsAppUrl()}
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-white/60 hover:text-white"

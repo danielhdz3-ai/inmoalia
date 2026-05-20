@@ -116,7 +116,7 @@ async function saveProduct(formData: FormData) {
   redirect('/admin/productos')
 }
 
-const CATEGORIES = ['jardin', 'mesas', 'sillas', 'iluminacion', 'decoracion', 'textil', 'muebles', 'ofertas']
+const CATEGORIES = ['jardin', 'mesas', 'sillas', 'iluminacion', 'decoracion', 'textil', 'hogar', 'ofertas']
 
 export default async function EditProductPage({ params }: Props) {
   const { id } = await params
@@ -245,7 +245,7 @@ export default async function EditProductPage({ params }: Props) {
             <label className="block text-xs font-medium text-[#6b5344] mb-1.5">Categoría *</label>
             <select
               name="category"
-              defaultValue={product?.category ?? 'muebles'}
+              defaultValue={product?.category ?? 'hogar'}
               required
               className="w-full h-10 px-3 rounded-lg border border-[#e8ddd0] bg-white text-sm text-[#2a2a2a] focus:outline-none focus:ring-2 focus:ring-[#2d4a3e]/30"
             >

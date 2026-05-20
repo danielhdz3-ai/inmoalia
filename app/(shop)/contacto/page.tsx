@@ -1,12 +1,23 @@
 import type { Metadata } from 'next'
 import { Mail, MessageCircle, Clock, MapPin } from 'lucide-react'
+import { getWhatsAppNumber, getWhatsAppUrl } from '@/lib/contact'
 
 export const metadata: Metadata = {
   title: 'Contacto — INMOALIA',
   description: 'Contacta con el equipo de INMOALIA. Estamos para ayudarte con cualquier consulta sobre productos y pedidos.',
 }
 
+function formatWhatsAppDisplay(num: string): string {
+  if (num.startsWith('34') && num.length >= 11) {
+    return `+34 ${num.slice(2, 5)} ${num.slice(5, 8)} ${num.slice(8)}`
+  }
+  return `+${num}`
+}
+
 export default function ContactoPage() {
+  const waNum = getWhatsAppNumber()
+  const waDisplay = formatWhatsAppDisplay(waNum)
+  const waHref = getWhatsAppUrl('Hola, tengo una consulta sobre INMOALIA')
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 md:py-16">
       <div className="mb-10">
@@ -27,8 +38,8 @@ export default function ContactoPage() {
             icon: MessageCircle,
             title: 'WhatsApp',
             desc: 'Respuesta rápida en horario de atención',
-            value: '+34 600 000 000',
-            href: 'https://wa.me/34600000000',
+            value: waDisplay,
+            href: waHref,
           },
           {
             icon: Clock,

@@ -135,5 +135,5 @@ function mapCategory(supplierCategory: string): string {
   if (lower.includes('light') || lower.includes('lamp') || lower.includes('iluminacion')) return 'iluminacion'
   if (lower.includes('decor') || lower.includes('decoracion') || lower.includes('mirror')) return 'decoracion'
   if (lower.includes('textile') || lower.includes('textil') || lower.includes('rug')) return 'textil'
-  return 'muebles'
+  return 'hogar'
 }

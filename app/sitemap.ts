@@ -1,6 +1,8 @@
 import type { MetadataRoute } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { CATEGORY_META } from '@/lib/shop/category-meta'
+import { COLLECTIONS } from '@/lib/content/collections'
+import { BLOG_POSTS } from '@/lib/content/blog-posts'
 import { getSiteUrl } from '@/lib/site'
 
 const STATIC_PATHS: {
@@ -21,7 +23,8 @@ const STATIC_PATHS: {
     { path: '/aviso-legal', changeFreq: 'yearly', priority: 0.35 },
     { path: '/sobre-nosotros', changeFreq: 'monthly', priority: 0.5 },
     { path: '/empleo', changeFreq: 'monthly', priority: 0.45 },
-    { path: '/blog', changeFreq: 'weekly', priority: 0.6 },
+    { path: '/blog', changeFreq: 'weekly', priority: 0.65 },
+    { path: '/colecciones', changeFreq: 'weekly', priority: 0.8 },
   ]
 
 const PAGE_SIZE = 800
@@ -60,6 +63,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${base}/categorias/${encodeURIComponent(slug)}`,
       changeFrequency: 'weekly',
       priority: 0.85,
+      lastModified: now,
+    })
+  }
+
+  for (const post of BLOG_POSTS) {
+    entries.push({
+      url: `${base}/blog/${encodeURIComponent(post.slug)}`,
+      lastModified: new Date(post.publishedAt),
+      changeFrequency: 'monthly',
+      priority: 0.65,
+    })
+  }
+
+  for (const slug of Object.keys(COLLECTIONS)) {
+    entries.push({
+      url: `${base}/colecciones/${encodeURIComponent(slug)}`,
+      changeFrequency: 'weekly',
+      priority: 0.8,
       lastModified: now,
     })
   }

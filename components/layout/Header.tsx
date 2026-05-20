@@ -10,8 +10,8 @@ import { Button } from '@/components/ui/button'
 
 const NAV_LINKS = [
   {
-    label: 'Muebles',
-    href: '/categorias/muebles',
+    label: 'Hogar',
+    href: '/categorias/hogar',
     children: [
       { label: 'Mesas', href: '/categorias/mesas' },
       { label: 'Sillas', href: '/categorias/sillas' },

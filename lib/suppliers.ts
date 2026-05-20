@@ -43,3 +43,10 @@ export function marginOnRetailPct(
   if (cost === null || cost === undefined || price <= 0) return null
   return Math.round(((price - cost) / price) * 1000) / 10
 }
+
+/** Ganancia neta en euros: PVP − coste proveedor. */
+export function marginNetEur(price: number, cost: number | null): number | null {
+  if (cost === null || cost === undefined) return null
+  const net = price - cost
+  return Math.round(net * 100) / 100
+}
