@@ -8,7 +8,7 @@ import Pagination from '@/components/shop/Pagination'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { CATEGORY_META } from '@/lib/shop/category-meta'
 import { breadcrumbCategoryJsonLd } from '@/lib/seo/jsonld-builders'
-import { absoluteUrl } from '@/lib/site'
+import { hasListingFilters, shopPageMetadata } from '@/lib/seo/page-metadata'
 import type { Product } from '@/lib/supabase/types'
 
 const PAGE_SIZE = 24
@@ -18,19 +18,23 @@ interface Props {
   searchParams: Promise<{ sort?: string; min?: string; max?: string; material?: string; page?: string }>
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { categoria } = await params
+  const sp = await searchParams
   const meta = CATEGORY_META[categoria]
-  if (!meta) return { title: 'Categoría no encontrada' }
-  const canonicalPath = `/categorias/${categoria}`
-
-  return {
-    title: meta.name,
-    description: meta.description,
-    alternates: {
-      canonical: absoluteUrl(canonicalPath),
-    },
+  if (!meta) {
+    return {
+      title: 'Categoría no encontrada',
+      robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
+    }
   }
+
+  return shopPageMetadata(meta.name, meta.description, `/categorias/${categoria}`, {
+    noindex: hasListingFilters(
+      { ...sp, categoria },
+      ['sort', 'min', 'max', 'material', 'featured', 'page', 'categoria'],
+    ),
+  })
 }
 export default async function CategoriaPage({ params, searchParams }: Props) {
   const { categoria } = await params
@@ -50,6 +54,10 @@ export default async function CategoriaPage({ params, searchParams }: Props) {
 
     if (categoria === 'mesas') {
       q = q.or('category.eq.mesas,tags.cs.{mesas}')
+    } else if (categoria === 'muebles' || categoria === 'hogar') {
+      q = q.eq('category', 'hogar')
+    } else if (categoria === 'ofertas') {
+      q = q.or('category.eq.ofertas,tags.cs.{ofertas}')
     } else if (categoria === 'salon') {
       q = q.or('and(category.eq.hogar,subcategory.eq.Salón),tags.cs.{salon}')
     } else if (meta.parent && meta.dbSubcategory) {

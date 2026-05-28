@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import ProductGrid from '@/components/shop/ProductGrid'
 import { Search } from 'lucide-react'
 import type { Product } from '@/lib/supabase/types'
 import SearchInput from '@/components/shop/SearchInput'
-import { absoluteUrl } from '@/lib/site'
+import { shopPageMetadata } from '@/lib/seo/page-metadata'
 
 interface PageProps {
   searchParams: Promise<{ q?: string }>
@@ -13,19 +14,16 @@ interface PageProps {
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const { q } = await searchParams
   const query = q?.trim() ?? ''
+  const hasQuery = query.length >= 2
 
-  let canonicalHref = absoluteUrl('/buscar')
-  if (query.length >= 2) {
-    canonicalHref = absoluteUrl(`/buscar?q=${encodeURIComponent(query)}`)
-  }
-
-  return {
-    title: query ? `"${query}" — Búsqueda | INMOALIA` : 'Buscar productos | INMOALIA',
-    description: query
+  return shopPageMetadata(
+    query ? `"${query}" — Búsqueda | INMOALIA` : 'Buscar productos | INMOALIA',
+    query
       ? `Resultados de búsqueda en INMOALIA para "${query}". Muebles, decoración y jardín premium.`
       : 'Busca muebles y decoración en INMOALIA por nombre, categoría o material.',
-    alternates: { canonical: canonicalHref },
-  }
+    '/buscar',
+    { noindex: hasQuery },
+  )
 }
 
 async function searchProducts(query: string): Promise<Product[]> {
@@ -49,6 +47,10 @@ export default async function BuscarPage({ searchParams }: PageProps) {
   const { q } = await searchParams
   const query = q?.trim() ?? ''
   const results = await searchProducts(query)
+
+  if (query.length >= 2 && results.length === 0) {
+    notFound()
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
@@ -92,6 +94,7 @@ export default async function BuscarPage({ searchParams }: PageProps) {
               <a
                 key={s}
                 href={`/buscar?q=${encodeURIComponent(s)}`}
+                rel="nofollow"
                 className="px-3 py-1.5 rounded-full border border-[#e8ddd0] text-sm text-[#6b5344] hover:border-[#a08c7a] hover:bg-[#f9f6f1] transition-colors"
               >
                 {s}

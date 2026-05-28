@@ -1,28 +1,20 @@
 import type { Metadata } from 'next'
-import { Mail, MessageCircle, Clock, MapPin } from 'lucide-react'
-import { getWhatsAppNumber, getWhatsAppUrl } from '@/lib/contact'
+import { Mail, Clock, MapPin } from 'lucide-react'
+import { SUPPORT_EMAIL } from '@/lib/support'
+import { shopPageMetadata } from '@/lib/seo/page-metadata'
 
-export const metadata: Metadata = {
-  title: 'Contacto — INMOALIA',
-  description: 'Contacta con el equipo de INMOALIA. Estamos para ayudarte con cualquier consulta sobre productos y pedidos.',
-}
-
-function formatWhatsAppDisplay(num: string): string {
-  if (num.startsWith('34') && num.length >= 11) {
-    return `+34 ${num.slice(2, 5)} ${num.slice(5, 8)} ${num.slice(8)}`
-  }
-  return `+${num}`
-}
+export const metadata: Metadata = shopPageMetadata(
+  'Contacto — INMOALIA',
+  'Contacta con el equipo de INMOALIA. Estamos para ayudarte con cualquier consulta sobre productos y pedidos.',
+  '/contacto',
+)
 
 export default function ContactoPage() {
-  const waNum = getWhatsAppNumber()
-  const waDisplay = formatWhatsAppDisplay(waNum)
-  const waHref = getWhatsAppUrl('Hola, tengo una consulta sobre INMOALIA')
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 md:py-16">
       <div className="mb-10">
         <h1 className="text-3xl font-bold text-[#2a2a2a] mb-2">Contacto</h1>
-        <p className="text-[#a08c7a]">Estamos aquí para ayudarte. Escríbenos y te responderemos en menos de 24 horas.</p>
+        <p className="text-[#a08c7a]">Estamos aquí para ayudarte. Escríbenos por email y te responderemos en menos de 24 horas.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
@@ -31,15 +23,8 @@ export default function ContactoPage() {
             icon: Mail,
             title: 'Email',
             desc: 'Para consultas generales, pedidos y devoluciones',
-            value: 'info@inmoalia.com',
-            href: 'mailto:info@inmoalia.com',
-          },
-          {
-            icon: MessageCircle,
-            title: 'WhatsApp',
-            desc: 'Respuesta rápida en horario de atención',
-            value: waDisplay,
-            href: waHref,
+            value: SUPPORT_EMAIL,
+            href: `mailto:${SUPPORT_EMAIL}`,
           },
           {
             icon: Clock,
@@ -83,7 +68,7 @@ export default function ContactoPage() {
           Para incidencias con pedidos en curso, incluye tu número de pedido (INM-XXXX-XXXXXX) en el asunto.
         </p>
         <a
-          href="mailto:info@inmoalia.com"
+          href={`mailto:${SUPPORT_EMAIL}`}
           className="inline-flex items-center gap-2 bg-[#2d4a3e] text-white px-6 py-3 rounded-lg hover:bg-[#1e3329] transition-colors text-sm font-medium"
         >
           <Mail className="w-4 h-4" />

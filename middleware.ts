@@ -1,6 +1,9 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { User } from '@supabase/supabase-js'
+import { CATEGORY_META } from '@/lib/shop/category-meta'
+import { isActiveProductSlug, isLegacyTestProductSlug, searchHasActiveProducts } from '@/lib/shop/product-slug-guard'
+import { productNotFoundResponse } from '@/lib/shop/not-found-response'
 
 /**
  * Evita que middleware reviente si faltan vars o siguen siendo el ejemplo del .env.
@@ -52,6 +55,69 @@ export async function middleware(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl
+
+  const productMatch = pathname.match(/^\/productos\/([^/]+)$/)
+  if (productMatch) {
+    const slug = decodeURIComponent(productMatch[1])
+    if (isLegacyTestProductSlug(slug)) {
+      return productNotFoundResponse()
+    }
+    const exists = await isActiveProductSlug(slug)
+    if (exists === false) {
+      return productNotFoundResponse()
+    }
+  }
+
+  // Consolidar /productos?categoria=X → /categorias/X (evita contenido duplicado)
+  if (pathname === '/productos') {
+    const q = request.nextUrl.searchParams.get('q')?.trim()
+    if (q) {
+      const dest = request.nextUrl.clone()
+      dest.pathname = '/buscar'
+      dest.search = ''
+      dest.searchParams.set('q', q)
+      return NextResponse.redirect(dest, 301)
+    }
+
+    const categoria = request.nextUrl.searchParams.get('categoria')?.trim()
+    if (categoria && CATEGORY_META[categoria]) {
+      const dest = request.nextUrl.clone()
+      dest.pathname = `/categorias/${categoria}`
+      dest.searchParams.delete('categoria')
+      return NextResponse.redirect(dest, 301)
+    }
+  }
+
+  if (pathname === '/buscar') {
+    const q = request.nextUrl.searchParams.get('q')?.trim()
+    if (q && q.length >= 2) {
+      const hasResults = await searchHasActiveProducts(q)
+      if (hasResults === false) {
+        return productNotFoundResponse()
+      }
+    }
+  }
+
+  const legacyCategoryRedirects: Record<string, string> = {
+    estanterias: '/categorias/salon',
+    decoracion: '/categorias/hogar',
+    outlet: '/categorias/ofertas',
+  }
+  if (pathname.startsWith('/categorias/')) {
+    const slug = pathname.slice('/categorias/'.length).split('/')[0]
+    const target = legacyCategoryRedirects[slug]
+    if (target) {
+      const suffix = pathname.slice(`/categorias/${slug}`.length)
+      return NextResponse.redirect(new URL(`${target}${suffix}${request.nextUrl.search}`, request.url), 301)
+    }
+
+    // Quitar ?categoria= duplicado (legacy: /categorias/jardin?categoria=jardin&...)
+    if (request.nextUrl.searchParams.has('categoria')) {
+      const dest = request.nextUrl.clone()
+      dest.searchParams.delete('categoria')
+      return NextResponse.redirect(dest, 301)
+    }
+  }
 
   // Protect /admin routes
   if (pathname.startsWith('/admin')) {

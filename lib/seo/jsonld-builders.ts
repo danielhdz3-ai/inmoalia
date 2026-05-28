@@ -1,6 +1,7 @@
 import { absoluteUrl, getSiteUrl } from '@/lib/site'
 import { productImageAbsoluteUrl } from '@/lib/seo/product-images'
 import { CATEGORY_META } from '@/lib/shop/category-meta'
+import { getShippingCostEuros } from '@/lib/shop/shipping'
 import type { Product } from '@/lib/supabase/types'
 
 function stripHtml(s: string): string {
@@ -11,10 +12,16 @@ export function organizationJsonLd() {
   const base = getSiteUrl()
   return {
     '@context': 'https://schema.org',
-    '@type': 'Organization',
+    '@type': ['Organization', 'OnlineStore'],
     name: 'INMOALIA',
+    alternateName: 'INMOALIA Tienda de Muebles',
+    description:
+      'Tienda online de muebles, decoración e iluminación para hogar, jardín y oficina. No somos una agencia inmobiliaria.',
     url: base,
-    logo: absoluteUrl('/file.svg'),
+    logo: absoluteUrl('/logo.png'),
+    image: absoluteUrl('/logo.png'),
+    areaServed: { '@type': 'Country', name: 'España' },
+    knowsAbout: ['muebles', 'decoración', 'iluminación', 'jardín', 'sillas de oficina'],
   }
 }
 
@@ -68,6 +75,9 @@ export function productJsonLd(product: Product) {
     product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'
   const descSource = product.description ?? product.meta_desc ?? ''
   const desc = stripHtml(descSource || product.name)
+  const category =
+    product.subcategory?.trim() ?? CATEGORY_META[product.category]?.name ?? product.category
+  const shippingCost = getShippingCostEuros(product.price)
 
   return {
     '@context': 'https://schema.org',
@@ -76,7 +86,9 @@ export function productJsonLd(product: Product) {
     description: desc,
     image: images.length ? images : undefined,
     sku: product.sku ?? undefined,
+    mpn: product.sku ?? undefined,
     url,
+    category,
     brand: { '@type': 'Brand', name: 'INMOALIA' },
     offers: {
       '@type': 'Offer',
@@ -85,6 +97,38 @@ export function productJsonLd(product: Product) {
       price: product.price,
       availability,
       itemCondition: 'https://schema.org/NewCondition',
+      seller: {
+        '@type': 'Organization',
+        name: 'INMOALIA',
+        url: base,
+      },
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: {
+          '@type': 'MonetaryAmount',
+          value: String(shippingCost),
+          currency: 'EUR',
+        },
+        shippingDestination: {
+          '@type': 'DefinedRegion',
+          addressCountry: 'ES',
+        },
+        deliveryTime: {
+          '@type': 'ShippingDeliveryTime',
+          handlingTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 1,
+            maxValue: 2,
+            unitCode: 'DAY',
+          },
+          transitTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 2,
+            maxValue: 5,
+            unitCode: 'DAY',
+          },
+        },
+      },
     },
   }
 }

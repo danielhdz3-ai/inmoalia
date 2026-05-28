@@ -21,15 +21,15 @@ const imagesDir = path.join(__dirname, '..', 'public', 'imagenes', 'productos')
 // Mapeo de slugs a URLs originales de Grupo SDM
 const imagesMap = {
   'sillon-ergonomico-graz-blanco-negro': [
-    'https://gruposdm.com/79417-large_default/sillon-de-oficina-graz-blanco-alto-malla-y-tejido-negro.jpg',
-    'https://gruposdm.com/79418-large_default/sillon-de-oficina-graz-blanco-alto-malla-y-tejido-negro.jpg',
-    'https://gruposdm.com/79419-large_default/sillon-de-oficina-graz-blanco-alto-malla-y-tejido-negro.jpg'
+    'https://gruposdm.com/22806-large_default/sillon-de-oficina-graz-blanco-alto-malla-y-tejido-negro.jpg',
+    'https://gruposdm.com/22807-large_default/sillon-de-oficina-graz-blanco-alto-malla-y-tejido-negro.jpg',
+    'https://gruposdm.com/22808-large_default/sillon-de-oficina-graz-blanco-alto-malla-y-tejido-negro.jpg',
   ],
   'sillon-gaming-portimao-amarillo-negro': [
-    'https://gruposdm.com/79401-large_default/sillon-gaming-portimao-amarillo-y-negro.jpg',
-    'https://gruposdm.com/79402-large_default/sillon-gaming-portimao-amarillo-y-negro.jpg',
-    'https://gruposdm.com/79403-large_default/sillon-gaming-portimao-amarillo-y-negro.jpg'
-  ]
+    'https://gruposdm.com/23329-large_default/sillon-de-oficina-portimao-racing-similpiel-amarilla-y-negra.jpg',
+    'https://gruposdm.com/23330-large_default/sillon-de-oficina-portimao-racing-similpiel-amarilla-y-negra.jpg',
+    'https://gruposdm.com/23331-large_default/sillon-de-oficina-portimao-racing-similpiel-amarilla-y-negra.jpg',
+  ],
 }
 
 function downloadImage(url, filepath) {
@@ -84,6 +84,14 @@ for (const [slug, urls] of Object.entries(imagesMap)) {
     }
     
     await new Promise(resolve => setTimeout(resolve, 500))
+  }
+
+  const localImages = urls.map((_, i) => `/imagenes/productos/${slug}-${i + 1}.jpg`)
+  const { error } = await supabase.from('products').update({ images: localImages }).eq('slug', slug)
+  if (error) {
+    console.log(`   ❌ DB: ${error.message}`)
+  } else {
+    console.log(`   ✅ DB actualizada (${localImages.length} imágenes)`)
   }
 }
 

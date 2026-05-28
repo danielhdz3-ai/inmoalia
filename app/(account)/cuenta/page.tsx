@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getOrdersForUser } from '@/lib/orders/queries'
 import Link from 'next/link'
 import { User, Package, Heart, Shield } from 'lucide-react'
-import type { Customer, Order } from '@/lib/supabase/types'
+import type { Customer } from '@/lib/supabase/types'
 
 export default async function CuentaPage() {
   const supabase = await createClient()
@@ -17,13 +18,7 @@ export default async function CuentaPage() {
     .single()
   const customer = rawCustomer as unknown as Customer | null
 
-  const { data: rawOrders } = await supabase
-    .from('orders')
-    .select('*')
-    .eq('customer_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(3)
-  const recentOrders = rawOrders as unknown as Order[] | null
+  const recentOrders = (await getOrdersForUser(user)).slice(0, 3)
 
   const STATUS_LABELS: Record<string, { label: string; color: string }> = {
     pending: { label: 'Pendiente', color: 'text-[#c9a84c] bg-[#c9a84c]/10' },

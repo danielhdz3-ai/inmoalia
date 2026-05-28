@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
+import { shopPageMetadata } from '@/lib/seo/page-metadata'
 
-export const metadata: Metadata = {
-  title: 'Términos y condiciones — INMOALIA',
-  description: 'Términos y condiciones de compra de INMOALIA.',
-}
+export const metadata: Metadata = shopPageMetadata(
+  'Términos y condiciones — INMOALIA',
+  'Términos y condiciones de compra de INMOALIA.',
+  '/terminos',
+)
 
 export default function TerminosPage() {
   return (
@@ -32,7 +34,7 @@ export default function TerminosPage() {
         <section>
           <h2 className="text-xl font-semibold mb-3">3. Precios y pagos</h2>
           <p className="text-[#6b5344] leading-relaxed">
-            Todos los precios se muestran en euros (€) e incluyen el IVA aplicable. El envío es gratuito para pedidos iguales o superiores a 600 €. En pedidos inferiores, los gastos de envío se calculan por tramos en función del importe total del pedido y se muestran antes de formalizar el pago.
+            Todos los precios se muestran en euros (€) e incluyen el IVA aplicable y los gastos de envío a domicilio en península. El importe mostrado en el carrito y al pagar es el precio final; no se añaden costes de transporte adicionales.
             El pago se realiza íntegramente mediante Stripe, que admite tarjeta de crédito/débito, Google Pay y Apple Pay.
           </p>
         </section>

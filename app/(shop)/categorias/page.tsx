@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Category } from '@/lib/supabase/types'
 import { absoluteUrl } from '@/lib/site'
+import { CATEGORY_META } from '@/lib/shop/category-meta'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -23,7 +24,9 @@ export default async function CategoriasPage() {
     .eq('is_active', true)
     .order('sort_order', { ascending: true })
 
-  const categories = rawCategories as unknown as Category[] | null
+  const categories = (rawCategories as unknown as Category[] | null)?.filter(
+    (cat) => cat.slug in CATEGORY_META,
+  )
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 md:py-16">

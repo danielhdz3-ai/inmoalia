@@ -1,6 +1,7 @@
 import { Resend } from 'resend'
 import type { Order, OrderItem, ShippingAddress } from '@/lib/supabase/types'
 import { isResendConfigured } from '@/lib/resend/config'
+import { absoluteUrl } from '@/lib/site'
 
 let resendInstance: Resend | null = null
 
@@ -72,98 +73,215 @@ function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
-export async function sendOrderConfirmation(order: Order) {
-  if (!isResendConfigured()) return
+function formatPrice(amount: number): string {
+  return new Intl.NumberFormat('es-ES', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(amount)
+}
 
-  const site = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://inmoalia.com'
+function emailProductImageUrl(image: string | undefined): string | null {
+  if (!image?.trim()) return null
+  const trimmed = image.trim()
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed
+  if (trimmed.startsWith('/')) return absoluteUrl(trimmed)
+  return null
+}
+
+function buildOrderItemsRowsHtml(items: OrderItem[]): string {
+  return items
+    .map((item) => {
+      const img = emailProductImageUrl(item.image)
+      const lineTotal = formatPrice(item.price * item.quantity)
+      const imgCell = img
+        ? `<td width="56" valign="top" style="padding:14px 12px 14px 0;border-bottom:1px solid #e8ddd0;">
+            <img src="${escapeHtml(img)}" alt="" width="48" height="48" style="display:block;width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid #e8ddd0;" />
+          </td>`
+        : `<td width="56" style="padding:14px 12px 14px 0;border-bottom:1px solid #e8ddd0;"></td>`
+
+      return `
+        <tr>
+          ${imgCell}
+          <td valign="top" style="padding:14px 0;border-bottom:1px solid #e8ddd0;color:#2a2a2a;font-size:14px;line-height:1.45;">
+            <strong style="font-weight:600;">${escapeHtml(item.name)}</strong><br />
+            <span style="color:#a08c7a;font-size:13px;">Cantidad: ${item.quantity}</span>
+          </td>
+          <td valign="top" align="right" style="padding:14px 0 14px 12px;border-bottom:1px solid #e8ddd0;color:#2a2a2a;font-size:14px;font-weight:600;white-space:nowrap;">
+            ${lineTotal}
+          </td>
+        </tr>`
+    })
+    .join('')
+}
+
+function buildOrderConfirmationHtml(order: Order): string {
   const items = order.items as unknown as OrderItem[]
   const address = order.shipping_address as unknown as ShippingAddress
+  const site = absoluteUrl('/').replace(/\/$/, '')
+  const firstName = escapeHtml(address.full_name?.trim().split(/\s+/)[0] || 'Cliente')
+  const shippingLabel =
+    order.shipping_cost === 0 ? 'GRATIS' : formatPrice(order.shipping_cost)
+  const shippingColor = order.shipping_cost === 0 ? '#27ae60' : '#2a2a2a'
 
-  const itemsList = items
-    .map(
-      (item) =>
-        `• ${item.name} x${item.quantity} — ${formatPrice(item.price * item.quantity)}`
-    )
-    .join('\n')
+  const addressLines = [
+    address.full_name,
+    address.address_line1,
+    address.address_line2,
+    [address.postal_code, address.city].filter(Boolean).join(' '),
+    address.province,
+    address.country,
+  ]
+    .filter(Boolean)
+    .map((line) => escapeHtml(String(line)))
+    .join('<br />')
+
+  return `
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f3efe8;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3efe8;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+
+          <!-- Cabecera -->
+          <tr>
+            <td align="center" style="padding:0 0 28px;">
+              <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:32px;font-weight:700;color:#2a2a2a;letter-spacing:-0.5px;">INMOALIA</p>
+              <p style="margin:6px 0 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:#a08c7a;">Hogar &amp; Jardín</p>
+            </td>
+          </tr>
+
+          <!-- Tarjeta principal -->
+          <tr>
+            <td style="background:#ffffff;border:1px solid #e8ddd0;border-radius:16px;padding:32px 28px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+
+                <!-- Badge pedido -->
+                <tr>
+                  <td align="center" style="padding-bottom:28px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" style="background:#2d4a3e;border-radius:12px;">
+                      <tr>
+                        <td style="padding:18px 32px;text-align:center;">
+                          <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.75);">Pedido confirmado</p>
+                          <p style="margin:6px 0 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:22px;font-weight:700;color:#ffffff;">${escapeHtml(order.order_number)}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#2a2a2a;font-size:16px;font-weight:600;padding-bottom:8px;">
+                    Hola, ${firstName}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#6b5344;font-size:15px;line-height:1.65;padding-bottom:28px;">
+                    Hemos recibido tu pago y ya estamos preparando tu pedido. Te avisaremos por email cuando salga de almacén.
+                  </td>
+                </tr>
+
+                <!-- Productos -->
+                <tr>
+                  <td style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#2a2a2a;font-size:15px;font-weight:600;padding-bottom:12px;border-bottom:2px solid #e8ddd0;">
+                    Resumen del pedido
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0 20px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      ${buildOrderItemsRowsHtml(items)}
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Totales -->
+                <tr>
+                  <td style="padding-bottom:24px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f9f6f1;border-radius:10px;">
+                      <tr>
+                        <td style="padding:14px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#a08c7a;">Subtotal</td>
+                        <td align="right" style="padding:14px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#2a2a2a;">${formatPrice(order.subtotal)}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:0 16px 14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#a08c7a;">Envío</td>
+                        <td align="right" style="padding:0 16px 14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:${shippingColor};font-weight:600;">${shippingLabel}</td>
+                      </tr>
+                      <tr>
+                        <td style="border-top:1px solid #e8ddd0;padding:14px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:16px;font-weight:700;color:#2a2a2a;">Total</td>
+                        <td align="right" style="border-top:1px solid #e8ddd0;padding:14px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:20px;font-weight:700;color:#2d4a3e;">${formatPrice(order.total)}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Dirección -->
+                <tr>
+                  <td style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#2a2a2a;font-size:15px;font-weight:600;padding-bottom:10px;">
+                    Dirección de entrega
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#6b5344;font-size:14px;line-height:1.65;padding-bottom:24px;">
+                    ${addressLines}
+                  </td>
+                </tr>
+
+                <!-- Próximos pasos -->
+                <tr>
+                  <td style="background:#eef6f1;border-left:4px solid #2d4a3e;border-radius:0 10px 10px 0;padding:18px 20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+                    <p style="margin:0 0 10px;font-size:14px;font-weight:600;color:#2a2a2a;">¿Qué pasa ahora?</p>
+                    <p style="margin:0;font-size:13px;line-height:1.7;color:#6b5344;">
+                      1. Preparamos tu pedido (24–48 h laborables)<br />
+                      2. Recibirás el número de seguimiento al enviarlo<br />
+                      3. Entrega estimada: 2–5 días laborables en España
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- CTA -->
+                <tr>
+                  <td align="center" style="padding:28px 0 8px;">
+                    <a href="${site}/pedidos" style="display:inline-block;background:#2d4a3e;color:#ffffff;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;font-weight:600;padding:14px 32px;border-radius:10px;">
+                      Ver mis pedidos
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;line-height:1.6;color:#a08c7a;padding-top:8px;">
+                    ¿Dudas? Escríbenos a <a href="mailto:info@inmoalia.com" style="color:#2d4a3e;">info@inmoalia.com</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Pie -->
+          <tr>
+            <td align="center" style="padding:24px 8px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:12px;line-height:1.6;color:#a08c7a;">
+              © ${new Date().getFullYear()} INMOALIA · <a href="${site}" style="color:#2d4a3e;text-decoration:none;">inmoalia.com</a><br />
+              <a href="${site}/devoluciones" style="color:#a08c7a;">Política de devoluciones</a>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+}
+
+export async function sendOrderConfirmation(order: Order) {
+  if (!isResendConfigured()) return
 
   await getResendInstance().emails.send({
     from: `INMOALIA <${FROM}>`,
     to: order.customer_email,
     subject: `Pedido confirmado #${order.order_number} — INMOALIA`,
-    html: `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; background: #fdfcfa; padding: 40px 20px;">
-        <div style="text-align: center; margin-bottom: 40px;">
-          <h1 style="font-size: 28px; font-weight: 700; color: #2a2a2a; letter-spacing: -0.5px; margin: 0;">INMOALIA</h1>
-          <p style="color: #a08c7a; font-size: 13px; margin: 4px 0 0;">Tu hogar, a otro nivel</p>
-        </div>
-        
-        <div style="background: white; border-radius: 12px; padding: 32px; border: 1px solid #e8ddd0; margin-bottom: 24px;">
-          <div style="background: #2d4a3e; color: white; padding: 16px 24px; border-radius: 8px; margin-bottom: 24px; text-align: center;">
-            <p style="margin: 0; font-size: 14px; opacity: 0.8;">Pedido confirmado</p>
-            <p style="margin: 4px 0 0; font-size: 22px; font-weight: 700;">${order.order_number}</p>
-          </div>
-          
-          <p style="color: #2a2a2a; font-size: 15px; margin: 0 0 24px;">Hola ${address.full_name},</p>
-          <p style="color: #6b5344; font-size: 15px; margin: 0 0 24px; line-height: 1.6;">
-            Hemos recibido tu pedido y ya estamos procesándolo. Te notificaremos cuando sea enviado.
-          </p>
-          
-          <h3 style="color: #2a2a2a; font-size: 16px; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 1px solid #e8ddd0;">
-            Resumen del pedido
-          </h3>
-          <pre style="font-family: inherit; color: #6b5344; font-size: 14px; line-height: 1.8; margin: 0 0 24px; white-space: pre-wrap;">${itemsList}</pre>
-          
-          <div style="background: #f9f6f1; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-              <span style="color: #a08c7a; font-size: 14px;">Subtotal</span>
-              <span style="color: #2a2a2a; font-size: 14px;">${formatPrice(order.subtotal)}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-              <span style="color: #a08c7a; font-size: 14px;">Envío</span>
-              <span style="color: ${order.shipping_cost === 0 ? '#27ae60' : '#2a2a2a'}; font-size: 14px;">${order.shipping_cost === 0 ? 'GRATIS' : formatPrice(order.shipping_cost)}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding-top: 8px; border-top: 1px solid #e8ddd0;">
-              <span style="color: #2a2a2a; font-size: 16px; font-weight: 700;">Total</span>
-              <span style="color: #2d4a3e; font-size: 16px; font-weight: 700;">${formatPrice(order.total)}</span>
-            </div>
-          </div>
-          
-          <h3 style="color: #2a2a2a; font-size: 16px; margin: 0 0 12px;">Dirección de entrega</h3>
-          <p style="color: #6b5344; font-size: 14px; line-height: 1.6; margin: 0;">
-            ${address.full_name}<br/>
-            ${address.address_line1}${address.address_line2 ? ', ' + address.address_line2 : ''}<br/>
-            ${address.postal_code} ${address.city}, ${address.province}<br/>
-            ${address.country}
-          </p>
-          
-          <div style="background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 8px; padding: 16px; margin: 24px 0;">
-            <h3 style="color: #2a2a2a; font-size: 15px; margin: 0 0 12px;">
-              📦 Información de entrega
-            </h3>
-            <p style="color: #6b5344; font-size: 14px; line-height: 1.7; margin: 0 0 8px;">
-              <strong>Tiempo estimado:</strong> 24-48 horas (productos en stock)<br/>
-            </p>
-            <p style="color: #6b5344; font-size: 13px; line-height: 1.6; margin: 0;">
-              <strong>Importante:</strong> Revisa tu pedido al recibirlo. Si observas algún daño, contacta con nosotros en las primeras 48 horas escribiendo a info@inmoalia.com. Conserva el embalaje original.
-            </p>
-          </div>
-          
-          <p style="color: #6b5344; font-size: 14px; line-height: 1.65; margin: 24px 0 0;">
-            <strong>Devoluciones:</strong> puedes iniciar cambios hasta <strong>30 días naturales</strong> tras la entrega según nuestra
-            <a href="${site}/devoluciones" style="color: #2d4a3e;"> política de devoluciones</a>.
-            Gastos habituales por devoluciones no preferentes pueden ser a cargo del comprador salvo defecto de fabricación o error nuestro.
-          </p>
-          <p style="color: #6b5344; font-size: 14px; line-height: 1.65; margin: 14px 0 0;">
-            Sigue tu pedido en <a href="${site}/pedidos" style="color: #2d4a3e;">Mis pedidos</a> dentro de <a href="${site}/cuenta" style="color: #2d4a3e;">Mi cuenta</a>.
-          </p>
-        </div>
-        
-        <div style="text-align: center; color: #a08c7a; font-size: 12px; line-height: 1.6;">
-          <p>© 2025 INMOALIA — inmoalia.com</p>
-          <p>Si tienes preguntas, contáctanos en <a href="mailto:info@inmoalia.com" style="color: #2d4a3e;">info@inmoalia.com</a></p>
-        </div>
-      </div>
-    `,
+    html: buildOrderConfirmationHtml(order),
   })
 }
 
@@ -352,12 +470,5 @@ export async function sendAbandonedCartReminder({ to, resumeUrl, productNames }:
       </div>
     `,
   })
-}
-
-function formatPrice(amount: number): string {
-  return new Intl.NumberFormat('es-ES', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(amount)
 }
 

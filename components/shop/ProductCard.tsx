@@ -11,6 +11,7 @@ import { useFavoritesStore } from '@/store/favorites'
 import { formatPrice } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import { getDiscountPercent, getListPrice } from '@/lib/shop/product-pricing'
+import ProductShippingLine from '@/components/shop/ProductShippingLine'
 import type { Product } from '@/lib/supabase/types'
 
 interface ProductCardProps {
@@ -210,6 +211,8 @@ export default function ProductCard({ product, priority = false, hideFavoriteBut
               </span>
             )}
           </div>
+
+          <ProductShippingLine price={product.price} variant="compact" />
 
           {/* Material tag */}
           {product.material && (

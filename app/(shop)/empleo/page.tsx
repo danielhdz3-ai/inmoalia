@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Briefcase } from 'lucide-react'
+import { shopPageMetadata } from '@/lib/seo/page-metadata'
 
-export const metadata: Metadata = {
-  title: 'Trabaja con nosotros — INMOALIA',
-  description: 'Únete al equipo de INMOALIA. Somos una startup de e-commerce en crecimiento.',
-}
+export const metadata: Metadata = shopPageMetadata(
+  'Trabaja con nosotros — INMOALIA',
+  'Únete al equipo de INMOALIA. Somos una startup de e-commerce en crecimiento.',
+  '/empleo',
+)
 
 export default function EmpleoPage() {
   return (

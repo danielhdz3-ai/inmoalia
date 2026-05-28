@@ -1,12 +1,12 @@
 import Link from 'next/link'
-import { Globe, Mail, MessageCircle } from 'lucide-react'
+import { Globe, Mail } from 'lucide-react'
 import NewsletterForm from '@/components/shop/NewsletterForm'
-import { getWhatsAppUrl } from '@/lib/contact'
+import { SUPPORT_EMAIL } from '@/lib/support'
 
 const FOOTER_LINKS = {
   'Tienda': [
-    { label: 'Novedades', href: '/productos?sort=newest' },
-    { label: 'Más vendidos', href: '/productos?sort=popular' },
+    { label: 'Novedades', href: '/productos' },
+    { label: 'Más vendidos', href: '/colecciones' },
     { label: 'Ofertas', href: '/categorias/ofertas' },
     { label: 'Colecciones', href: '/colecciones' },
     { label: 'Sillas de oficina', href: '/colecciones/sillas-oficina' },
@@ -76,6 +76,12 @@ export default function Footer() {
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex flex-col items-center md:items-start gap-1">
             <span className="text-lg font-bold tracking-tight">INMOALIA</span>
+            <a
+              href={`mailto:${SUPPORT_EMAIL}`}
+              className="text-sm text-white/60 hover:text-white transition-colors"
+            >
+              {SUPPORT_EMAIL}
+            </a>
             <span className="text-white/40 text-xs">© {new Date().getFullYear()} INMOALIA. Todos los derechos reservados.</span>
           </div>
 
@@ -104,20 +110,11 @@ export default function Footer() {
               <Globe className="w-4 h-4" />
             </a>
             <a
-              href="mailto:info@inmoalia.com"
+              href={`mailto:${SUPPORT_EMAIL}`}
               className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-white/60 hover:text-white"
               aria-label="Email"
             >
               <Mail className="w-4 h-4" />
-            </a>
-            <a
-              href={getWhatsAppUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-white/60 hover:text-white"
-              aria-label="WhatsApp"
-            >
-              <MessageCircle className="w-4 h-4" />
             </a>
           </div>
         </div>

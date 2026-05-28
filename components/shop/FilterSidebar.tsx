@@ -14,7 +14,7 @@ const CATEGORIES = [
   { slug: 'sillas', name: 'Sillas y butacas' },
   { slug: 'iluminacion', name: 'Iluminación' },
   { slug: 'textil', name: 'Textil hogar' },
-  { slug: 'hogar', name: 'Hogar' },
+  { slug: 'muebles', name: 'Muebles' },
 ]
 
 const PRICE_RANGES = [
@@ -42,9 +42,11 @@ export default function FilterSidebar({ currentParams }: FilterSidebarProps) {
     const params = new URLSearchParams()
     const merged = { ...currentParams, ...overrides }
     Object.entries(merged).forEach(([k, v]) => {
-      if (v) params.set(k, v)
+      // categoria ya está en la ruta /categorias/[slug]; no duplicar en query (SEO).
+      if (v && k !== 'categoria') params.set(k, v)
     })
-    return `${pathname}?${params.toString()}`
+    const qs = params.toString()
+    return qs ? `${pathname}?${qs}` : pathname
   }
 
   const clearUrl = () => pathname

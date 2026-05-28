@@ -1,0 +1,2 @@
+-- Reorganización categorías + producto test Stripe 5€
+-- Ejecutado vía scripts/fix-categories-and-test-product.mjs

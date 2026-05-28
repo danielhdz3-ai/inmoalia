@@ -2,8 +2,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Package } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { getOrdersForUser } from '@/lib/orders/queries'
 import PedidosListaClient from '@/components/account/PedidosListaClient'
-import type { Order } from '@/lib/supabase/types'
 
 export default async function PedidosPage() {
   const supabase = await createClient()
@@ -11,13 +11,7 @@ export default async function PedidosPage() {
 
   if (!user) redirect('/login')
 
-  const { data: rawOrders } = await supabase
-    .from('orders')
-    .select('*')
-    .eq('customer_id', user.id)
-    .order('created_at', { ascending: false })
-
-  const orders = (rawOrders as unknown as Order[]) ?? []
+  const orders = await getOrdersForUser(user)
 
   return (
     <div className="max-w-4xl lg:max-w-none">

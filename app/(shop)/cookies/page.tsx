@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
+import { shopPageMetadata } from '@/lib/seo/page-metadata'
 
-export const metadata: Metadata = {
-  title: 'Política de cookies — INMOALIA',
-  description: 'Información sobre el uso de cookies en INMOALIA.',
-}
+export const metadata: Metadata = shopPageMetadata(
+  'Política de cookies — INMOALIA',
+  'Información sobre el uso de cookies en INMOALIA.',
+  '/cookies',
+)
 
 const COOKIES = [
   { nombre: 'inmoalia-cart', tipo: 'Técnica', finalidad: 'Almacena los artículos del carrito de compra en tu navegador.', duracion: 'Persistente (localStorage)', tercero: 'No' },

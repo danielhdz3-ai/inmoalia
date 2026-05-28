@@ -1,16 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe/client'
+import { toStripeProductImages } from '@/lib/stripe/checkout-images'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import type { CartItem } from '@/store/cart'
 import type { ShippingAddress, Product } from '@/lib/supabase/types'
 import { getShippingCostEuros } from '@/lib/shop/shipping'
+import { absoluteUrl } from '@/lib/site'
 
 function getAdminClient() {
   return createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
+}
+
+function getStripePaymentMethodTypes(): ['card'] | ['card', 'bizum'] {
+  if (process.env.STRIPE_ENABLE_BIZUM === 'true') {
+    return ['card', 'bizum']
+  }
+  return ['card']
 }
 
 export async function POST(req: NextRequest) {
@@ -113,7 +122,7 @@ export async function POST(req: NextRequest) {
         currency: 'eur',
         product_data: {
           name: item.name,
-          images: item.image ? [item.image] : [],
+          images: toStripeProductImages(item.image),
         },
         unit_amount: Math.round(item.price * 100),
       },
@@ -151,15 +160,17 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const paymentMethodTypes = getStripePaymentMethodTypes()
+
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
-      // Bizum en Stripe (ES); el tipo del SDK no lista 'bizum' aún
+      // Bizum no está en los tipos del SDK; activar con STRIPE_ENABLE_BIZUM=true en Stripe Dashboard
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      payment_method_types: ['card', 'bizum'] as any,
+      payment_method_types: paymentMethodTypes as any,
       line_items: lineItems,
       ...(stripeDiscounts.length > 0 ? { discounts: stripeDiscounts } : {}),
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout/exito?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/carrito`,
+      success_url: `${absoluteUrl('/checkout/exito')}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: absoluteUrl('/carrito'),
       customer_email: user?.email ?? shippingAddress.email,
       metadata: {
         customer_id: user?.id ?? '',

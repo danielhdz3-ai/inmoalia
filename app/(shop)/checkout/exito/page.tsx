@@ -3,16 +3,21 @@ import Link from 'next/link'
 import { CheckCircle2, Package, Mail, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { stripe } from '@/lib/stripe/client'
+import { fulfillOrderFromStripeSession } from '@/lib/stripe/fulfill-order'
 import { formatPrice, formatDate } from '@/lib/utils'
 import type { OrderItem } from '@/lib/supabase/types'
 import CartClearer from './CartClearer'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = {
-  title: 'Pedido confirmado — INMOALIA',
-  description: 'Tu pedido ha sido confirmado y está siendo procesado.',
-}
+import { shopPageMetadata } from '@/lib/seo/page-metadata'
+
+export const metadata: Metadata = shopPageMetadata(
+  'Pedido confirmado — INMOALIA',
+  'Tu pedido ha sido confirmado y está siendo procesado.',
+  '/checkout/exito',
+  { noindex: true },
+)
 
 interface PageProps {
   searchParams: Promise<{ session_id?: string }>
@@ -32,6 +37,10 @@ async function getSessionDetails(sessionId: string) {
 export default async function CheckoutExitoPage({ searchParams }: PageProps) {
   const { session_id } = await searchParams
   const session = session_id ? await getSessionDetails(session_id) : null
+
+  if (session?.payment_status === 'paid') {
+    await fulfillOrderFromStripeSession(session)
+  }
 
   const items: OrderItem[] = session?.metadata?.items
     ? JSON.parse(session.metadata.items)

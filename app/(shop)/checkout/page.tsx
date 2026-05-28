@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCart } from '@/hooks/useCart'
-import { getShippingCostEuros } from '@/lib/shop/shipping'
 import { formatPrice } from '@/lib/utils'
 import { Lock, Loader2, Tag, X, CheckCircle, Truck, Clock, Shield } from 'lucide-react'
 import Image from 'next/image'
@@ -138,8 +137,7 @@ export default function CheckoutPage() {
       : Math.min(appliedCoupon.discount_value, subtotal)
     : 0
   const discountedSubtotal = Math.max(0, subtotal - discountAmount)
-  const shippingCostFinal = getShippingCostEuros(discountedSubtotal)
-  const total = discountedSubtotal + shippingCostFinal
+  const total = discountedSubtotal
   const ivaAmount = calcIva(total)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -461,55 +459,14 @@ export default function CheckoutPage() {
               <h3 className="text-base font-semibold text-[#2a2a2a]">Información de envío</h3>
             </div>
 
-            {/* Tabla de costos */}
             <div className="bg-white rounded-xl p-4 mb-4">
-              <p className="text-xs font-medium text-[#2a2a2a] mb-3">Costos de envío según importe del pedido:</p>
-              <div className="space-y-2">
-                {[
-                  { range: 'Hasta 60€', cost: '22€' },
-                  { range: '60€ - 120€', cost: '28€' },
-                  { range: '120€ - 190€', cost: '33€' },
-                  { range: '190€ - 300€', cost: '39€' },
-                  { range: '300€ - 400€', cost: '45€' },
-                  { range: '400€ - 500€', cost: '49€' },
-                  { range: '500€ - 599€', cost: '59€' },
-                ].map(({ range, cost }) => {
-                  const isCurrentRange = 
-                    (range === 'Hasta 60€' && discountedSubtotal <= 60) ||
-                    (range === '60€ - 120€' && discountedSubtotal > 60 && discountedSubtotal <= 120) ||
-                    (range === '120€ - 190€' && discountedSubtotal > 120 && discountedSubtotal <= 190) ||
-                    (range === '190€ - 300€' && discountedSubtotal > 190 && discountedSubtotal <= 300) ||
-                    (range === '300€ - 400€' && discountedSubtotal > 300 && discountedSubtotal <= 400) ||
-                    (range === '400€ - 500€' && discountedSubtotal > 400 && discountedSubtotal <= 500) ||
-                    (range === '500€ - 599€' && discountedSubtotal > 500 && discountedSubtotal < 600)
-                  
-                  return (
-                    <div 
-                      key={range} 
-                      className={`flex justify-between text-xs py-1.5 px-2 rounded ${
-                        isCurrentRange ? 'bg-[#2d4a3e]/10 font-medium text-[#2d4a3e]' : 'text-[#6b5344]'
-                      }`}
-                    >
-                      <span>{range}</span>
-                      <span>{cost}</span>
-                    </div>
-                  )
-                })}
-                <div className="flex justify-between text-sm py-2 px-2 rounded bg-gradient-to-r from-[#27ae60]/10 to-[#27ae60]/5 border border-[#27ae60]/20 font-bold text-[#27ae60]">
-                  <span>600€ o más</span>
-                  <span className="flex items-center gap-1">
-                    ✨ GRATIS
-                  </span>
-                </div>
-              </div>
-              {discountedSubtotal < 600 && (
-                <p className="text-xs text-[#a08c7a] mt-3 text-center">
-                  ¡Solo te faltan {formatPrice(600 - discountedSubtotal)} para envío gratis! 🎉
-                </p>
-              )}
+              <p className="text-sm text-[#2d4a3e] font-medium mb-1">Envío incluido en el precio</p>
+              <p className="text-xs text-[#6b5344]">
+                El importe que pagas ya incluye el transporte a domicilio. No se añaden gastos de envío al finalizar la
+                compra.
+              </p>
             </div>
 
-            {/* Detalles de entrega */}
             <div className="space-y-3">
               <div className="flex items-start gap-3">
                 <Clock className="w-4 h-4 text-[#2d4a3e] mt-0.5 shrink-0" />
@@ -564,9 +521,7 @@ export default function CheckoutPage() {
               )}
               <div className="flex justify-between text-sm">
                 <span className="text-[#6b5344]">Envío</span>
-                <span className={shippingCostFinal === 0 ? 'text-[#27ae60] font-medium' : 'text-[#2a2a2a]'}>
-                  {shippingCostFinal === 0 ? 'GRATIS' : formatPrice(shippingCostFinal)}
-                </span>
+                <span className="text-[#27ae60] font-medium">Incluido</span>
               </div>
               <div className="flex justify-between text-xs text-[#a08c7a] pt-1">
                 <span>IVA 21% (incluido)</span>

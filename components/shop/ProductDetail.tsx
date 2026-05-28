@@ -26,12 +26,14 @@ import { useFavoritesStore } from '@/store/favorites'
 import { formatPrice } from '@/lib/utils'
 import { toastOk, toastErr } from '@/lib/toast-client'
 import { getDiscountAmount, getDiscountPercent, getListPrice } from '@/lib/shop/product-pricing'
+import { SUPPORT_EMAIL } from '@/lib/support'
 import type { ProductFaqItem } from '@/lib/seo/product-faq'
 import type { Product } from '@/lib/supabase/types'
 import ProductCard from './ProductCard'
 import WaitlistForm from './WaitlistForm'
-import WhatsAppButton from './WhatsAppButton'
 import ProductFaqAccordion from './ProductFaqAccordion'
+import ProductShippingLine from './ProductShippingLine'
+import ProductContactEmail from './ProductContactEmail'
 
 interface ProductDetailProps {
   product: Product
@@ -281,6 +283,8 @@ export default function ProductDetail({
             )}
           </div>
 
+          <ProductShippingLine price={product.price} variant="detail" />
+
           {/* Stock */}
           <div className="flex flex-col gap-2 mb-6">
             <div className="flex items-center gap-2">
@@ -324,7 +328,7 @@ export default function ProductDetail({
               </Button>
             </div>
 
-            <WhatsAppButton productName={product.name} productSlug={product.slug} className="w-full" />
+            <ProductContactEmail productName={product.name} productSlug={product.slug} />
 
             {product.stock > 0 ? (
               <div className="flex items-center gap-4 flex-wrap pt-2">
@@ -373,7 +377,10 @@ export default function ProductDetail({
           {/* Benefits */}
           <div className="space-y-3 py-6 border-t border-[#e8ddd0]">
             {[
-              { icon: Truck, text: 'Envío gratis en pedidos desde 600€. Entrega en 2-5 días.' },
+              {
+                icon: Truck,
+                text: 'Envío incluido en el precio. Entrega en 2–5 días laborables.',
+              },
               { icon: Shield, text: 'Pago 100% seguro con cifrado SSL. Stripe certificado.' },
               { icon: RotateCcw, text: 'Devolución gratuita en 30 días sin preguntas.' },
             ].map((item) => (
@@ -426,7 +433,7 @@ export default function ProductDetail({
                 {product.tags.map((tag) => (
                   <Link
                     key={tag}
-                    href={`/productos?q=${encodeURIComponent(tag)}`}
+                    href={`/buscar?q=${encodeURIComponent(tag)}`}
                     className="text-xs px-2.5 py-1 rounded-full border border-[#e8ddd0] text-[#6b5344] hover:border-[#2d4a3e] hover:text-[#2d4a3e] transition-colors"
                   >
                     #{tag}

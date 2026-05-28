@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
+import { shopPageMetadata } from '@/lib/seo/page-metadata'
 
-export const metadata: Metadata = {
-  title: 'Política de privacidad — INMOALIA',
-  description: 'Información sobre cómo INMOALIA trata y protege tus datos personales.',
-}
+export const metadata: Metadata = shopPageMetadata(
+  'Política de privacidad — INMOALIA',
+  'Información sobre cómo INMOALIA trata y protege tus datos personales.',
+  '/privacidad',
+)
 
 export default function PrivacidadPage() {
   return (

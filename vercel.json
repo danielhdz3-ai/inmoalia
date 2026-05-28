@@ -5,16 +5,6 @@
   "regions": ["cdg1"],
   "redirects": [
     {
-      "source": "/categorias/muebles",
-      "destination": "/categorias/hogar",
-      "permanent": true
-    },
-    {
-      "source": "/categorias/muebles/:path*",
-      "destination": "/categorias/hogar/:path*",
-      "permanent": true
-    },
-    {
       "source": "/categorias/estanterias",
       "destination": "/categorias/salon",
       "permanent": true
@@ -22,6 +12,16 @@
     {
       "source": "/categorias/estanterias/:path*",
       "destination": "/categorias/salon/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/categorias/decoracion",
+      "destination": "/categorias/hogar",
+      "permanent": true
+    },
+    {
+      "source": "/categorias/decoracion/:path*",
+      "destination": "/categorias/hogar/:path*",
       "permanent": true
     },
     {

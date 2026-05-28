@@ -1,8 +1,8 @@
 import { formatPrice } from '@/lib/utils'
+import { SUPPORT_EMAIL } from '@/lib/support'
 import type { ProductBundle } from '@/lib/content/bundles'
 import type { Product } from '@/lib/supabase/types'
 import ProductCard from './ProductCard'
-import Link from 'next/link'
 
 interface ProductBundleBlockProps {
   bundle: ProductBundle
@@ -44,9 +44,9 @@ export default function ProductBundleBlock({ bundle, products, currentSlug }: Pr
 
       <p className="text-xs text-[#a08c7a]">
         Añade cada producto al carrito por separado. Descuento pack aplicable contactando por{' '}
-        <Link href="/contacto" className="text-[#2d4a3e] underline">
-          WhatsApp
-        </Link>{' '}
+        <a href={`mailto:${SUPPORT_EMAIL}`} className="text-[#2d4a3e] underline">
+          {SUPPORT_EMAIL}
+        </a>{' '}
         con referencia <strong>{bundle.slug}</strong>.
       </p>
     </section>

@@ -52,7 +52,7 @@ El pistón de gas debe permitir que tus pies apoyen en el suelo con rodillas a 9
 
 ## 5. Consejo final
 
-Mide el espacio disponible (ancho × fondo) antes de comprar. Si dudas entre dos modelos, [escríbenos por WhatsApp](/contacto) con tu altura y horas de uso — te orientamos sin compromiso.
+Mide el espacio disponible (ancho × fondo) antes de comprar. Si dudas entre dos modelos, consulta las medidas en cada ficha o revisa nuestra [guía de sillas](/blog/como-elegir-sillon-oficina-ergonomico).
 
 Explora toda la [colección de sillas de oficina](/colecciones/sillas-oficina) con envío en 2–5 días laborables.`,
   },

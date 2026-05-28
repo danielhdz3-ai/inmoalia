@@ -1,5 +1,6 @@
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getOrderForUser } from '@/lib/orders/queries'
 import Link from 'next/link'
 import { Package, ChevronLeft, MapPin, Truck, CreditCard, RotateCcw } from 'lucide-react'
 import PrintPedidoButton from '@/components/account/PrintPedidoButton'
@@ -28,16 +29,8 @@ export default async function PedidoDetailPage({ params }: Props) {
 
   if (!user) redirect('/login')
 
-  const { data: rawOrder } = await supabase
-    .from('orders')
-    .select('*')
-    .eq('id', id)
-    .eq('customer_id', user.id)
-    .single()
-
-  if (!rawOrder) notFound()
-
-  const order = rawOrder as unknown as Order
+  const order = await getOrderForUser(id, user)
+  if (!order) notFound()
   const items = order.items as unknown as OrderItem[]
   const address = order.shipping_address as unknown as ShippingAddress
   const status = STATUS_CONFIG[order.status] ?? { label: order.status, color: 'text-[#a08c7a]', bg: 'bg-[#a08c7a]/10', step: 0 }

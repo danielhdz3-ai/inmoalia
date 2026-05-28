@@ -86,6 +86,7 @@ export const useCartStore = create<CartState>()(
       },
 
       getTotal: () => {
+        const items = get().items
         const subtotal = get().getSubtotal()
         return subtotal + getShippingCostEuros(subtotal)
       },

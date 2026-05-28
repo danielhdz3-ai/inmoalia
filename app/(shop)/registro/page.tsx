@@ -45,24 +45,14 @@ export default function RegistroPage() {
     setLoading(true)
     const { error, session } = await signUp(form.email, form.password, form.fullName)
     if (error) {
-      const raw = (error.message || '').toLowerCase()
-      if (error.message === 'User already registered') {
+      if (error.message?.includes('Ya existe')) {
         setError('Ya existe una cuenta con ese email. Prueba a iniciar sesión.')
-      } else if (
-        raw.includes('confirmation email')
-        || raw.includes('sending confirmation')
-        || raw.includes('error sending')
-      ) {
-        setError(
-          'No se pudo enviar el email de confirmación. En el panel de Supabase revisa Authentication → SMTP (p. ej. Resend) o, si prefieres acceso inmediato, desactiva “Confirm email” en Email. Mientras tanto puedes registrarte con Google o escribir a info@inmoalia.com.'
-        )
       } else {
         setError(error.message || 'Error al crear la cuenta. Inténtalo de nuevo.')
       }
       setLoading(false)
       return
     }
-    // Si “Confirm email” está desactivado en Supabase, llega sesión y el usuario entra al momento.
     if (session) {
       router.push('/cuenta')
       router.refresh()
@@ -70,6 +60,7 @@ export default function RegistroPage() {
       return
     }
     setSuccess(true)
+    setLoading(false)
   }
 
   const handleGoogle = async () => {
@@ -91,8 +82,9 @@ export default function RegistroPage() {
           </div>
           <h1 className="text-2xl font-bold text-[#2a2a2a] mb-2">¡Cuenta creada!</h1>
           <p className="text-[#a08c7a] mb-6">
-            Hemos enviado un email de confirmación a <strong>{form.email}</strong>.<br />
-            Confírmalo para activar tu cuenta.
+            Tu cuenta con <strong>{form.email}</strong> está lista.
+            <br />
+            Inicia sesión para acceder a tu área personal.
           </p>
           <Button asChild>
             <Link href="/login">Ir a iniciar sesión</Link>

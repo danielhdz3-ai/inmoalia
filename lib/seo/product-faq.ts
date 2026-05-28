@@ -1,5 +1,5 @@
 import type { Product } from '@/lib/supabase/types'
-import { formatPrice } from '@/lib/utils'
+import { SUPPORT_EMAIL } from '@/lib/support'
 
 export interface ProductFaqItem {
   question: string
@@ -52,13 +52,14 @@ export function buildProductFaqs(product: Product): ProductFaqItem[] {
 
   faqs.push({
     question: '¿Cuánto cuesta el envío?',
-    answer: `El envío es gratuito en pedidos desde ${formatPrice(600)}. En pedidos inferiores, el coste se calcula en el checkout según destino.`,
+    answer:
+      'El envío está incluido en el precio que ves. No se añaden gastos de transporte al pagar. Entrega en 2–5 días laborables en península.',
   })
 
   faqs.push({
     question: '¿Puedo devolver el producto?',
     answer:
-      'Dispones de 30 días para devoluciones. Consulta nuestra política en la página de devoluciones o escríbenos por WhatsApp si tienes dudas sobre medidas o compatibilidad.',
+      `Dispones de 30 días para devoluciones. Consulta nuestra política en la página de devoluciones o escríbenos a ${SUPPORT_EMAIL} si tienes dudas sobre medidas o compatibilidad.`,
   })
 
   return faqs

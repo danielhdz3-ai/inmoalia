@@ -5,19 +5,18 @@ import {
   extractSessionData,
   paymentIntentIdFromCharge,
 } from '@/lib/stripe/webhooks'
+import { fulfillOrderFromStripeSession } from '@/lib/stripe/fulfill-order'
+import { stripe } from '@/lib/stripe/client'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import { sendOrderConfirmation, sendOrderRefundNotice } from '@/lib/resend/emails'
-import { createDropXLOrder } from '@/lib/providers/dropxl'
-import { createDropperyOrder } from '@/lib/providers/droppery'
-import { generateOrderNumber } from '@/lib/utils'
-import type { OrderItem, ShippingAddress, Order } from '@/lib/supabase/types'
+import { sendOrderRefundNotice } from '@/lib/resend/emails'
+import type { Order } from '@/lib/supabase/types'
 
 export const runtime = 'nodejs'
 
 function getSupabaseService() {
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
   )
 }
 
@@ -84,104 +83,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No session data' }, { status: 400 })
   }
 
-  const supabase = getSupabaseService()
-
   try {
-    // Parsear items del metadata
-    const items: OrderItem[] = JSON.parse(session.metadata?.items ?? '[]')
-    const shippingAddress: ShippingAddress = JSON.parse(session.metadata?.shipping_address ?? '{}')
-    const customerId = session.metadata?.customer_id ?? null
-    const customerEmail = session.customer_email ?? ''
-    const subtotal = (session.amount_subtotal ?? 0) / 100
-    const total = (session.amount_total ?? 0) / 100
-    const shippingCost = total - subtotal
+    const fullSession = await stripe.checkout.sessions.retrieve(session.id)
+    const result = await fulfillOrderFromStripeSession(fullSession)
 
-    // Crear el pedido en Supabase
-    const insertData = {
-      order_number: generateOrderNumber(),
-      customer_id: customerId || null,
-      customer_email: customerEmail,
-      status: 'paid' as const,
-      stripe_session_id: session.id,
-      stripe_payment_id: typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id ?? null,
-      items: items as unknown as Order['items'],
-      shipping_address: shippingAddress as unknown as Order['shipping_address'],
-      subtotal,
-      shipping_cost: shippingCost,
-      total,
+    if (result.status === 'fulfilled') {
+      return NextResponse.json({
+        success: true,
+        orderId: result.order.id,
+        created: result.created,
+      })
     }
 
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .insert(insertData as never)
-      .select()
-      .single()
-
-    if (orderError || !order) {
-      console.error('Error creating order:', orderError)
-      return NextResponse.json({ error: 'Failed to create order' }, { status: 500 })
+    if (result.status === 'skipped') {
+      console.warn('[webhook] skipped:', result.reason, session.id)
+      return NextResponse.json({ received: true, skipped: result.reason })
     }
 
-    // Decrementar stock de cada producto vendido
-    try {
-      const productIds = items.map((i) => i.product_id)
-      const { data: currentProducts } = await supabase
-        .from('products')
-        .select('id, stock')
-        .in('id', productIds)
-
-      if (currentProducts) {
-        await Promise.all(
-          items.map((item) => {
-            const current = (currentProducts as { id: string; stock: number }[]).find(
-              (p) => p.id === item.product_id
-            )
-            if (!current) return Promise.resolve()
-            const newStock = Math.max(0, current.stock - item.quantity)
-            return supabase
-              .from('products')
-              .update({ stock: newStock } as never)
-              .eq('id', item.product_id)
-          })
-        )
-      }
-    } catch (stockErr) {
-      console.error('Error decrementing stock:', stockErr)
-    }
-
-    // Crear pedido en el proveedor según supplier
-    const suppliers = [...new Set(items.map((i) => i.supplier).filter(Boolean))]
-
-    for (const supplier of suppliers) {
-      try {
-        let supplierOrderId: string | undefined
-
-        if (supplier === 'dropxl') {
-          const dropxlOrder = await createDropXLOrder(order as unknown as Order)
-          supplierOrderId = dropxlOrder.id
-        } else if (supplier === 'droppery') {
-          const dropperyOrder = await createDropperyOrder(order as unknown as Order)
-          supplierOrderId = dropperyOrder.order_id
-        }
-
-        if (supplierOrderId) {
-          await supabase
-            .from('orders')
-            .update({ supplier_order_id: supplierOrderId, status: 'processing' } as never)
-            .eq('id', (order as unknown as Order).id)
-        }
-      } catch (err) {
-        console.error(`Error placing order with ${supplier}:`, err)
-      }
-    }
-
-    try {
-      await sendOrderConfirmation(order as unknown as Order)
-    } catch (err) {
-      console.error('Error sending confirmation email:', err)
-    }
-
-    return NextResponse.json({ success: true, orderId: (order as unknown as Order).id })
+    console.error('[webhook] fulfill error:', result.reason, session.id)
+    return NextResponse.json({ error: result.reason }, { status: 500 })
   } catch (err) {
     console.error('Webhook processing error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

@@ -13,6 +13,7 @@ export const CATEGORY_META: Record<string, CategoryEntry> = {
   iluminacion: { name: 'Iluminación', description: 'Lámparas de pie, apliques y colgantes para crear la atmósfera perfecta.' },
   textil: { name: 'Textil Hogar', description: 'Cojines, alfombras, mantas y cortinas de materiales naturales premium.' },
   hogar: { name: 'Hogar', description: 'Sofás, salón y piezas para completar tu hogar con estilo.' },
+  muebles: { name: 'Muebles', description: 'Sofás, salón, almacenaje y piezas para completar tu hogar.' },
   ofertas: { name: 'Ofertas', description: 'Las mejores ofertas de nuestra selección con descuentos especiales.' },
   'sofas-butacas': {
     name: 'Sofás y Butacas',

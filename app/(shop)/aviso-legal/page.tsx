@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
+import { shopPageMetadata } from '@/lib/seo/page-metadata'
 
-export const metadata: Metadata = {
-  title: 'Aviso legal — INMOALIA',
-  description: 'Aviso legal e información corporativa de INMOALIA S.L.',
-}
+export const metadata: Metadata = shopPageMetadata(
+  'Aviso legal — INMOALIA',
+  'Aviso legal e información corporativa de INMOALIA S.L.',
+  '/aviso-legal',
+)
 
 export default function AvisoLegalPage() {
   return (

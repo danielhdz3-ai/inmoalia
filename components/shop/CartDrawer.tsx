@@ -7,7 +7,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Button } from '@/components/ui/button'
 import { useCart } from '@/hooks/useCart'
 import { formatPrice } from '@/lib/utils'
-import { FREE_SHIPPING_MIN_EUROS } from '@/lib/shop/shipping'
 
 export default function CartDrawer() {
   const {
@@ -18,9 +17,6 @@ export default function CartDrawer() {
     updateQuantity,
     getItemCount,
     getSubtotal,
-    shippingCost,
-    hasFreeShipping,
-    freeShippingRemaining,
   } = useCart()
 
   const itemCount = getItemCount()
@@ -41,27 +37,11 @@ export default function CartDrawer() {
           </SheetTitle>
         </SheetHeader>
 
-        {/* Free shipping progress */}
-        {!hasFreeShipping && subtotal > 0 && (
-          <div className="px-6 py-3 bg-[#f9f6f1] border-b border-[#e8ddd0]">
-            <div className="flex justify-between text-xs text-[#6b5344] mb-2">
-              <span>¡Te faltan <strong>{formatPrice(freeShippingRemaining)}</strong> para envío gratis!</span>
-              <span className="text-[#a08c7a]">{FREE_SHIPPING_MIN_EUROS}€</span>
-            </div>
-            <div className="h-1.5 bg-[#e8ddd0] rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[#2d4a3e] rounded-full transition-all duration-500"
-                style={{ width: `${Math.min((subtotal / FREE_SHIPPING_MIN_EUROS) * 100, 100)}%` }}
-              />
-            </div>
-          </div>
-        )}
-
-        {hasFreeShipping && (
+        {items.length > 0 && (
           <div className="px-6 py-3 bg-[#2d4a3e]/5 border-b border-[#2d4a3e]/10">
             <p className="text-xs text-[#2d4a3e] font-medium flex items-center gap-1.5">
               <Package className="w-3.5 h-3.5" />
-              ¡Envío gratuito aplicado!
+              Envío incluido en el precio
             </p>
           </div>
         )}
@@ -146,18 +126,12 @@ export default function CartDrawer() {
           <div className="border-t border-[#e8ddd0] px-6 py-5 space-y-3 bg-[#fdfcfa]">
             <div className="space-y-1.5">
               <div className="flex justify-between text-sm">
-                <span className="text-[#6b5344]">Subtotal</span>
-                <span className="text-[#2a2a2a] font-medium">{formatPrice(subtotal)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
                 <span className="text-[#6b5344]">Envío</span>
-                <span className={hasFreeShipping ? 'text-[#27ae60] font-medium' : 'text-[#2a2a2a] font-medium'}>
-                  {hasFreeShipping ? 'GRATIS' : formatPrice(shippingCost)}
-                </span>
+                <span className="text-[#27ae60] font-medium">Incluido</span>
               </div>
               <div className="flex justify-between text-base font-semibold pt-2 border-t border-[#e8ddd0]">
                 <span className="text-[#2a2a2a]">Total</span>
-                <span className="text-[#2d4a3e]">{formatPrice(subtotal + shippingCost)}</span>
+                <span className="text-[#2d4a3e]">{formatPrice(subtotal)}</span>
               </div>
             </div>
 

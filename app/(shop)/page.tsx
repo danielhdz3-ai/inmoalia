@@ -11,23 +11,23 @@ import type { Product } from '@/lib/supabase/types'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'INMOALIA — Hogar, Jardín y Decoración Premium',
+    title: 'INMOALIA — Tienda de Muebles, Jardín y Decoración',
     description:
-      'Descubre muebles y decoración de calidad europea. Selección curada de estilo nórdico y mediterráneo. Envío en 2-5 días laborables.',
+      'Tienda online de muebles y decoración de calidad europea para hogar, jardín y oficina. Envío en 2-5 días. No confundir con agencias inmobiliarias.',
     alternates: { canonical: absoluteUrl('/') },
   }
 }
 
 const CATEGORIES = [
   { slug: 'jardin', name: 'Jardín', emoji: '🌿', image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&q=80' },
-  { slug: 'mesas', name: 'Mesas', emoji: '🪑', image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80' },
+  { slug: 'mesas', name: 'Mesas', emoji: '🪑', image: '/imagenes/productos/mesa-de-oficina-arezzo-160-con-mueble-auxiliar-blanco-y-roble-1.jpg' },
   { slug: 'sillas', name: 'Sillas', emoji: '🛋️', image: 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&q=80' },
   { slug: 'iluminacion', name: 'Iluminación', emoji: '💡', image: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&q=80' },
-  { slug: 'textil', name: 'Textil', emoji: '🧶', image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80' },
+  { slug: 'muebles', name: 'Muebles', emoji: '🛋️', image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80' },
 ]
 
 const BENEFITS = [
-  { icon: Truck, title: 'Envío gratis desde 600€', desc: 'Entrega en 2-5 días laborables en toda España.' },
+  { icon: Truck, title: 'Envío incluido', desc: 'Transporte incluido en el precio. Entrega en 2-5 días laborables.' },
   { icon: Shield, title: 'Pago 100% seguro', desc: 'Stripe. Tarjeta, PayPal, Google Pay y más.' },
   { icon: RotateCcw, title: 'Devoluciones fáciles', desc: '30 días para devoluciones sin preguntas.' },
   { icon: Star, title: 'Calidad seleccionada', desc: 'Cada producto pasa por nuestro control de calidad.' },
@@ -186,7 +186,7 @@ export default async function HomePage() {
                 <p className="text-[#a08c7a]">Los favoritos de nuestra comunidad</p>
               </div>
               <Link
-                href="/productos?featured=true"
+                href="/productos"
                 className="hidden md:flex items-center gap-1.5 text-sm font-medium text-[#2d4a3e] hover:text-[#1e3329] transition-colors"
               >
                 Ver todos <ArrowRight className="w-4 h-4" />
@@ -256,7 +256,7 @@ export default async function HomePage() {
                 <p className="text-[#a08c7a]">Las últimas incorporaciones al catálogo</p>
               </div>
               <Link
-                href="/productos?sort=newest"
+                href="/productos"
                 className="hidden md:flex items-center gap-1.5 text-sm font-medium text-[#2d4a3e] hover:text-[#1e3329] transition-colors"
               >
                 Ver novedades <ArrowRight className="w-4 h-4" />

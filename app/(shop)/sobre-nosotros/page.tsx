@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Leaf, Truck, Shield, Heart } from 'lucide-react'
+import { shopPageMetadata } from '@/lib/seo/page-metadata'
 
-export const metadata: Metadata = {
-  title: 'Sobre INMOALIA — Hogar & Jardín con alma',
-  description: 'Conoce la historia de INMOALIA, nuestra misión y los valores que nos mueven.',
-}
+export const metadata: Metadata = shopPageMetadata(
+  'Sobre INMOALIA — Hogar & Jardín con alma',
+  'Conoce la historia de INMOALIA, nuestra misión y los valores que nos mueven.',
+  '/sobre-nosotros',
+)
 
 const VALUES = [
   { icon: Leaf, title: 'Sostenibilidad', desc: 'Priorizamos materiales y procesos de fabricación con el menor impacto posible, sin renunciar a la estética ni a la longevidad del mueble.' },

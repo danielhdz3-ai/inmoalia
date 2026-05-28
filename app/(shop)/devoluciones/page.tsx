@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { RotateCcw, CheckCircle, Clock, Mail } from 'lucide-react'
+import { shopPageMetadata } from '@/lib/seo/page-metadata'
 
-export const metadata: Metadata = {
-  title: 'Devoluciones — INMOALIA',
-  description: 'Política de devoluciones de INMOALIA. 30 días para devolver tu compra sin preguntas.',
-}
+export const metadata: Metadata = shopPageMetadata(
+  'Devoluciones — INMOALIA',
+  'Política de devoluciones de INMOALIA. 30 días para devolver tu compra sin preguntas.',
+  '/devoluciones',
+)
 
 const STEPS = [
   { step: '01', title: 'Contáctanos', desc: 'Escríbenos a info@inmoalia.com indicando tu número de pedido y el motivo de la devolución. Te responderemos en menos de 24 horas.' },

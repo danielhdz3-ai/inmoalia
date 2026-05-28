@@ -14,8 +14,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-
-const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'info@inmoalia.com'
+import { SUPPORT_EMAIL } from '@/lib/support'
 
 const NAV = [
   { href: '/cuenta', label: 'Resumen', icon: LayoutDashboard },

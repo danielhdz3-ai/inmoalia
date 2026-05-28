@@ -24,11 +24,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: {
-    default: 'INMOALIA — Hogar, Jardín y Decoración Premium',
+    default: 'INMOALIA — Tienda de Muebles, Jardín y Decoración',
     template: '%s | INMOALIA',
   },
   description:
-    'Descubre muebles y decoración de calidad europea para tu hogar y jardín. Selección curada, envío en 2-5 días. Estilo nórdico y mediterráneo a precios justos.',
+    'Tienda online de muebles y decoración de calidad europea para hogar, jardín y oficina. Envío en 2-5 días. No confundir con agencias inmobiliarias.',
   keywords: ['muebles', 'decoración hogar', 'jardín', 'terraza', 'ratán', 'madera', 'iluminación', 'dropshipping hogar'],
   authors: [{ name: 'INMOALIA' }],
   creator: 'INMOALIA',
@@ -39,10 +39,12 @@ export const metadata: Metadata = {
     siteName: 'INMOALIA',
     title: 'INMOALIA — Hogar, Jardín y Decoración Premium',
     description: 'Muebles y decoración de calidad europea. Estilo nórdico y mediterráneo.',
+    images: [{ url: '/logo.png', width: 1024, height: 1024, alt: 'INMOALIA — Hogar y Jardín' }],
   },
   twitter: {
     card: 'summary_large_image',
     site: '@inmoalia',
+    images: ['/logo.png'],
   },
   robots: indexingRobotsMetadata(),
 }

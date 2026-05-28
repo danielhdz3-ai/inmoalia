@@ -4,17 +4,21 @@ import ProductGrid from '@/components/shop/ProductGrid'
 import FilterSidebar from '@/components/shop/FilterSidebar'
 import { SlidersHorizontal } from 'lucide-react'
 import type { Product } from '@/lib/supabase/types'
-import { absoluteUrl } from '@/lib/site'
+import { hasListingFilters, shopPageMetadata } from '@/lib/seo/page-metadata'
 
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: 'Catálogo de Productos',
-    description:
-      'Explora nuestra selección de muebles, decoración y jardín. Filtros por categoría, precio, material y color.',
-    alternates: {
-      canonical: absoluteUrl('/productos'),
-    },
-  }
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>
+}): Promise<Metadata> {
+  const params = await searchParams
+
+  return shopPageMetadata(
+    'Tienda de Muebles — Catálogo Online',
+    'Compra muebles, decoración e iluminación para hogar, jardín y oficina en INMOALIA. Tienda online con envío en 2-5 días. No somos una inmobiliaria.',
+    '/productos',
+    { noindex: hasListingFilters(params) },
+  )
 }
 
 interface SearchParams {

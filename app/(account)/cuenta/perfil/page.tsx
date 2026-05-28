@@ -43,7 +43,7 @@ export default function PerfilPage() {
         .from('customers')
         .select('*')
         .eq('id', user.id)
-        .single()
+        .maybeSingle()
 
       const customer = rawCustomer as unknown as Customer | null
 
@@ -69,22 +69,30 @@ export default function PerfilPage() {
 
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/login'); return }
-
-    // Type cast needed due to Supabase TS generics resolving Insert as never for this table
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const customerData: any = {
-      id: user.id,
-      full_name: fullName.trim() || null,
-      phone: phone.trim() || null,
-      address: address,
+    if (!user) {
+      router.push('/login')
+      setSaving(false)
+      return
     }
-    const { error: upsertError } = await supabase
-      .from('customers')
-      .upsert(customerData)
 
-    if (upsertError) {
-      setError('No se pudieron guardar los cambios. Inténtalo de nuevo.')
+    const res = await fetch('/api/account/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        fullName,
+        phone,
+        address: {
+          ...address,
+          phone: phone.trim() || address.phone,
+        },
+      }),
+    })
+
+    const data = (await res.json()) as { message?: string }
+
+    if (!res.ok) {
+      setError(data.message ?? 'No se pudieron guardar los cambios. Inténtalo de nuevo.')
     } else {
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)

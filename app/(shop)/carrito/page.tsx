@@ -10,7 +10,6 @@ import { useCart } from '@/hooks/useCart'
 import { useCartStore } from '@/store/cart'
 import type { CartItem } from '@/store/cart'
 import { formatPrice } from '@/lib/utils'
-import { FREE_SHIPPING_MIN_EUROS } from '@/lib/shop/shipping'
 
 function sanitizeCartPayload(rawList: unknown): CartItem[] {
   if (!Array.isArray(rawList)) return []
@@ -42,8 +41,7 @@ function CartPageContent() {
   const recoveryToken = searchParams.get('recovery')
   const [recoveryDone, setRecoveryDone] = useState(!recoveryToken)
 
-  const { items, removeItem, updateQuantity, getSubtotal, shippingCost, hasFreeShipping, freeShippingRemaining } =
-    useCart()
+  const { items, removeItem, updateQuantity, getSubtotal } = useCart()
 
   useEffect(() => {
     if (!recoveryToken) return
@@ -101,23 +99,9 @@ function CartPageContent() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Items */}
         <div className="lg:col-span-2 space-y-4">
-          {!hasFreeShipping && (
-            <div className="bg-[#f9f6f1] border border-[#e8ddd0] rounded-xl p-4">
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-[#6b5344]">
-                  ¡Te faltan <strong className="text-[#2a2a2a]">{formatPrice(freeShippingRemaining)}</strong> para
-                  envío gratis!
-                </span>
-                <span className="text-[#a08c7a]">{FREE_SHIPPING_MIN_EUROS}€</span>
-              </div>
-              <div className="h-2 bg-[#e8ddd0] rounded-full">
-                <div
-                  className="h-full bg-[#2d4a3e] rounded-full transition-all"
-                  style={{ width: `${Math.min((subtotal / FREE_SHIPPING_MIN_EUROS) * 100, 100)}%` }}
-                />
-              </div>
-            </div>
-          )}
+          <div className="bg-[#2d4a3e]/5 border border-[#2d4a3e]/10 rounded-xl p-4">
+            <p className="text-sm text-[#2d4a3e] font-medium">Envío incluido en el precio · Entrega en 2–5 días</p>
+          </div>
 
           {items.map((item) => (
             <div key={item.id} className="flex gap-4 bg-white border border-[#e8ddd0] rounded-xl p-4">
@@ -188,14 +172,12 @@ function CartPageContent() {
 
             <div className="space-y-3 mb-5">
               <div className="flex justify-between text-sm">
-                <span className="text-[#6b5344]">Subtotal</span>
+                <span className="text-[#6b5344]">Productos</span>
                 <span className="text-[#2a2a2a] font-medium">{formatPrice(subtotal)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-[#6b5344]">Gastos de envío</span>
-                <span className={hasFreeShipping ? 'text-[#27ae60] font-medium' : 'text-[#2a2a2a] font-medium'}>
-                  {hasFreeShipping ? 'GRATIS' : formatPrice(shippingCost)}
-                </span>
+                <span className="text-[#6b5344]">Envío</span>
+                <span className="text-[#27ae60] font-medium">Incluido</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-[#6b5344]">IVA (incluido)</span>
@@ -206,9 +188,7 @@ function CartPageContent() {
             <div className="border-t border-[#e8ddd0] pt-4 mb-6">
               <div className="flex justify-between">
                 <span className="font-bold text-[#2a2a2a]">Total</span>
-                <span className="text-xl font-bold text-[#2d4a3e]">
-                  {formatPrice(subtotal + shippingCost)}
-                </span>
+                <span className="text-xl font-bold text-[#2d4a3e]">{formatPrice(subtotal)}</span>
               </div>
               <p className="text-xs text-[#a08c7a] mt-1">IVA incluido en el precio final</p>
             </div>

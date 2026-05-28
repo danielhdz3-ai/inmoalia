@@ -45,23 +45,38 @@ export function useAuth() {
   }, [])
 
   const signUp = useCallback(async (email: string, password: string, fullName: string) => {
-    const supabase = createClient()
-    const redirectBase =
-      typeof window !== 'undefined' ? window.location.origin : ''
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName },
-        emailRedirectTo: redirectBase
-          ? `${redirectBase}/api/auth/callback?next=/cuenta`
-          : undefined,
-      },
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ email, password, fullName }),
     })
+
+    const data = (await res.json()) as {
+      error?: string
+      message?: string
+      session?: boolean
+      success?: boolean
+    }
+
+    if (!res.ok) {
+      return {
+        error: { message: data.message ?? 'Error al crear la cuenta.' },
+        session: null,
+        errorCode: data.error ?? null,
+      }
+    }
+
+    const supabase = createClient()
+    if (data.session !== false) {
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    }
+    const { data: sessionData } = await supabase.auth.getSession()
+
     return {
-      error,
-      session: data.session,
-      errorCode: error?.code ?? null,
+      error: null,
+      session: data.session === false ? null : sessionData.session,
+      errorCode: null,
     }
   }, [])
 
