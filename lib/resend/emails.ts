@@ -404,6 +404,129 @@ export async function sendOrderConfirmation(order: Order) {
   })
 }
 
+const ORDER_STATUS_LABELS: Record<Order['status'], string> = {
+  pending: 'Pendiente',
+  paid: 'Pagado',
+  processing: 'En proceso',
+  shipped: 'Enviado',
+  delivered: 'Entregado',
+  cancelled: 'Cancelado',
+}
+
+const ORDER_STATUS_UPDATE_COPY: Partial<
+  Record<Order['status'], { headline: string; body: string; subjectSuffix: string }>
+> = {
+  paid: {
+    headline: 'Pago confirmado',
+    body: 'Hemos confirmado el pago de tu pedido. En breve comenzaremos a prepararlo.',
+    subjectSuffix: 'pago confirmado',
+  },
+  processing: {
+    headline: 'Tu pedido está en preparación',
+    body: 'Estamos preparando tu pedido en nuestro almacén. Te avisaremos cuando salga hacia tu dirección.',
+    subjectSuffix: 'en preparación',
+  },
+  delivered: {
+    headline: 'Pedido entregado',
+    body: 'Tu pedido figura como entregado. Esperamos que disfrutes de tu compra.',
+    subjectSuffix: 'entregado',
+  },
+}
+
+export async function sendOrderStatusEmail(order: Order, notifyStatus: Order['status']) {
+  if (!isResendConfigured()) return
+
+  const copy = ORDER_STATUS_UPDATE_COPY[notifyStatus]
+  if (!copy) return
+
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://inmoalia.com'
+  const address = order.shipping_address as unknown as ShippingAddress
+  const who = escapeHtml(address.full_name?.trim() || order.customer_email)
+  const statusLabel = ORDER_STATUS_LABELS[notifyStatus]
+
+  await getResendInstance().emails.send({
+    from: `INMOALIA <${FROM}>`,
+    to: order.customer_email,
+    subject: `Actualización de tu pedido #${order.order_number} — ${copy.subjectSuffix}`,
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; background: #fdfcfa; padding: 40px 20px;">
+        <div style="text-align: center; margin-bottom: 28px;">
+          <h1 style="font-size: 26px; font-weight: 700; color: #2a2a2a; margin: 0;">INMOALIA</h1>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 28px; border: 1px solid #e8ddd0;">
+          <h2 style="color: #2a2a2a; font-size: 20px; margin: 0 0 12px;">${copy.headline}</h2>
+          <p style="color: #6b5344; font-size: 15px; line-height: 1.65; margin: 0 0 16px;">
+            Hola ${who},
+          </p>
+          <p style="color: #6b5344; font-size: 15px; line-height: 1.65; margin: 0 0 16px;">
+            ${copy.body}
+          </p>
+          <div style="background: #f9f6f1; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+            <p style="color: #a08c7a; font-size: 12px; margin: 0 0 6px;">Pedido</p>
+            <p style="color: #2a2a2a; font-size: 16px; font-weight: 600; margin: 0 0 10px;">${escapeHtml(order.order_number)}</p>
+            <p style="color: #a08c7a; font-size: 12px; margin: 0 0 4px;">Estado</p>
+            <p style="color: #2a2a2a; font-size: 15px; margin: 0;"><strong>${escapeHtml(statusLabel)}</strong></p>
+          </div>
+          <p style="color: #6b5344; font-size: 14px; line-height: 1.6; margin: 0;">
+            Consulta el detalle en <a href="${site}/pedidos" style="color: #2d4a3e;">Mis pedidos</a>
+            · <a href="mailto:info@inmoalia.com" style="color: #2d4a3e;">info@inmoalia.com</a>
+          </p>
+        </div>
+        <p style="text-align: center; color: #a08c7a; font-size: 12px; margin-top: 20px;">© INMOALIA</p>
+      </div>
+    `,
+  })
+}
+
+export type ManualOrderEmailType =
+  | 'confirmation'
+  | 'paid'
+  | 'processing'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled'
+
+export async function sendManualOrderCustomerEmail(
+  order: Order,
+  emailType: ManualOrderEmailType,
+  trackingNumber?: string
+): Promise<{ sent: boolean; error?: string }> {
+  if (!isResendConfigured()) {
+    return { sent: false, error: 'Resend no está configurado (RESEND_API_KEY)' }
+  }
+
+  try {
+    switch (emailType) {
+      case 'confirmation':
+        await sendOrderConfirmation(order)
+        break
+      case 'shipped': {
+        const tracking = trackingNumber?.trim() || order.tracking_number?.trim()
+        if (!tracking) {
+          return { sent: false, error: 'Indica un número de seguimiento para el email de envío' }
+        }
+        await sendShippingNotification(order, tracking)
+        break
+      }
+      case 'cancelled':
+        await sendOrderCancelledNotice(order)
+        break
+      case 'paid':
+      case 'processing':
+      case 'delivered':
+        await sendOrderStatusEmail(order, emailType)
+        break
+    }
+    return { sent: true }
+  } catch (err) {
+    console.error('Error sending manual order email:', err)
+    return {
+      sent: false,
+      error: err instanceof Error ? err.message : 'No se pudo enviar el email',
+    }
+  }
+}
+
 export async function sendShippingNotification(
   order: Order,
   trackingNumber: string,
@@ -426,11 +549,11 @@ export async function sendShippingNotification(
         
         <div style="background: white; border-radius: 12px; padding: 32px; border: 1px solid #e8ddd0;">
           <h2 style="color: #2a2a2a; font-size: 22px; margin: 0 0 8px;">¡Tu pedido está en camino!</h2>
-          <p style="color: #6b5344; font-size: 15px; margin: 0 0 24px;">Pedido ${order.order_number}</p>
+          <p style="color: #6b5344; font-size: 15px; margin: 0 0 24px;">Pedido ${escapeHtml(order.order_number)}</p>
           
           <div style="background: #f9f6f1; border-radius: 8px; padding: 20px; margin-bottom: 24px; text-align: center;">
             <p style="color: #a08c7a; font-size: 13px; margin: 0 0 4px;">Número de seguimiento</p>
-            <p style="color: #2a2a2a; font-size: 18px; font-weight: 700; margin: 0;">${trackingNumber}</p>
+            <p style="color: #2a2a2a; font-size: 18px; font-weight: 700; margin: 0;">${escapeHtml(trackingNumber)}</p>
             ${trackingUrl ? `<a href="${trackingUrl}" style="color: #2d4a3e; font-size: 14px; text-decoration: none; display: inline-block; margin-top: 8px;">Rastrear envío →</a>` : ''}
           </div>
           

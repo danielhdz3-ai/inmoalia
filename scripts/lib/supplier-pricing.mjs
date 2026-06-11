@@ -30,3 +30,20 @@ export function minPvpForNetProfit(coste, minNet = MIN_NET_PROFIT_EUR) {
   const base = roundEuros(coste + transporte + minNet)
   return roundEuros(base * (1 + IVA_RATE))
 }
+
+/** Desglose de precio para altas de producto (coste + transporte + neto mínimo + IVA). */
+export function getPricingBreakdown(coste, minNet = MIN_NET_PROFIT_EUR) {
+  const costeRounded = roundEuros(Number(coste))
+  const transporte = getShippingCost(costeRounded)
+  const baseImponible = roundEuros(costeRounded + transporte + minNet)
+  const pvp = roundEuros(baseImponible * (1 + IVA_RATE))
+  const iva = roundEuros(pvp - baseImponible)
+  return {
+    coste: costeRounded,
+    transporte,
+    neto: minNet,
+    baseImponible,
+    iva,
+    pvp,
+  }
+}

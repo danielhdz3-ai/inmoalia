@@ -3,9 +3,15 @@ import Link from 'next/link'
 import { revalidatePath } from 'next/cache'
 import { ShoppingCart, ChevronLeft } from 'lucide-react'
 import { formatPrice, formatDate } from '@/lib/utils'
-import { sendShippingNotification, sendOrderCancelledNotice } from '@/lib/resend/emails'
+import {
+  sendShippingNotification,
+  sendOrderCancelledNotice,
+  sendManualOrderCustomerEmail,
+  type ManualOrderEmailType,
+} from '@/lib/resend/emails'
 import { assertAdmin } from '@/lib/admin/assert-admin'
 import AdminOrderCustomerPanel from '@/components/admin/AdminOrderCustomerPanel'
+import AdminOrderUpdatePanel from '@/components/admin/AdminOrderUpdatePanel'
 import type { Order, OrderItem, ShippingAddress } from '@/lib/supabase/types'
 
 export const dynamic = 'force-dynamic'
@@ -93,6 +99,34 @@ async function updateOrderStatus(formData: FormData) {
   }
 
   revalidatePath('/admin/pedidos')
+}
+
+async function sendOrderCustomerEmail(formData: FormData): Promise<{ ok: boolean; message: string }> {
+  'use server'
+  await assertAdmin()
+
+  const id = formData.get('id') as string
+  const emailType = formData.get('email_type') as ManualOrderEmailType
+  const trackingNumber = (formData.get('tracking_number') as string | null)?.trim() ?? ''
+  const supabase = createAdminClient()
+
+  const { data: rawOrder } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  const order = rawOrder as unknown as Order | null
+  if (!order) {
+    return { ok: false, message: 'Pedido no encontrado' }
+  }
+
+  const result = await sendManualOrderCustomerEmail(order, emailType, trackingNumber || undefined)
+  if (!result.sent) {
+    return { ok: false, message: result.error ?? 'No se pudo enviar el email' }
+  }
+
+  return { ok: true, message: `Email enviado a ${order.customer_email}` }
 }
 
 export default async function AdminPedidosPage() {
@@ -204,44 +238,12 @@ export default async function AdminPedidosPage() {
 
                       <AdminOrderCustomerPanel order={order} />
 
-                      {/* Update status */}
-                      <div>
-                        <h4 className="text-xs font-semibold text-[#a08c7a] uppercase tracking-wide mb-3">Actualizar pedido</h4>
-                        <form action={updateOrderStatus} className="bg-white rounded-xl border border-[#e8ddd0] p-4 space-y-3">
-                          <input type="hidden" name="id" value={order.id} />
-                          <div>
-                            <label className="text-xs font-medium text-[#6b5344] block mb-1.5">Estado</label>
-                            <select
-                              name="status"
-                              defaultValue={order.status}
-                              className="w-full text-sm border border-[#e8ddd0] rounded-lg px-3 py-2 bg-white text-[#2a2a2a] focus:outline-none focus:ring-2 focus:ring-[#2d4a3e]/30"
-                            >
-                              {ORDER_STATUSES.map((s) => (
-                                <option key={s.value} value={s.value}>{s.label}</option>
-                              ))}
-                            </select>
-                          </div>
-                          <div>
-                            <label className="text-xs font-medium text-[#6b5344] block mb-1.5">Número de seguimiento</label>
-                            <input
-                              name="tracking_number"
-                              type="text"
-                              defaultValue={order.tracking_number ?? ''}
-                              placeholder="Ej: GLS1234567890"
-                              className="w-full text-sm border border-[#e8ddd0] rounded-lg px-3 py-2 bg-white text-[#2a2a2a] placeholder-[#a08c7a] focus:outline-none focus:ring-2 focus:ring-[#2d4a3e]/30"
-                            />
-                            <p className="text-[11px] text-[#a08c7a] mt-1.5 leading-snug">
-                              Al guardar estado <strong>Enviado</strong> con un número de tracking, el cliente recibe automáticamente un email si Resend está configurado.
-                            </p>
-                          </div>
-                          <button
-                            type="submit"
-                            className="w-full bg-[#2d4a3e] text-white text-sm font-medium py-2 rounded-lg hover:bg-[#1e3329] transition-colors"
-                          >
-                            Guardar cambios
-                          </button>
-                        </form>
-                      </div>
+                      <AdminOrderUpdatePanel
+                        order={order}
+                        orderStatuses={ORDER_STATUSES}
+                        updateOrderStatus={updateOrderStatus}
+                        sendOrderCustomerEmail={sendOrderCustomerEmail}
+                      />
                     </div>
                   </div>
                 </details>

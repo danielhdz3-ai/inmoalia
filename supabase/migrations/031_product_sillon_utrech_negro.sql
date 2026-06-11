@@ -1,0 +1,77 @@
+-- Sillón oficina UTRECH (Grupo SDM · ref. 794.SUTRECNNE).
+-- PVP: coste 52,70 € + transporte 22 € + neto 60 € + IVA 21 % = 162,99 €.
+
+insert into products (
+  slug,
+  name,
+  description,
+  price,
+  cost_price,
+  images,
+  category,
+  subcategory,
+  tags,
+  sku,
+  supplier_sku,
+  supplier,
+  stock,
+  dimensions,
+  material,
+  color,
+  is_active,
+  is_featured,
+  meta_title,
+  meta_desc,
+  supplier_product_url
+) values (
+  'sillon-de-oficina-utrech-alto-negro-malla-y-tejido-negro',
+  'Sillón de oficina UTRECH, alto · negro · malla y tejido negro',
+  'Sillón de oficina moderno con cabezal. Regulación de altura mediante cilindro neumático. Mecanismo de basculación con mando de ajuste de la intensidad. Armazón y base de polipropileno reforzado con fibra de vidrio de color negro. Tapizado del respaldo en malla con diseño horizontal de color negro, asiento en tejido acrílico negro. Otros colores disponibles; sobre pedido podemos suministrar en otros colores. Como silla de visita puede usar el modelo Clifford y Risley. Si lo desea podemos suministrar topes en vez de ruedas.
+
+Dimensiones (cm): ancho 64, fondo 61, alto 112–123. Embalaje: plástico y cartón. Unidad: 1 · volumen: 0,12 m³. Producto nuevo con certificado (test report) emitido por laboratorio internacional homologado, con detalle del cumplimiento de la norma UNE o su equivalente internacional.',
+  162.99,
+  52.70,
+  array[
+    '/imagenes/productos/sillon-de-oficina-utrech-alto-negro-malla-y-tejido-negro-1.jpg',
+    '/imagenes/productos/sillon-de-oficina-utrech-alto-negro-malla-y-tejido-negro-2.jpg',
+    '/imagenes/productos/sillon-de-oficina-utrech-alto-negro-malla-y-tejido-negro-3.jpg',
+    '/imagenes/productos/sillon-de-oficina-utrech-alto-negro-malla-y-tejido-negro-4.jpg'
+  ]::text[],
+  'sillas',
+  'Sillas de oficina',
+  array['oficina','sillón','Utrech','malla','negro','basculante','ergonómico','cabezal','pvp_ref']::text[],
+  'INM-SUTRECNNE',
+  '794.SUTRECNNE',
+  'gruposdm',
+  102,
+  '{"width": 64, "height": 123, "depth": 61}'::jsonb,
+  'Polipropileno reforzado con fibra de vidrio, malla, tejido acrílico',
+  'Negro',
+  true,
+  false,
+  'Sillón de oficina UTRECH alto negro malla y tejido | INMOALIA',
+  'Sillón UTRECH alto con cabezal, basculante y malla negra. 64×61×112–123 cm. IVA incluido. Certificación UNE.',
+  'https://gruposdm.com/es/oficinas/sillas-de-oficinas/sillones-de-direccion/sillon-de-oficina-utrech-alto-negro-malla-y-tejido-negro.html'
+)
+on conflict (slug) do update set
+  name = excluded.name,
+  description = excluded.description,
+  price = excluded.price,
+  cost_price = excluded.cost_price,
+  images = excluded.images,
+  category = excluded.category,
+  subcategory = excluded.subcategory,
+  tags = excluded.tags,
+  sku = excluded.sku,
+  supplier_sku = excluded.supplier_sku,
+  supplier = excluded.supplier,
+  stock = excluded.stock,
+  dimensions = excluded.dimensions,
+  material = excluded.material,
+  color = excluded.color,
+  is_active = excluded.is_active,
+  is_featured = excluded.is_featured,
+  meta_title = excluded.meta_title,
+  meta_desc = excluded.meta_desc,
+  supplier_product_url = coalesce(products.supplier_product_url, excluded.supplier_product_url),
+  updated_at = now();
