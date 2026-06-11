@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ClipboardList, ChevronLeft, ExternalLink, Pencil, PackageSearch } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import type { Product } from '@/lib/supabase/types'
-import { getProductCostBreakdown } from '@/lib/shop/pricing'
+import { getProductCostBreakdown, MIN_NET_PROFIT_EUR } from '@/lib/shop/pricing'
 import { formatSupplierLabel, resolveSupplierHref } from '@/lib/suppliers'
 
 export const dynamic = 'force-dynamic'
@@ -354,7 +354,7 @@ export default async function AdminInventarioPage({
         <strong>IVA:</strong> cuota del 21% incluida en el PVP.{' '}
         <strong>Transporte:</strong> tarifa proveedor según importe del pedido (22–59 €; incluido en el PVP).{' '}
         <strong>Margen %:</strong> (base imponible − coste − transporte) / base imponible.{' '}
-        <strong>Neto €:</strong> beneficio estimado por unidad (base imponible − coste − transporte).
+        <strong>Neto €:</strong> beneficio estimado por unidad (base imponible − coste − transporte). Objetivo mínimo: {MIN_NET_PROFIT_EUR} €.
       </p>
     </div>
   )

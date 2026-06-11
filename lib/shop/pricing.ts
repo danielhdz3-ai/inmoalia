@@ -43,7 +43,20 @@ export function getShippingCostByOrderAmount(orderAmountEuros: number): number {
   return tier?.cost ?? SHIPPING_TIERS[SHIPPING_TIERS.length - 1].cost
 }
 
-export interface ProductCostBreakdown {
+/** Beneficio neto mínimo objetivo (€): base imponible − coste − transporte. */
+export const MIN_NET_PROFIT_EUR = 60
+
+/** PVP mínimo (IVA incl.) para alcanzar un beneficio neto dado. */
+export function minPvpForNetProfit(
+  costPrice: number,
+  minNetProfit = MIN_NET_PROFIT_EUR,
+): number {
+  const coste = roundEuros(Number(costPrice))
+  const transporte = getShippingCostByOrderAmount(coste)
+  const baseImponible = roundEuros(coste + transporte + minNetProfit)
+  return applyIva(baseImponible)
+}
+
   /** PVP mostrado al cliente (IVA incluido). */
   pvpConIva: number
   /** Base imponible (sin IVA). */
