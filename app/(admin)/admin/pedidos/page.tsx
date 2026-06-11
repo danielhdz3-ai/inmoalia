@@ -5,7 +5,8 @@ import { ShoppingCart, ChevronLeft } from 'lucide-react'
 import { formatPrice, formatDate } from '@/lib/utils'
 import { sendShippingNotification, sendOrderCancelledNotice } from '@/lib/resend/emails'
 import { assertAdmin } from '@/lib/admin/assert-admin'
-import type { Order, OrderItem } from '@/lib/supabase/types'
+import AdminOrderCustomerPanel from '@/components/admin/AdminOrderCustomerPanel'
+import type { Order, OrderItem, ShippingAddress } from '@/lib/supabase/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -147,13 +148,16 @@ export default async function AdminPedidosPage() {
           <div className="divide-y divide-[#e8ddd0]">
             {orders.map((order) => {
               const items = order.items as unknown as OrderItem[]
+              const address = order.shipping_address as unknown as ShippingAddress
+              const customerLabel = address?.full_name?.trim() || order.customer_email
               return (
                 <details key={order.id} className="group">
                   <summary className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-[#f9f6f1] transition-colors list-none">
                     <div className="flex items-center gap-4 min-w-0">
                       <div className="min-w-0">
                         <p className="font-semibold text-[#2a2a2a] text-sm">{order.order_number}</p>
-                        <p className="text-xs text-[#a08c7a]">{order.customer_email}</p>
+                        <p className="text-xs text-[#a08c7a]">{customerLabel}</p>
+                        <p className="text-xs text-[#6b5344] truncate">{order.customer_email}</p>
                       </div>
                       <div className="hidden sm:block">
                         <p className="text-xs text-[#a08c7a]">{formatDate(order.created_at)}</p>
@@ -175,7 +179,7 @@ export default async function AdminPedidosPage() {
 
                   {/* Order detail */}
                   <div className="px-6 pb-6 bg-[#f9f6f1] border-t border-[#e8ddd0]">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-5">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-5">
                       {/* Items */}
                       <div>
                         <h4 className="text-xs font-semibold text-[#a08c7a] uppercase tracking-wide mb-3">Productos</h4>
@@ -188,12 +192,17 @@ export default async function AdminPedidosPage() {
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-[#2a2a2a] truncate">{item.name}</p>
                                 <p className="text-xs text-[#a08c7a]">x{item.quantity} · {formatPrice(item.price)}</p>
+                                {item.supplier_sku && (
+                                  <p className="text-[10px] text-[#a08c7a]">SKU: {item.supplier_sku}</p>
+                                )}
                               </div>
                               <p className="text-sm font-semibold text-[#2a2a2a] shrink-0">{formatPrice(item.price * item.quantity)}</p>
                             </div>
                           ))}
                         </div>
                       </div>
+
+                      <AdminOrderCustomerPanel order={order} />
 
                       {/* Update status */}
                       <div>
