@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { ShoppingBag, Search, Menu, User, Heart, ChevronDown } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { DELIVERY_INCLUDED_LINE } from '@/lib/shop/shipping'
 
 const NAV_LINKS = [
   {
@@ -61,7 +61,7 @@ export default function Header() {
     <>
       {/* Announcement bar */}
       <div className="bg-[#2d4a3e] text-white text-center py-2 px-4 text-xs font-medium tracking-wide">
-        Envío incluido en el precio · Entrega en 2-5 días laborables
+        {DELIVERY_INCLUDED_LINE}
       </div>
 
       <header

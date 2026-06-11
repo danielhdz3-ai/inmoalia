@@ -8,12 +8,13 @@ import NewsletterForm from '@/components/shop/NewsletterForm'
 import { Button } from '@/components/ui/button'
 import { absoluteUrl } from '@/lib/site'
 import type { Product } from '@/lib/supabase/types'
+import { DELIVERY_TIME_ASCII } from '@/lib/shop/shipping'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: 'INMOALIA — Tienda de Muebles, Jardín y Decoración',
     description:
-      'Tienda online de muebles y decoración de calidad europea para hogar, jardín y oficina. Envío en 2-5 días. No confundir con agencias inmobiliarias.',
+      'Tienda online de muebles y decoración de calidad europea para hogar, jardín y oficina. Envío en 4-8 días a toda España. No confundir con agencias inmobiliarias.',
     alternates: { canonical: absoluteUrl('/') },
   }
 }
@@ -27,7 +28,7 @@ const CATEGORIES = [
 ]
 
 const BENEFITS = [
-  { icon: Truck, title: 'Envío incluido', desc: 'Transporte incluido en el precio. Entrega en 2-5 días laborables.' },
+  { icon: Truck, title: 'Envío incluido', desc: `Transporte incluido en el precio. Entrega en ${DELIVERY_TIME_ASCII} a toda España.` },
   { icon: Shield, title: 'Pago 100% seguro', desc: 'Stripe. Tarjeta, PayPal, Google Pay y más.' },
   { icon: RotateCcw, title: 'Devoluciones fáciles', desc: '30 días para devoluciones sin preguntas.' },
   { icon: Star, title: 'Calidad seleccionada', desc: 'Cada producto pasa por nuestro control de calidad.' },
@@ -98,7 +99,7 @@ export default async function HomePage() {
               <span className="text-[#c9a84c]">rediseñado.</span>
             </h1>
             <p className="text-lg text-white/80 leading-relaxed mb-8 max-w-md">
-              Muebles y decoración de calidad europea. Estilo nórdico y mediterráneo, sin intermediarios, a tu puerta en 2-5 días.
+              Muebles y decoración de calidad europea. Estilo nórdico y mediterráneo, sin intermediarios, a tu puerta en {DELIVERY_TIME_ASCII}.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="xl" className="shadow-lg">

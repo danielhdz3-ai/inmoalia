@@ -57,6 +57,7 @@ export function minPvpForNetProfit(
   return applyIva(baseImponible)
 }
 
+export interface ProductCostBreakdown {
   /** PVP mostrado al cliente (IVA incluido). */
   pvpConIva: number
   /** Base imponible (sin IVA). */

@@ -1,4 +1,5 @@
 import type { Product } from '@/lib/supabase/types'
+import { DELIVERY_SCOPE, DELIVERY_TIME_SHORT } from '@/lib/shop/shipping'
 import { SUPPORT_EMAIL } from '@/lib/support'
 
 export interface ProductFaqItem {
@@ -12,7 +13,7 @@ export function buildProductFaqs(product: Product): ProductFaqItem[] {
   faqs.push({
     question: '¿Cuál es el plazo de entrega?',
     answer:
-      'Enviamos en 2–5 días laborables en península. Recibirás confirmación y seguimiento por email cuando salga tu pedido.',
+      `Enviamos en ${DELIVERY_TIME_SHORT} en ${DELIVERY_SCOPE}. Recibirás confirmación y seguimiento por email cuando salga tu pedido.`,
   })
 
   if (product.stock > 0) {
@@ -53,7 +54,7 @@ export function buildProductFaqs(product: Product): ProductFaqItem[] {
   faqs.push({
     question: '¿Cuánto cuesta el envío?',
     answer:
-      'El envío está incluido en el precio que ves. No se añaden gastos de transporte al pagar. Entrega en 2–5 días laborables en península.',
+      `El envío está incluido en el precio que ves. No se añaden gastos de transporte al pagar. Entrega en ${DELIVERY_TIME_SHORT} en ${DELIVERY_SCOPE}.`,
   })
 
   faqs.push({

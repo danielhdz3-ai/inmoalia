@@ -127,7 +127,7 @@ export function SupplierEditor({ supplier }: { supplier?: Supplier | null }) {
           name="delivery_time"
           defaultValue={supplier?.delivery_time ?? ''}
           rows={3}
-          placeholder="Ej. Preparación 24–48 h; entrega 2–5 días laborables…"
+          placeholder="Ej. Preparación 24–48 h; entrega 4–8 días laborables…"
         />
         <FieldTextarea
           label="Notas"

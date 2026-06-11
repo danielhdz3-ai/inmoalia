@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Package, Truck, Clock, MapPin } from 'lucide-react'
 import { shopPageMetadata } from '@/lib/seo/page-metadata'
+import { DELIVERY_SCOPE, DELIVERY_TIME_SHORT } from '@/lib/shop/shipping'
 
 export const metadata: Metadata = shopPageMetadata(
   'Información de envíos — INMOALIA',
@@ -26,7 +27,7 @@ export default function EnviosPage() {
             <h2 className="text-2xl font-bold">Envío incluido</h2>
           </div>
           <p className="text-white/90 text-lg">
-            Todos nuestros precios incluyen el envío a domicilio en península. El total del carrito es el importe final
+            Todos nuestros precios incluyen el envío a domicilio en {DELIVERY_SCOPE}. El total del carrito es el importe final
             que pagarás.
           </p>
         </div>
@@ -38,7 +39,7 @@ export default function EnviosPage() {
               <h3 className="font-semibold text-[#2a2a2a]">Plazos de entrega</h3>
             </div>
             <p className="text-[#6b5344] text-sm leading-relaxed">
-              Entrega estimada en <strong>2–5 días laborables</strong> en península. Los pedidos se entregan de lunes a
+              Entrega estimada en <strong>{DELIVERY_TIME_SHORT}</strong> en {DELIVERY_SCOPE}. Los pedidos se entregan de lunes a
               viernes en horario comercial.
             </p>
           </div>
@@ -49,8 +50,8 @@ export default function EnviosPage() {
               <h3 className="font-semibold text-[#2a2a2a]">Zonas de envío</h3>
             </div>
             <p className="text-[#6b5344] text-sm leading-relaxed">
-              Realizamos envíos a toda la <strong>península española</strong>. Para Baleares, Canarias, Ceuta y Melilla,
-              consulta condiciones en{' '}
+              Realizamos envíos a <strong>{DELIVERY_SCOPE}</strong> (península, Baleares, Canarias, Ceuta y Melilla).
+              Para consultas sobre entregas especiales, escríbenos a{' '}
               <a href="mailto:info@inmoalia.com" className="text-[#2d4a3e] underline">
                 info@inmoalia.com
               </a>

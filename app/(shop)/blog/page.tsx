@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Calendar, Clock, ArrowRight } from 'lucide-react'
 import { BLOG_POSTS } from '@/lib/content/blog-posts'
+import { DELIVERY_TIME_SHORT } from '@/lib/shop/shipping'
 import { absoluteUrl } from '@/lib/site'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -66,7 +67,7 @@ export default function BlogPage() {
 
       <div className="mt-12 p-6 rounded-2xl bg-[#f9f6f1] border border-[#e8ddd0]">
         <h3 className="font-semibold text-[#2a2a2a] mb-2">¿Buscas silla de oficina?</h3>
-        <p className="text-sm text-[#6b5344] mb-4">Explora nuestra colección con envío en 2–5 días.</p>
+        <p className="text-sm text-[#6b5344] mb-4">Explora nuestra colección con envío en {DELIVERY_TIME_SHORT}.</p>
         <Link
           href="/colecciones/sillas-oficina"
           className="inline-flex items-center gap-2 bg-[#2d4a3e] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#1e3329]"

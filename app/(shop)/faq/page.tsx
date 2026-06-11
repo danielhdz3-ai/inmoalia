@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { shopPageMetadata } from '@/lib/seo/page-metadata'
+import { DELIVERY_SCOPE, DELIVERY_TIME_SHORT } from '@/lib/shop/shipping'
 
 export const metadata: Metadata = shopPageMetadata(
   'Preguntas frecuentes — INMOALIA',
@@ -12,10 +13,10 @@ const FAQS = [
   {
     section: 'Envíos',
     items: [
-      { q: '¿Cuánto tarda en llegar mi pedido?', a: 'El plazo de entrega estimado es de 2 a 5 días laborables en España peninsular. Para Baleares, Canarias, Ceuta y Melilla puede variar entre 5 y 10 días.' },
-      { q: '¿Cuánto cuesta el envío?', a: 'El envío está incluido en el precio de todos los productos. No se añaden gastos de transporte al pagar. Entrega en 2–5 días laborables en península.' },
+      { q: '¿Cuánto tarda en llegar mi pedido?', a: `El plazo de entrega estimado es de ${DELIVERY_TIME_SHORT} en ${DELIVERY_SCOPE} (península, Baleares, Canarias, Ceuta y Melilla).` },
+      { q: '¿Cuánto cuesta el envío?', a: `El envío está incluido en el precio de todos los productos. No se añaden gastos de transporte al pagar. Entrega en ${DELIVERY_TIME_SHORT} en ${DELIVERY_SCOPE}.` },
       { q: '¿Puedo seguir mi pedido?', a: 'Sí. Una vez que tu pedido salga de almacén, recibirás un email con el número de seguimiento y el enlace del transportista.' },
-      { q: '¿Hacéis envíos internacionales?', a: 'Actualmente solo enviamos a España peninsular, Baleares, Canarias, Ceuta y Melilla. Estamos trabajando para ampliar a Europa próximamente.' },
+      { q: '¿Hacéis envíos internacionales?', a: `Actualmente solo enviamos a ${DELIVERY_SCOPE} (península, Baleares, Canarias, Ceuta y Melilla). Estamos trabajando para ampliar a Europa próximamente.` },
     ],
   },
   {

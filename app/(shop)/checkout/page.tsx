@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCart } from '@/hooks/useCart'
 import { formatPrice } from '@/lib/utils'
+import { DELIVERY_SCOPE, DELIVERY_TIME_ASCII } from '@/lib/shop/shipping'
 import { Lock, Loader2, Tag, X, CheckCircle, Truck, Clock, Shield } from 'lucide-react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
@@ -470,7 +471,7 @@ export default function CheckoutPage() {
                 <Clock className="w-4 h-4 text-[#2d4a3e] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-xs font-medium text-[#2a2a2a]">Tiempo de entrega</p>
-                  <p className="text-xs text-[#6b5344]">5-7 días laborables a toda España</p>
+                  <p className="text-xs text-[#6b5344]">{DELIVERY_TIME_ASCII} en {DELIVERY_SCOPE}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">

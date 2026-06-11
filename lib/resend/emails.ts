@@ -2,6 +2,7 @@ import { Resend } from 'resend'
 import type { Order, OrderItem, ShippingAddress } from '@/lib/supabase/types'
 import { isResendConfigured } from '@/lib/resend/config'
 import { absoluteUrl } from '@/lib/site'
+import { DELIVERY_SCOPE, DELIVERY_TIME_ASCII, DELIVERY_TIME_SHORT } from '@/lib/shop/shipping'
 
 let resendInstance: Resend | null = null
 
@@ -236,7 +237,7 @@ function buildOrderConfirmationHtml(order: Order): string {
                     <p style="margin:0;font-size:13px;line-height:1.7;color:#6b5344;">
                       1. Preparamos tu pedido (24–48 h laborables)<br />
                       2. Recibirás el número de seguimiento al enviarlo<br />
-                      3. Entrega estimada: 2–5 días laborables en España
+                      3. Entrega estimada: ${DELIVERY_TIME_SHORT} en ${DELIVERY_SCOPE}
                     </p>
                   </td>
                 </tr>
@@ -446,7 +447,7 @@ export async function sendShippingNotification(
           
           <p style="color: #6b5344; font-size: 15px; line-height: 1.6; margin: 0 0 20px;">
             Hola ${address.full_name}, tu pedido está en camino. 
-            El tiempo estimado de entrega es de 2-5 días laborables.
+            El tiempo estimado de entrega es de ${DELIVERY_TIME_ASCII} en ${DELIVERY_SCOPE}.
           </p>
           <p style="color: #6b5344; font-size: 14px; line-height: 1.65; margin: 0;">
             Para devoluciones o incidencias, consulta <a href="${site}/devoluciones" style="color: #2d4a3e;">devoluciones</a> y tu historial en <a href="${site}/pedidos" style="color: #2d4a3e;">Mis pedidos</a>.

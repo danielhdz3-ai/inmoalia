@@ -32,6 +32,7 @@ import type { Product } from '@/lib/supabase/types'
 import ProductCard from './ProductCard'
 import WaitlistForm from './WaitlistForm'
 import ProductFaqAccordion from './ProductFaqAccordion'
+import { DELIVERY_INCLUDED_BENEFITS } from '@/lib/shop/shipping'
 import ProductShippingLine from './ProductShippingLine'
 import ProductContactEmail from './ProductContactEmail'
 
@@ -380,7 +381,7 @@ export default function ProductDetail({
             {[
               {
                 icon: Truck,
-                text: 'Envío e IVA incluidos en el precio. Entrega en 2–5 días laborables.',
+                text: DELIVERY_INCLUDED_BENEFITS,
               },
               { icon: Shield, text: 'Pago 100% seguro con cifrado SSL. Stripe certificado.' },
               { icon: RotateCcw, text: 'Devolución gratuita en 30 días sin preguntas.' },

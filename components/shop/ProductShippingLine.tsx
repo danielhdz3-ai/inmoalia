@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Truck } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { DELIVERY_SCOPE, DELIVERY_TIME_SHORT } from '@/lib/shop/shipping'
 
 interface ProductShippingLineProps {
   price: number
@@ -45,11 +46,11 @@ export default function ProductShippingLine({
         <div className="text-sm text-[#6b5344] space-y-1">
           <p>
             <span className="font-semibold text-[#27ae60]">Envío incluido</span> en el precio ·{' '}
-            <span className="font-semibold text-[#27ae60]">IVA incluido</span> · Entrega en 2–5 días
-            laborables
+            <span className="font-semibold text-[#27ae60]">IVA incluido</span> · Entrega en {DELIVERY_TIME_SHORT} en{' '}
+            {DELIVERY_SCOPE}
           </p>
           <p className="text-xs">
-            Entrega en península.{' '}
+            Envío a {DELIVERY_SCOPE}.{' '}
             <Link href="/envios" className="text-[#2d4a3e] underline underline-offset-2 hover:text-[#1e3329]">
               Más información de envío
             </Link>

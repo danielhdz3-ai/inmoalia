@@ -7,6 +7,7 @@ import AnalyticsConsentGate from '@/components/analytics/AnalyticsConsentGate'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { organizationJsonLd, webSiteJsonLd } from '@/lib/seo/jsonld-builders'
 import { getSiteUrl, indexingRobotsMetadata } from '@/lib/site'
+import { DELIVERY_SCOPE, DELIVERY_TIME_ASCII } from '@/lib/shop/shipping'
 import './globals.css'
 
 const geistSans = Geist({
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
     template: '%s | INMOALIA',
   },
   description:
-    'Tienda online de muebles y decoración de calidad europea para hogar, jardín y oficina. Envío en 2-5 días. No confundir con agencias inmobiliarias.',
+    `Tienda online de muebles y decoración de calidad europea para hogar, jardín y oficina. Envío en ${DELIVERY_TIME_ASCII} a ${DELIVERY_SCOPE}. No confundir con agencias inmobiliarias.`,
   keywords: ['muebles', 'decoración hogar', 'jardín', 'terraza', 'ratán', 'madera', 'iluminación', 'dropshipping hogar'],
   authors: [{ name: 'INMOALIA' }],
   creator: 'INMOALIA',

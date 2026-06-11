@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { stripe } from '@/lib/stripe/client'
 import { fulfillOrderFromStripeSession } from '@/lib/stripe/fulfill-order'
 import { formatPrice, formatDate } from '@/lib/utils'
+import { DELIVERY_SCOPE, DELIVERY_TIME_ASCII } from '@/lib/shop/shipping'
 import type { OrderItem } from '@/lib/supabase/types'
 import CartClearer from './CartClearer'
 
@@ -126,7 +127,7 @@ export default async function CheckoutExitoPage({ searchParams }: PageProps) {
             'Recibirás un email de confirmación con el resumen del pedido.',
             'Preparamos tu pedido para envío (24-48 h laborables).',
             'Recibirás el número de seguimiento cuando salga de almacén.',
-            'Entrega estimada: 2-5 días laborables en España.',
+            `Entrega estimada: ${DELIVERY_TIME_ASCII} en ${DELIVERY_SCOPE}.`,
           ].map((step, i) => (
             <li key={i} className="flex items-start gap-3 text-sm text-[#6b5344]">
               <span className="shrink-0 w-5 h-5 rounded-full bg-[#2d4a3e]/10 text-[#2d4a3e] text-xs font-bold flex items-center justify-center mt-0.5">

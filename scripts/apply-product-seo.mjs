@@ -6,6 +6,8 @@
 
 import { createClient } from '@supabase/supabase-js'
 
+const DELIVERY_TIME_ASCII = '4-8 días laborables'
+const DELIVERY_SCOPE = 'toda España'
 const DRY_RUN = process.argv.includes('--dry-run')
 const META_DESC_MAX = 158
 const META_TITLE_MAX = 58
@@ -86,13 +88,13 @@ function buildProductMetaDescription(product) {
 
   const variants = [
     material
-      ? `${product.name}: ${material}. Compra online en INMOALIA desde ${price}. Envío 2-5 días laborables en España.`
+      ? `${product.name}: ${material}. Compra online en INMOALIA desde ${price}. Envío ${DELIVERY_TIME_ASCII} en ${DELIVERY_SCOPE}.`
       : null,
     snippet
-      ? `${truncateAtWord(snippet, 90)} Compra en INMOALIA desde ${price}. Envío 2-5 días.`
+      ? `${truncateAtWord(snippet, 90)} Compra en INMOALIA desde ${price}. Envío ${DELIVERY_TIME_ASCII}.`
       : null,
-    `Compra ${product.name} en INMOALIA. ${cat} de calidad desde ${price}. Envío rápido a toda España.`,
-    `${product.name} — ${cat} en INMOALIA. Precio ${price}. Envío 2-5 días laborables.`,
+    `Compra ${product.name} en INMOALIA. ${cat} de calidad desde ${price}. Envío rápido a ${DELIVERY_SCOPE}.`,
+    `${product.name} — ${cat} en INMOALIA. Precio ${price}. Envío ${DELIVERY_TIME_ASCII}.`,
   ].filter(Boolean)
 
   for (const candidate of variants) {

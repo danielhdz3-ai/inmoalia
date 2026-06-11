@@ -5,6 +5,7 @@ import FilterSidebar from '@/components/shop/FilterSidebar'
 import { SlidersHorizontal } from 'lucide-react'
 import type { Product } from '@/lib/supabase/types'
 import { hasListingFilters, shopPageMetadata } from '@/lib/seo/page-metadata'
+import { DELIVERY_SCOPE, DELIVERY_TIME_ASCII } from '@/lib/shop/shipping'
 
 export async function generateMetadata({
   searchParams,
@@ -15,7 +16,7 @@ export async function generateMetadata({
 
   return shopPageMetadata(
     'Tienda de Muebles — Catálogo Online',
-    'Compra muebles, decoración e iluminación para hogar, jardín y oficina en INMOALIA. Tienda online con envío en 2-5 días. No somos una inmobiliaria.',
+    `Compra muebles, decoración e iluminación para hogar, jardín y oficina en INMOALIA. Tienda online con envío en ${DELIVERY_TIME_ASCII} a ${DELIVERY_SCOPE}. No somos una inmobiliaria.`,
     '/productos',
     { noindex: hasListingFilters(params) },
   )

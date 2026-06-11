@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { shopPageMetadata } from '@/lib/seo/page-metadata'
+import { DELIVERY_SCOPE, DELIVERY_TIME_SHORT } from '@/lib/shop/shipping'
 
 export const metadata: Metadata = shopPageMetadata(
   'Términos y condiciones — INMOALIA',
@@ -34,7 +35,7 @@ export default function TerminosPage() {
         <section>
           <h2 className="text-xl font-semibold mb-3">3. Precios y pagos</h2>
           <p className="text-[#6b5344] leading-relaxed">
-            Todos los precios se muestran en euros (€) e incluyen el IVA aplicable y los gastos de envío a domicilio en península. El importe mostrado en el carrito y al pagar es el precio final; no se añaden costes de transporte adicionales.
+            Todos los precios se muestran en euros (€) e incluyen el IVA aplicable y los gastos de envío a domicilio en {DELIVERY_SCOPE}. El importe mostrado en el carrito y al pagar es el precio final; no se añaden costes de transporte adicionales.
             El pago se realiza íntegramente mediante Stripe, que admite tarjeta de crédito/débito, Google Pay y Apple Pay.
           </p>
         </section>
@@ -42,7 +43,7 @@ export default function TerminosPage() {
         <section>
           <h2 className="text-xl font-semibold mb-3">4. Plazos de entrega</h2>
           <p className="text-[#6b5344] leading-relaxed">
-            Los plazos estimados de entrega son de 2 a 5 días laborables en territorio español peninsular. Para Baleares, Canarias, Ceuta y Melilla los plazos pueden variar.
+            Los plazos estimados de entrega son de {DELIVERY_TIME_SHORT} en {DELIVERY_SCOPE} (península, Baleares, Canarias, Ceuta y Melilla).
             Estos plazos son orientativos y pueden verse afectados por circunstancias externas como huelgas, festivos o incidencias logísticas.
           </p>
         </section>

@@ -10,6 +10,7 @@ import { useCart } from '@/hooks/useCart'
 import { useCartStore } from '@/store/cart'
 import type { CartItem } from '@/store/cart'
 import { formatPrice } from '@/lib/utils'
+import { DELIVERY_TIME_LABEL } from '@/lib/shop/shipping'
 
 function sanitizeCartPayload(rawList: unknown): CartItem[] {
   if (!Array.isArray(rawList)) return []
@@ -100,7 +101,7 @@ function CartPageContent() {
         {/* Items */}
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-[#2d4a3e]/5 border border-[#2d4a3e]/10 rounded-xl p-4">
-            <p className="text-sm text-[#2d4a3e] font-medium">Envío incluido en el precio · Entrega en 2–5 días</p>
+            <p className="text-sm text-[#2d4a3e] font-medium">{DELIVERY_TIME_LABEL}</p>
           </div>
 
           {items.map((item) => (

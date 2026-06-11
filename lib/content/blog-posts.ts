@@ -54,7 +54,7 @@ El pistón de gas debe permitir que tus pies apoyen en el suelo con rodillas a 9
 
 Mide el espacio disponible (ancho × fondo) antes de comprar. Si dudas entre dos modelos, consulta las medidas en cada ficha o revisa nuestra [guía de sillas](/blog/como-elegir-sillon-oficina-ergonomico).
 
-Explora toda la [colección de sillas de oficina](/colecciones/sillas-oficina) con envío en 2–5 días laborables.`,
+Explora toda la [colección de sillas de oficina](/colecciones/sillas-oficina) con envío en 4–8 días laborables a toda España.`,
   },
   {
     slug: 'silla-oficina-vs-gaming-diferencias',
@@ -141,7 +141,7 @@ El estilo gaming no es más ergonómico por defecto — depende del modelo concr
 
 ## En INMOALIA
 
-Todas nuestras sillas de oficina incluyen descripción técnica, dimensiones y envío en **2–5 días laborables**. Consulta la [colección sillas de oficina](/colecciones/sillas-oficina) o las [ofertas actuales](/categorias/ofertas).`,
+Todas nuestras sillas de oficina incluyen descripción técnica, dimensiones y envío en **4–8 días laborables** a toda España. Consulta la [colección sillas de oficina](/colecciones/sillas-oficina) o las [ofertas actuales](/categorias/ofertas).`,
   },
 ]
 

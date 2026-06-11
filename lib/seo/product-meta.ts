@@ -1,4 +1,5 @@
 import { CATEGORY_META } from '@/lib/shop/category-meta'
+import { DELIVERY_SCOPE, DELIVERY_TIME_ASCII } from '@/lib/shop/shipping'
 import type { Product } from '@/lib/supabase/types'
 
 const META_DESC_MAX = 158
@@ -75,13 +76,13 @@ export function buildProductMetaDescription(
 
   const variants = [
     material
-      ? `${product.name}: ${material}. Compra online en INMOALIA desde ${price}. Envío 2-5 días laborables en España.`
+      ? `${product.name}: ${material}. Compra online en INMOALIA desde ${price}. Envío ${DELIVERY_TIME_ASCII} en ${DELIVERY_SCOPE}.`
       : null,
     snippet
-      ? `${truncateAtWord(snippet, 90)} Compra en INMOALIA desde ${price}. Envío 2-5 días.`
+      ? `${truncateAtWord(snippet, 90)} Compra en INMOALIA desde ${price}. Envío ${DELIVERY_TIME_ASCII}.`
       : null,
-    `Compra ${product.name} en INMOALIA. ${cat} de calidad desde ${price}. Envío rápido a toda España.`,
-    `${product.name} — ${cat} en INMOALIA. Precio ${price}. Envío 2-5 días laborables.`,
+    `Compra ${product.name} en INMOALIA. ${cat} de calidad desde ${price}. Envío rápido a ${DELIVERY_SCOPE}.`,
+    `${product.name} — ${cat} en INMOALIA. Precio ${price}. Envío ${DELIVERY_TIME_ASCII}.`,
   ].filter(Boolean) as string[]
 
   for (const candidate of variants) {
