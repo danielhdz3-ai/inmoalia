@@ -4,10 +4,9 @@ import { getOrderForUser } from '@/lib/orders/queries'
 import Link from 'next/link'
 import { Package, ChevronLeft, MapPin, Truck, CreditCard, RotateCcw } from 'lucide-react'
 import PrintPedidoButton from '@/components/account/PrintPedidoButton'
+import { extractIvaFromGross } from '@/lib/shop/pricing'
 import { formatPrice, formatDate } from '@/lib/utils'
 import type { Order, OrderItem, ShippingAddress } from '@/lib/supabase/types'
-
-const calcIva = (totalWithIva: number) => totalWithIva * 21 / 121
 
 interface Props {
   params: Promise<{ id: string }>
@@ -219,7 +218,7 @@ export default async function PedidoDetailPage({ params }: Props) {
               </div>
               <div className="flex justify-between text-xs text-[#a08c7a]">
                 <span>IVA 21% (incluido)</span>
-                <span>{formatPrice(calcIva(order.total))}</span>
+                <span>{formatPrice(extractIvaFromGross(order.total))}</span>
               </div>
               <div className="flex justify-between font-bold text-[#2a2a2a] pt-2 border-t border-[#e8ddd0]">
                 <span>Total</span>

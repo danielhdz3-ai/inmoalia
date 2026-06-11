@@ -11,13 +11,11 @@ import { formatPrice } from '@/lib/utils'
 import { Lock, Loader2, Tag, X, CheckCircle, Truck, Clock, Shield } from 'lucide-react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
+import { extractIvaFromGross } from '@/lib/shop/pricing'
 import type { Customer } from '@/lib/supabase/types'
 
 // Evita pre-renderización estática en esta página dinámica
 export const dynamic = 'force-dynamic'
-
-// IVA 21% extraído del total (precios con IVA incluido)
-const calcIva = (totalWithIva: number) => totalWithIva * 21 / 121
 
 interface FormData {
   full_name: string
@@ -138,7 +136,7 @@ export default function CheckoutPage() {
     : 0
   const discountedSubtotal = Math.max(0, subtotal - discountAmount)
   const total = discountedSubtotal
-  const ivaAmount = calcIva(total)
+  const ivaAmount = extractIvaFromGross(total)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))

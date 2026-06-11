@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { ClipboardList, ChevronLeft, ExternalLink, Pencil, PackageSearch } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import type { Product } from '@/lib/supabase/types'
-import { formatSupplierLabel, marginNetEur, marginOnRetailPct, resolveSupplierHref } from '@/lib/suppliers'
+import { getProductCostBreakdown } from '@/lib/shop/pricing'
+import { formatSupplierLabel, resolveSupplierHref } from '@/lib/suppliers'
 
 export const dynamic = 'force-dynamic'
 
@@ -116,7 +117,7 @@ export default async function AdminInventarioPage({
           <div>
             <h1 className="text-2xl font-bold text-[#2a2a2a]">Inventario</h1>
             <p className="text-sm text-[#a08c7a] mt-0.5">
-              Stock, coste, PVP, proveedor y enlaces. Vista operativa del catálogo.
+              Desglose de coste, IVA, transporte, PVP y margen. Vista operativa del catálogo.
             </p>
           </div>
         </div>
@@ -210,12 +211,14 @@ export default async function AdminInventarioPage({
 
       <div className="bg-white rounded-2xl border border-[#e8ddd0] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-xs sm:text-sm min-w-[1000px]">
+          <table className="w-full text-xs sm:text-sm min-w-[1180px]">
             <thead>
               <tr className="border-b border-[#e8ddd0] bg-[#f9f6f1]">
                 <th className="text-left px-3 py-2.5 font-medium text-[#a08c7a]">Producto</th>
                 <th className="text-left px-2 py-2.5 font-medium text-[#a08c7a] whitespace-nowrap">Proveedor</th>
                 <th className="text-right px-2 py-2.5 font-medium text-[#a08c7a] whitespace-nowrap">Coste</th>
+                <th className="text-right px-2 py-2.5 font-medium text-[#a08c7a] whitespace-nowrap">IVA</th>
+                <th className="text-right px-2 py-2.5 font-medium text-[#a08c7a] whitespace-nowrap">Transporte</th>
                 <th className="text-right px-2 py-2.5 font-medium text-[#a08c7a] whitespace-nowrap">PVP</th>
                 <th className="text-right px-2 py-2.5 font-medium text-[#a08c7a] whitespace-nowrap">Margen %</th>
                 <th className="text-right px-2 py-2.5 font-medium text-[#a08c7a] whitespace-nowrap">Neto €</th>
@@ -225,8 +228,7 @@ export default async function AdminInventarioPage({
             </thead>
             <tbody className="divide-y divide-[#e8ddd0]">
               {rows.map((product) => {
-                const margen = marginOnRetailPct(Number(product.price), product.cost_price)
-                const neto = marginNetEur(Number(product.price), product.cost_price)
+                const breakdown = getProductCostBreakdown(Number(product.price), product.cost_price)
                 const supplierUrl = resolveSupplierHref(product)
                 return (
                   <tr
@@ -265,22 +267,31 @@ export default async function AdminInventarioPage({
                       )}
                     </td>
                     <td className="px-2 py-2 text-right whitespace-nowrap text-[#6b5344]">
-                      {product.cost_price != null ? formatPrice(Number(product.cost_price)) : '—'}
+                      {breakdown.coste != null ? formatPrice(breakdown.coste) : '—'}
+                    </td>
+                    <td className="px-2 py-2 text-right whitespace-nowrap text-[#6b5344]">
+                      {formatPrice(breakdown.iva)}
+                    </td>
+                    <td className="px-2 py-2 text-right whitespace-nowrap text-[#6b5344]">
+                      {formatPrice(breakdown.transporte)}
                     </td>
                     <td className="px-2 py-2 text-right font-semibold whitespace-nowrap text-[#2a2a2a]">
-                      {formatPrice(Number(product.price))}
+                      <div>{formatPrice(breakdown.pvpConIva)}</div>
+                      <span className="text-[10px] font-normal text-[#a08c7a]">IVA incl.</span>
                     </td>
                     <td className="px-2 py-2 text-right whitespace-nowrap">
-                      {margen != null ? (
-                        <span className={`font-medium ${margen >= 30 ? 'text-[#27ae60]' : 'text-[#c9a84c]'}`}>
-                          {margen}%
+                      {breakdown.margenPct != null ? (
+                        <span
+                          className={`font-medium ${breakdown.margenPct >= 30 ? 'text-[#27ae60]' : 'text-[#c9a84c]'}`}
+                        >
+                          {breakdown.margenPct}%
                         </span>
                       ) : (
                         '—'
                       )}
                     </td>
                     <td className="px-2 py-2 text-right whitespace-nowrap font-medium text-[#2a2a2a]">
-                      {neto != null ? formatPrice(neto) : '—'}
+                      {breakdown.neto != null ? formatPrice(breakdown.neto) : '—'}
                     </td>
                     <td className="px-2 py-2 text-right">
                       <span
@@ -338,10 +349,12 @@ export default async function AdminInventarioPage({
         )}
       </div>
 
-      <p className="text-[11px] text-[#a08c7a] mt-4 max-w-3xl">
-        <strong>Margen %:</strong> (PVP − coste) / PVP. <strong>Neto €:</strong> ganancia en euros por unidad vendida (PVP − coste).
-        Para un enlace directo a una ficha AW, edita el producto y rellena <em>URL proveedor</em>.
-        Sin URL, AW usa el portal genérico; dropXL/Droppery según corresponda.
+      <p className="text-[11px] text-[#a08c7a] mt-4 max-w-4xl">
+        <strong>PVP:</strong> precio de venta con IVA incluido (lo que ve el cliente).{' '}
+        <strong>IVA:</strong> cuota del 21% incluida en el PVP.{' '}
+        <strong>Transporte:</strong> tarifa proveedor según importe del pedido (22–59 €; incluido en el PVP).{' '}
+        <strong>Margen %:</strong> (base imponible − coste − transporte) / base imponible.{' '}
+        <strong>Neto €:</strong> beneficio estimado por unidad (base imponible − coste − transporte).
       </p>
     </div>
   )

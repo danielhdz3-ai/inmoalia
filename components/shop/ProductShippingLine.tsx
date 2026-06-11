@@ -27,6 +27,8 @@ export default function ProductShippingLine({
     return (
       <p className={cn('text-[11px] text-[#6b5344] mt-1.5 leading-snug', className)}>
         Envío <span className="text-[#27ae60] font-semibold">incluido</span>
+        {' · '}
+        IVA <span className="text-[#27ae60] font-semibold">incluido</span>
       </p>
     )
   }
@@ -42,7 +44,8 @@ export default function ProductShippingLine({
         <Truck className="w-4 h-4 text-[#2d4a3e] shrink-0 mt-0.5" aria-hidden />
         <div className="text-sm text-[#6b5344] space-y-1">
           <p>
-            <span className="font-semibold text-[#27ae60]">Envío incluido</span> en el precio · Entrega en 2–5 días
+            <span className="font-semibold text-[#27ae60]">Envío incluido</span> en el precio ·{' '}
+            <span className="font-semibold text-[#27ae60]">IVA incluido</span> · Entrega en 2–5 días
             laborables
           </p>
           <p className="text-xs">

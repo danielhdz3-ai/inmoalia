@@ -267,7 +267,7 @@ export default function ProductDetail({
           </h1>
 
           {/* Price */}
-          <div className="flex items-baseline gap-3 mb-6">
+          <div className="flex items-baseline gap-3 mb-2">
             <span className="text-3xl font-bold text-[#2a2a2a]">
               {formatPrice(product.price)}
             </span>
@@ -282,6 +282,7 @@ export default function ProductDetail({
               </>
             )}
           </div>
+          <p className="text-xs text-[#a08c7a] mb-4">Precio con IVA incluido</p>
 
           <ProductShippingLine price={product.price} variant="detail" />
 
@@ -379,7 +380,7 @@ export default function ProductDetail({
             {[
               {
                 icon: Truck,
-                text: 'Envío incluido en el precio. Entrega en 2–5 días laborables.',
+                text: 'Envío e IVA incluidos en el precio. Entrega en 2–5 días laborables.',
               },
               { icon: Shield, text: 'Pago 100% seguro con cifrado SSL. Stripe certificado.' },
               { icon: RotateCcw, text: 'Devolución gratuita en 30 días sin preguntas.' },
