@@ -1,19 +1,20 @@
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
-import { ClipboardList, ChevronLeft, ExternalLink, Pencil, PackageSearch } from 'lucide-react'
+import { ClipboardList, ChevronLeft, Download, ExternalLink, Pencil, PackageSearch } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import type { Product } from '@/lib/supabase/types'
 import { getProductCostBreakdown, MIN_NET_PROFIT_EUR } from '@/lib/shop/pricing'
+import {
+  fetchInventarioProducts,
+  fetchInventarioSupplierOptions,
+  inventarioExportHref,
+  type InventarioSearchParams,
+} from '@/lib/admin/inventario'
 import { formatSupplierLabel, resolveSupplierHref } from '@/lib/suppliers'
 
 export const dynamic = 'force-dynamic'
 
-interface SearchParams {
-  supplier?: string
-  active?: string
-  stock?: string
-  q?: string
-}
+type SearchParams = InventarioSearchParams
 
 function adminDb() {
   return createClient(
@@ -23,44 +24,10 @@ function adminDb() {
 }
 
 async function fetchInventario(params: SearchParams) {
-  const supabase = adminDb()
-
-  let q = supabase
-    .from('products')
-    .select(
-      'id, slug, name, sku, supplier_sku, supplier, supplier_product_url, cost_price, price, stock, is_active, images',
-    )
-    .order('name', { ascending: true })
-
-  if (params.supplier) {
-    q = q.eq('supplier', params.supplier)
-  }
-
-  if (params.active === '1') q = q.eq('is_active', true)
-  if (params.active === '0') q = q.eq('is_active', false)
-
-  if (params.stock === 'low') q = q.lte('stock', 5).gt('stock', 0)
-  if (params.stock === 'out') q = q.eq('stock', 0)
-
-  if (params.q?.trim()) {
-    const raw = params.q.trim().slice(0, 80).replace(/[%,*_]/g, '')
-    if (raw) {
-      const pat = `%${raw}%`
-      q = q.or(`name.ilike.${pat},sku.ilike.${pat},supplier_sku.ilike.${pat}`)
-    }
-  }
-
-  const { data } = await q
-  const rows = (data as unknown as Product[]) ?? []
-
-  const { data: dirSlugRows } = await supabase.from('suppliers').select('slug').eq('is_active', true)
-  const fromDirectory = (dirSlugRows as { slug: string }[] | null)?.map((r) => r.slug) ?? []
-
-  const { data: supRows } = await supabase.from('products').select('supplier')
-  const fromProducts = (supRows as { supplier: string | null }[] | null)?.map((r) => r.supplier).filter(Boolean) as string[]
-
-  const supplierOptions = Array.from(new Set([...fromDirectory, ...fromProducts])).sort()
-
+  const [rows, supplierOptions] = await Promise.all([
+    fetchInventarioProducts(params),
+    fetchInventarioSupplierOptions(),
+  ])
   return { rows, supplierOptions }
 }
 
@@ -207,7 +174,16 @@ export default async function AdminInventarioPage({
         </Link>
       </form>
 
-      <p className="text-xs text-[#a08c7a] mb-3">{rows.length} resultado(s).</p>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <p className="text-xs text-[#a08c7a]">{rows.length} resultado(s).</p>
+        <a
+          href={inventarioExportHref(sp)}
+          className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-[#e8ddd0] bg-white text-xs font-medium text-[#2d4a3e] hover:bg-[#f9f6f1] transition-colors"
+        >
+          <Download className="w-3.5 h-3.5" />
+          Descargar CSV
+        </a>
+      </div>
 
       <div className="bg-white rounded-2xl border border-[#e8ddd0] overflow-hidden">
         <div className="overflow-x-auto">

@@ -88,7 +88,7 @@ export function getProductCostBreakdown(
 
   if (coste != null && baseImponible > 0) {
     neto = roundEuros(baseImponible - coste - transporte)
-    margenPct = roundEuros(((baseImponible - coste - transporte) / baseImponible) * 1000) / 10
+    margenPct = Math.round(((baseImponible - coste - transporte) / baseImponible) * 100)
   }
 
   return {
