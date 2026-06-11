@@ -274,6 +274,124 @@ function buildOrderConfirmationHtml(order: Order): string {
 </html>`
 }
 
+function getOrderNotifyEmails(): string[] {
+  const raw =
+    process.env.ORDER_NOTIFY_EMAILS?.trim() ||
+    process.env.ADMIN_EMAILS?.trim() ||
+    ''
+  return [...new Set(raw.split(',').map((e) => e.trim()).filter(Boolean))]
+}
+
+function formatShippingAddressHtml(address: ShippingAddress): string {
+  const country =
+    address.country === 'ES' || address.country?.toLowerCase() === 'es'
+      ? 'España'
+      : address.country
+  return [
+    address.full_name,
+    address.address_line1,
+    address.address_line2,
+    [address.postal_code, address.city].filter(Boolean).join(' '),
+    address.province,
+    country,
+    address.phone ? `Tel: ${address.phone}` : null,
+    address.email ? `Email: ${address.email}` : null,
+  ]
+    .filter(Boolean)
+    .map((line) => escapeHtml(String(line)))
+    .join('<br />')
+}
+
+function buildNewSaleAdminHtml(order: Order): string {
+  const items = order.items as unknown as OrderItem[]
+  const address = order.shipping_address as unknown as ShippingAddress
+  const adminUrl = absoluteUrl('/admin/pedidos')
+
+  const itemsList = items
+    .map(
+      (item) =>
+        `<li style="margin-bottom:6px;">${escapeHtml(item.name)} × ${item.quantity} — <strong>${formatPrice(item.price * item.quantity)}</strong>${item.supplier_sku ? ` <span style="color:#a08c7a;">(SKU ${escapeHtml(item.supplier_sku)})</span>` : ''}</li>`,
+    )
+    .join('')
+
+  return `
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f3efe8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center" style="padding:28px 16px;">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#fff;border:1px solid #e8ddd0;border-radius:14px;overflow:hidden;">
+        <tr>
+          <td style="background:#2d4a3e;color:#fff;padding:22px 24px;">
+            <p style="margin:0;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;opacity:0.85;">Nueva venta</p>
+            <p style="margin:6px 0 0;font-size:22px;font-weight:700;">${escapeHtml(order.order_number)}</p>
+            <p style="margin:8px 0 0;font-size:18px;font-weight:600;">${formatPrice(order.total)}</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:24px;">
+            <p style="margin:0 0 16px;color:#6b5344;font-size:15px;line-height:1.6;">
+              Se ha registrado un pago en INMOALIA. Prepara el envío cuanto antes.
+            </p>
+            <h3 style="margin:0 0 8px;font-size:14px;color:#2a2a2a;text-transform:uppercase;letter-spacing:0.06em;">Cliente</h3>
+            <p style="margin:0 0 20px;color:#6b5344;font-size:14px;line-height:1.65;">
+              ${escapeHtml(address.full_name || '—')}<br />
+              ${escapeHtml(order.customer_email)}
+            </p>
+            <h3 style="margin:0 0 8px;font-size:14px;color:#2a2a2a;text-transform:uppercase;letter-spacing:0.06em;">Dirección de envío</h3>
+            <p style="margin:0 0 20px;color:#6b5344;font-size:14px;line-height:1.65;">
+              ${formatShippingAddressHtml(address)}
+            </p>
+            <h3 style="margin:0 0 8px;font-size:14px;color:#2a2a2a;text-transform:uppercase;letter-spacing:0.06em;">Productos</h3>
+            <ul style="margin:0 0 20px;padding-left:18px;color:#2a2a2a;font-size:14px;line-height:1.5;">
+              ${itemsList}
+            </ul>
+            <p style="margin:0 0 20px;color:#6b5344;font-size:13px;">
+              Subtotal: ${formatPrice(order.subtotal)} · Envío: ${order.shipping_cost === 0 ? 'Gratis' : formatPrice(order.shipping_cost)}
+            </p>
+            <div style="text-align:center;">
+              <a href="${adminUrl}" style="display:inline-block;background:#2d4a3e;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600;font-size:14px;">
+                Ver en panel admin
+              </a>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+}
+
+/** Aviso interno al equipo por cada venta nueva (ORDER_NOTIFY_EMAILS o ADMIN_EMAILS). */
+export async function sendNewSaleAdminAlert(order: Order) {
+  if (!isResendConfigured()) {
+    console.warn('[RESEND] API key no configurada, aviso de venta no enviado')
+    return { success: false, error: 'API key no configurada' }
+  }
+
+  const recipients = getOrderNotifyEmails()
+  if (!recipients.length) {
+    console.warn('[RESEND] ORDER_NOTIFY_EMAILS / ADMIN_EMAILS vacío, aviso de venta no enviado')
+    return { success: false, error: 'Sin destinatarios admin' }
+  }
+
+  try {
+    const result = await getResendInstance().emails.send({
+      from: `INMOALIA Ventas <${FROM}>`,
+      to: recipients,
+      subject: `Nueva venta ${order.order_number} — ${formatPrice(order.total)}`,
+      html: buildNewSaleAdminHtml(order),
+    })
+    console.log('[RESEND] Aviso de venta enviado:', { order: order.order_number, to: recipients, id: result.data?.id })
+    return { success: true, id: result.data?.id }
+  } catch (error) {
+    console.error('[RESEND] Error aviso de venta:', error)
+    return { success: false, error: String(error) }
+  }
+}
+
 export async function sendOrderConfirmation(order: Order) {
   if (!isResendConfigured()) return
 

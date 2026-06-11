@@ -1,6 +1,6 @@
 import type Stripe from 'stripe'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import { sendOrderConfirmation } from '@/lib/resend/emails'
+import { sendOrderConfirmation, sendNewSaleAdminAlert } from '@/lib/resend/emails'
 import { createDropXLOrder } from '@/lib/providers/dropxl'
 import { createDropperyOrder } from '@/lib/providers/droppery'
 import { generateOrderNumber } from '@/lib/utils'
@@ -250,6 +250,12 @@ export async function fulfillOrderFromStripeSession(
     await sendOrderConfirmation(typedOrder)
   } catch (err) {
     console.error('[fulfill-order] confirmation email:', err)
+  }
+
+  try {
+    await sendNewSaleAdminAlert(typedOrder)
+  } catch (err) {
+    console.error('[fulfill-order] admin sale alert:', err)
   }
 
   return { status: 'fulfilled', order: typedOrder, created: true }
