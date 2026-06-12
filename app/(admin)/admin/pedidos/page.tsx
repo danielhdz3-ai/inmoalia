@@ -6,9 +6,9 @@ import { formatPrice, formatDate } from '@/lib/utils'
 import {
   sendShippingNotification,
   sendOrderCancelledNotice,
-  sendManualOrderCustomerEmail,
-  type ManualOrderEmailType,
+  sendOrderCustomerTemplateEmail,
 } from '@/lib/resend/emails'
+import type { OrderEmailTemplate } from '@/lib/resend/order-email-templates'
 import { assertAdmin } from '@/lib/admin/assert-admin'
 import AdminOrderCustomerPanel from '@/components/admin/AdminOrderCustomerPanel'
 import AdminOrderUpdatePanel from '@/components/admin/AdminOrderUpdatePanel'
@@ -106,7 +106,7 @@ async function sendOrderCustomerEmail(formData: FormData): Promise<{ ok: boolean
   await assertAdmin()
 
   const id = formData.get('id') as string
-  const emailType = formData.get('email_type') as ManualOrderEmailType
+  const emailTemplate = formData.get('email_template') as OrderEmailTemplate
   const trackingNumber = (formData.get('tracking_number') as string | null)?.trim() ?? ''
   const supabase = createAdminClient()
 
@@ -121,7 +121,11 @@ async function sendOrderCustomerEmail(formData: FormData): Promise<{ ok: boolean
     return { ok: false, message: 'Pedido no encontrado' }
   }
 
-  const result = await sendManualOrderCustomerEmail(order, emailType, trackingNumber || undefined)
+  const result = await sendOrderCustomerTemplateEmail(
+    order,
+    emailTemplate,
+    trackingNumber || undefined,
+  )
   if (!result.sent) {
     return { ok: false, message: result.error ?? 'No se pudo enviar el email' }
   }

@@ -3,6 +3,14 @@ import type { Order, OrderItem, ShippingAddress } from '@/lib/supabase/types'
 import { isResendConfigured } from '@/lib/resend/config'
 import { absoluteUrl } from '@/lib/site'
 import { DELIVERY_SCOPE, DELIVERY_TIME_ASCII, DELIVERY_TIME_SHORT } from '@/lib/shop/shipping'
+import type { OrderEmailTemplate } from '@/lib/resend/order-email-templates'
+import {
+  ORDER_EMAIL_TEMPLATE_COPY,
+  buildOrderEmailBody,
+  TEMPLATES_WITH_TRACKING,
+} from '@/lib/resend/order-email-templates'
+
+export type { OrderEmailTemplate } from '@/lib/resend/order-email-templates'
 
 let resendInstance: Resend | null = null
 
@@ -476,6 +484,78 @@ export async function sendOrderStatusEmail(order: Order, notifyStatus: Order['st
       </div>
     `,
   })
+}
+
+export async function sendOrderCustomerTemplateEmail(
+  order: Order,
+  template: OrderEmailTemplate,
+  trackingNumber?: string
+): Promise<{ sent: boolean; error?: string }> {
+  if (!isResendConfigured()) {
+    return { sent: false, error: 'Resend no está configurado (RESEND_API_KEY)' }
+  }
+
+  const tracking = trackingNumber?.trim() || order.tracking_number?.trim()
+
+  try {
+    if (template === 'shipped' && tracking) {
+      await sendShippingNotification(order, tracking)
+      return { sent: true }
+    }
+
+    const copy = ORDER_EMAIL_TEMPLATE_COPY[template]
+    const site = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://inmoalia.com'
+    const address = order.shipping_address as unknown as ShippingAddress
+    const who = escapeHtml(address.full_name?.trim() || order.customer_email)
+    let bodyText = buildOrderEmailBody(template, tracking)
+    if (template === 'shipped') {
+      bodyText += ` El tiempo estimado de entrega es de ${DELIVERY_TIME_ASCII} en ${DELIVERY_SCOPE}.`
+    }
+    const trackingBlock =
+      tracking && TEMPLATES_WITH_TRACKING.has(template)
+        ? `<div style="background: #f9f6f1; border-radius: 8px; padding: 16px; margin-bottom: 20px; text-align: center;">
+            <p style="color: #a08c7a; font-size: 12px; margin: 0 0 4px;">Número de seguimiento</p>
+            <p style="color: #2a2a2a; font-size: 17px; font-weight: 700; margin: 0;">${escapeHtml(tracking)}</p>
+          </div>`
+        : ''
+
+    await getResendInstance().emails.send({
+      from: `INMOALIA <${FROM}>`,
+      to: order.customer_email,
+      subject: `Actualización de tu pedido #${order.order_number} — ${copy.subjectSuffix}`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; background: #fdfcfa; padding: 40px 20px;">
+          <div style="text-align: center; margin-bottom: 28px;">
+            <h1 style="font-size: 26px; font-weight: 700; color: #2a2a2a; margin: 0;">INMOALIA</h1>
+          </div>
+          <div style="background: white; border-radius: 12px; padding: 28px; border: 1px solid #e8ddd0;">
+            <h2 style="color: #2a2a2a; font-size: 20px; margin: 0 0 12px;">${copy.headline}</h2>
+            <p style="color: #6b5344; font-size: 15px; line-height: 1.65; margin: 0 0 16px;">Hola ${who},</p>
+            <p style="color: #6b5344; font-size: 15px; line-height: 1.65; margin: 0 0 16px;">${escapeHtml(bodyText)}</p>
+            <div style="background: #f9f6f1; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+              <p style="color: #a08c7a; font-size: 12px; margin: 0 0 6px;">Pedido</p>
+              <p style="color: #2a2a2a; font-size: 16px; font-weight: 600; margin: 0 0 10px;">${escapeHtml(order.order_number)}</p>
+              <p style="color: #a08c7a; font-size: 12px; margin: 0 0 4px;">Estado</p>
+              <p style="color: #2a2a2a; font-size: 15px; margin: 0;"><strong>${escapeHtml(copy.statusLabel)}</strong></p>
+            </div>
+            ${trackingBlock}
+            <p style="color: #6b5344; font-size: 14px; line-height: 1.6; margin: 0;">
+              Consulta el detalle en <a href="${site}/pedidos" style="color: #2d4a3e;">Mis pedidos</a>
+              · <a href="mailto:info@inmoalia.com" style="color: #2d4a3e;">info@inmoalia.com</a>
+            </p>
+          </div>
+          <p style="text-align: center; color: #a08c7a; font-size: 12px; margin-top: 20px;">© INMOALIA</p>
+        </div>
+      `,
+    })
+    return { sent: true }
+  } catch (err) {
+    console.error('Error sending order template email:', err)
+    return {
+      sent: false,
+      error: err instanceof Error ? err.message : 'No se pudo enviar el email',
+    }
+  }
 }
 
 export type ManualOrderEmailType =
