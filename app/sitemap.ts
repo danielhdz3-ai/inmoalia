@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { CATEGORY_META } from '@/lib/shop/category-meta'
 import { COLLECTIONS } from '@/lib/content/collections'
 import { BLOG_POSTS } from '@/lib/content/blog-posts'
+import { getAllGeoSillaSlugs } from '@/lib/content/geo-landings'
 import { getSiteUrl } from '@/lib/site'
 import { isIndexableProduct } from '@/lib/seo/indexable-products'
 
@@ -83,6 +84,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${base}/colecciones/${encodeURIComponent(slug)}`,
       changeFrequency: 'weekly',
       priority: 0.8,
+      lastModified: now,
+    })
+  }
+
+  for (const ciudad of getAllGeoSillaSlugs()) {
+    entries.push({
+      url: `${base}/envio/sillas/${encodeURIComponent(ciudad)}`,
+      changeFrequency: 'monthly',
+      priority: 0.6,
       lastModified: now,
     })
   }

@@ -9,7 +9,9 @@ const FOOTER_LINKS = {
     { label: 'Más vendidos', href: '/colecciones' },
     { label: 'Ofertas', href: '/categorias/ofertas' },
     { label: 'Colecciones', href: '/colecciones' },
-    { label: 'Sillas de oficina', href: '/colecciones/sillas-oficina' },
+    { label: 'Sillas de oficina', href: '/categorias/sillas-oficina' },
+    { label: 'Sillas ergonómicas', href: '/categorias/sillas-ergonomicas' },
+    { label: 'Guías de sillas', href: '/blog' },
     { label: 'Todas las categorías', href: '/categorias' },
   ],
   'Atención al cliente': [

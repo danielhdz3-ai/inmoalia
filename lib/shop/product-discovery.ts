@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { COLLECTIONS, collectionForProduct } from '@/lib/content/collections'
+import { CATEGORY_META } from '@/lib/shop/category-meta'
+import { applyCategoryFilter } from '@/lib/shop/category-filters'
 import type { Product } from '@/lib/supabase/types'
 
 export async function getProductsByCollectionSlug(slug: string): Promise<Product[]> {
@@ -11,6 +13,10 @@ export async function getProductsByCollectionSlug(slug: string): Promise<Product
 
   if (col.tag) {
     q = q.contains('tags', [col.tag])
+  } else if (col.categorySlug) {
+    const meta = CATEGORY_META[col.categorySlug]
+    if (!meta) return []
+    q = applyCategoryFilter(q, col.categorySlug, meta)
   } else if (col.categoryFilter) {
     q = q.eq('category', col.categoryFilter)
   } else {
@@ -25,7 +31,7 @@ export async function getCollectionProductsForProduct(
   product: Product,
   limit = 4,
 ): Promise<{ slug: string; name: string; products: Product[] } | null> {
-  const colSlug = collectionForProduct(product.tags, product.category)
+  const colSlug = collectionForProduct(product.tags, product.category, product.subcategory)
   if (!colSlug) return null
 
   const col = COLLECTIONS[colSlug]
@@ -43,7 +49,7 @@ export async function getEnhancedRelatedProducts(
   limit = 4,
 ): Promise<{ related: Product[]; collection: Product[]; collectionName: string | null; collectionSlug: string | null }> {
   const supabase = await createClient()
-  const colSlug = collectionForProduct(product.tags, product.category)
+  const colSlug = collectionForProduct(product.tags, product.category, product.subcategory)
 
   let collection: Product[] = []
   let collectionName: string | null = null

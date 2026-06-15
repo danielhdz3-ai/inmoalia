@@ -1,6 +1,7 @@
 import { absoluteUrl, getSiteUrl } from '@/lib/site'
 import { productImageAbsoluteUrl } from '@/lib/seo/product-images'
 import { CATEGORY_META } from '@/lib/shop/category-meta'
+import { chairSubcategorySlug } from '@/lib/shop/chair-seo'
 import { getShippingCostEuros } from '@/lib/shop/shipping'
 import type { Product } from '@/lib/supabase/types'
 
@@ -45,16 +46,33 @@ export function webSiteJsonLd() {
 
 export function breadcrumbCategoryJsonLd(categoriaSlug: string, categoryTitle: string) {
   const base = getSiteUrl()
-  const items = [
+  const meta = CATEGORY_META[categoriaSlug]
+  const items: { '@type': string; position: number; name: string; item: string }[] = [
     { '@type': 'ListItem', position: 1, name: 'Inicio', item: `${base}/` },
     { '@type': 'ListItem', position: 2, name: 'Categorías', item: `${base}/categorias` },
-    {
+  ]
+
+  if (meta?.parent && CATEGORY_META[meta.parent]) {
+    items.push({
+      '@type': 'ListItem',
+      position: 3,
+      name: CATEGORY_META[meta.parent].name,
+      item: `${base}/categorias/${encodeURIComponent(meta.parent)}`,
+    })
+    items.push({
+      '@type': 'ListItem',
+      position: 4,
+      name: categoryTitle,
+      item: `${base}/categorias/${encodeURIComponent(categoriaSlug)}`,
+    })
+  } else {
+    items.push({
       '@type': 'ListItem',
       position: 3,
       name: categoryTitle,
       item: `${base}/categorias/${encodeURIComponent(categoriaSlug)}`,
-    },
-  ]
+    })
+  }
 
   return {
     '@context': 'https://schema.org',
@@ -185,24 +203,56 @@ export function breadcrumbCollectionJsonLd(slug: string, title: string) {
 
 export function breadcrumbProductJsonLd(product: Product) {
   const base = getSiteUrl()
-  const catSlug = product.category
-  const catLabel = CATEGORY_META[catSlug]?.name ?? catSlug
+  const chairSlug = chairSubcategorySlug(product)
+  const catSlug = chairSlug ?? product.category
+  const catLabel = CATEGORY_META[catSlug]?.name ?? product.subcategory ?? product.category
 
-  const items = [
+  const items: { '@type': string; position: number; name: string; item: string }[] = [
     { '@type': 'ListItem', position: 1, name: 'Inicio', item: `${base}/` },
-    {
+  ]
+
+  if (chairSlug && chairSlug.startsWith('sillas')) {
+    items.push({
+      '@type': 'ListItem',
+      position: 2,
+      name: CATEGORY_META.sillas.name,
+      item: `${base}/categorias/sillas`,
+    })
+    if (chairSlug !== 'sillas') {
+      items.push({
+        '@type': 'ListItem',
+        position: 3,
+        name: catLabel,
+        item: `${base}/categorias/${encodeURIComponent(chairSlug)}`,
+      })
+      items.push({
+        '@type': 'ListItem',
+        position: 4,
+        name: product.name,
+        item: `${base}/productos/${encodeURIComponent(product.slug)}`,
+      })
+    } else {
+      items.push({
+        '@type': 'ListItem',
+        position: 3,
+        name: product.name,
+        item: `${base}/productos/${encodeURIComponent(product.slug)}`,
+      })
+    }
+  } else {
+    items.push({
       '@type': 'ListItem',
       position: 2,
       name: catLabel,
-      item: `${base}/categorias/${encodeURIComponent(catSlug)}`,
-    },
-    {
+      item: `${base}/categorias/${encodeURIComponent(product.category)}`,
+    })
+    items.push({
       '@type': 'ListItem',
       position: 3,
       name: product.name,
       item: `${base}/productos/${encodeURIComponent(product.slug)}`,
-    },
-  ]
+    })
+  }
 
   return {
     '@context': 'https://schema.org',

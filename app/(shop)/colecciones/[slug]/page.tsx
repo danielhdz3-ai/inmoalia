@@ -81,6 +81,10 @@ export default async function ColeccionPage({ params }: Props) {
             <Link href="/blog/como-elegir-sillon-oficina-ergonomico" className="text-sm text-[#2d4a3e] font-medium hover:underline">
               Cómo elegir sillón de oficina →
             </Link>
+            <span className="text-[#e8ddd0] mx-2">·</span>
+            <Link href="/categorias/sillas-oficina" className="text-sm text-[#2d4a3e] font-medium hover:underline">
+              Ver categoría completa →
+            </Link>
           </div>
         )}
       </div>

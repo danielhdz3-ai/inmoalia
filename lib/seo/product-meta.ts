@@ -1,4 +1,5 @@
 import { CATEGORY_META } from '@/lib/shop/category-meta'
+import { isChairProduct } from '@/lib/shop/chair-seo'
 import { DELIVERY_SCOPE, DELIVERY_TIME_ASCII } from '@/lib/shop/shipping'
 import type { Product } from '@/lib/supabase/types'
 
@@ -76,7 +77,7 @@ export function buildProductMetaDescription(
 
   const variants = [
     material
-      ? `${product.name}: ${material}. Compra online en INMOALIA desde ${price}. Envío ${DELIVERY_TIME_ASCII} en ${DELIVERY_SCOPE}.`
+      ? `${product.name}: ${material}. Compra online en INMOALIA desde ${price}. Envío ${DELIVERY_TIME_ASCII} en ${DELIVERY_SCOPE}. IVA incluido.`
       : null,
     snippet
       ? `${truncateAtWord(snippet, 90)} Compra en INMOALIA desde ${price}. Envío ${DELIVERY_TIME_ASCII}.`
@@ -108,5 +109,15 @@ export function buildProductKeywords(product: Pick<Product, 'name' | 'category' 
     (t) => t && !t.startsWith('pvp_ref:') && t !== 'ofertas' && t !== 'test' && t !== 'interno',
   )
 
-  return [...new Set([...base, ...fromTags].filter((k): k is string => Boolean(k?.trim())))]
+  const chairExtras = isChairProduct(product)
+    ? [
+        'silla online',
+        'sillas envío España',
+        product.subcategory?.toLowerCase(),
+        'envío incluido',
+        'IVA incluido',
+      ]
+    : []
+
+  return [...new Set([...base, ...fromTags, ...chairExtras].filter((k): k is string => Boolean(k?.trim())))]
 }

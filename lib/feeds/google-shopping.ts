@@ -2,6 +2,11 @@ import { createClient } from '@/lib/supabase/server'
 import { productImageAbsoluteUrl } from '@/lib/seo/product-images'
 import { absoluteUrl } from '@/lib/site'
 import { isIndexableProduct } from '@/lib/seo/indexable-products'
+import {
+  googleProductCategoryForChair,
+  googleProductTypeForChair,
+  isChairProduct,
+} from '@/lib/shop/chair-seo'
 import type { Product } from '@/lib/supabase/types'
 
 function xmlEscape(s: string): string {
@@ -32,6 +37,11 @@ function buildFeedItem(product: Product): string | null {
   const rawDesc = product.meta_desc?.trim() || product.description?.trim() || product.name
   const description = stripHtml(rawDesc).slice(0, 5000)
   const availability = product.stock > 0 ? 'in_stock' : 'out_of_stock'
+  const isChair = isChairProduct(product)
+  const googleCategory = isChair ? googleProductCategoryForChair(product) : '436'
+  const productType = isChair
+    ? googleProductTypeForChair(product)
+    : product.subcategory?.trim() || product.category
 
   return `    <item>
       <g:id>${xmlEscape(productFeedId(product))}</g:id>
@@ -47,8 +57,9 @@ function buildFeedItem(product: Product): string | null {
         <g:country>ES</g:country>
         <g:price>0.00 EUR</g:price>
       </g:shipping>
-      <g:google_product_category>436</g:google_product_category>
-      <g:product_type>${xmlEscape(product.subcategory?.trim() || product.category)}</g:product_type>
+      <g:google_product_category>${googleCategory}</g:google_product_category>
+      <g:product_type>${xmlEscape(productType)}</g:product_type>${product.sku?.trim() ? `
+      <g:mpn>${xmlEscape(product.sku.trim())}</g:mpn>` : ''}
     </item>`
 }
 

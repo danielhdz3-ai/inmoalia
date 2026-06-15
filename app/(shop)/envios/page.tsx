@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Package, Truck, Clock, MapPin } from 'lucide-react'
 import { shopPageMetadata } from '@/lib/seo/page-metadata'
+import { GEO_SILLA_LANDINGS } from '@/lib/content/geo-landings'
 import { DELIVERY_SCOPE, DELIVERY_TIME_SHORT } from '@/lib/shop/shipping'
 
 export const metadata: Metadata = shopPageMetadata(
@@ -99,6 +100,20 @@ export default function EnviosPage() {
             </a>
             . Conserva el embalaje original para devoluciones.
           </p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#e8ddd0] p-6 mb-8">
+          <h3 className="font-semibold text-[#2a2a2a] mb-2">Envío de sillas por ciudad</h3>
+          <p className="text-sm text-[#6b5344] mb-3">
+            Información de entrega y consejos locales para comprar sillas online:
+          </p>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            {Object.values(GEO_SILLA_LANDINGS).map((g) => (
+              <Link key={g.slug} href={`/envio/sillas/${g.slug}`} className="text-[#2d4a3e] hover:underline">
+                Sillas en {g.city}
+              </Link>
+            ))}
+          </div>
         </div>
 
         <div className="text-center bg-white rounded-xl border border-[#e8ddd0] p-8">

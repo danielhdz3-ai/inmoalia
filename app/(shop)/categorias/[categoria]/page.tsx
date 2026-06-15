@@ -7,7 +7,9 @@ import SortSelector from '@/components/shop/SortSelector'
 import Pagination from '@/components/shop/Pagination'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { CATEGORY_META } from '@/lib/shop/category-meta'
+import { applyCategoryFilter } from '@/lib/shop/category-filters'
 import { breadcrumbCategoryJsonLd } from '@/lib/seo/jsonld-builders'
+import CategorySeoBlock from '@/components/shop/CategorySeoBlock'
 import { hasListingFilters, shopPageMetadata } from '@/lib/seo/page-metadata'
 import type { Product } from '@/lib/supabase/types'
 
@@ -51,20 +53,7 @@ export default async function CategoriaPage({ params, searchParams }: Props) {
 
   const buildBaseQuery = () => {
     let q = supabase.from('products').select('*', { count: 'exact' }).eq('is_active', true)
-
-    if (categoria === 'mesas') {
-      q = q.or('category.eq.mesas,tags.cs.{mesas}')
-    } else if (categoria === 'muebles' || categoria === 'hogar') {
-      q = q.eq('category', 'hogar')
-    } else if (categoria === 'ofertas') {
-      q = q.or('category.eq.ofertas,tags.cs.{ofertas}')
-    } else if (categoria === 'salon') {
-      q = q.or('and(category.eq.hogar,subcategory.eq.Salón),tags.cs.{salon}')
-    } else if (meta.parent && meta.dbSubcategory) {
-      q = q.eq('category', meta.parent).eq('subcategory', meta.dbSubcategory)
-    } else {
-      q = q.eq('category', categoria)
-    }
+    q = applyCategoryFilter(q, categoria, meta)
 
     if (sp.min) q = q.gte('price', parseFloat(sp.min))
     if (sp.max) q = q.lte('price', parseFloat(sp.max))
@@ -131,6 +120,8 @@ export default async function CategoriaPage({ params, searchParams }: Props) {
             totalPages={totalPages}
             buildUrl={buildPageUrl}
           />
+
+          <CategorySeoBlock categoria={categoria} />
         </div>
       </div>
       </div>

@@ -7,9 +7,9 @@ import { absoluteUrl } from '@/lib/site'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'Blog — Sillas de oficina y guías hogar',
+    title: 'Blog — Guías de sillas y hogar',
     description:
-      'Consejos sobre sillas ergonómicas, teletrabajo, salón y decoración. Guías de compra INMOALIA.',
+      'Consejos sobre sillas de oficina, comedor, exterior, teletrabajo y decoración. Guías de compra INMOALIA.',
     alternates: { canonical: absoluteUrl('/blog') },
   }
 }
@@ -24,7 +24,7 @@ export default function BlogPage() {
       <div className="mb-10">
         <h1 className="text-3xl font-bold text-[#2a2a2a] mb-2">Blog INMOALIA</h1>
         <p className="text-[#a08c7a]">
-          Guías de sillas de oficina, teletrabajo y decoración para tu hogar.
+          Guías de sillas, teletrabajo y decoración para tu hogar.
         </p>
       </div>
 
@@ -69,7 +69,7 @@ export default function BlogPage() {
         <h3 className="font-semibold text-[#2a2a2a] mb-2">¿Buscas silla de oficina?</h3>
         <p className="text-sm text-[#6b5344] mb-4">Explora nuestra colección con envío en {DELIVERY_TIME_SHORT}.</p>
         <Link
-          href="/colecciones/sillas-oficina"
+          href="/categorias/sillas-oficina"
           className="inline-flex items-center gap-2 bg-[#2d4a3e] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#1e3329]"
         >
           Ver sillas de oficina

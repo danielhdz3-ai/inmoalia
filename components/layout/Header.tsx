@@ -15,6 +15,9 @@ const NAV_LINKS = [
     children: [
       { label: 'Mesas', href: '/categorias/mesas' },
       { label: 'Sillas', href: '/categorias/sillas' },
+      { label: 'Sillas de oficina', href: '/categorias/sillas-oficina' },
+      { label: 'Sillas ergonómicas', href: '/categorias/sillas-ergonomicas' },
+      { label: 'Sillas de comedor', href: '/categorias/sillas-comedor' },
       { label: 'Sofás y butacas', href: '/categorias/sofas-butacas' },
       { label: 'Salón', href: '/categorias/salon' },
     ],
